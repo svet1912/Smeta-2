@@ -1,0 +1,60 @@
+
+> mantis-material-free-react@1.6.0 start:all
+> concurrently --names "BACKEND,FRONTEND" --prefix-colors "bgBlue,bgGreen" "npm run server" "npm run client"
+
+[BACKEND] 
+[BACKEND] > mantis-material-free-react@1.6.0 server
+[BACKEND] > cd server && node index.js
+[BACKEND] 
+[FRONTEND] 
+[FRONTEND] > mantis-material-free-react@1.6.0 client
+[FRONTEND] > vite
+[FRONTEND] 
+[BACKEND] 🔑 DATABASE_URL загружен: postgres:***@azap001-kiy026-3dfc.j.aivencloud.com:11433/defaultdb?sslmode=require
+[BACKEND] 🔍 DB META: {
+[BACKEND]   host: 'azap001-kiy026-3dfc.j.aivencloud.com',
+[BACKEND]   port: '11433',
+[BACKEND]   user: 'avnadmin',
+[BACKEND]   passwordLength: 24,
+[BACKEND]   hasPassword: true,
+[BACKEND]   database: 'defaultdb'
+[BACKEND] }
+[BACKEND] 🔧 Aiven Cloud: используем sslmode=prefer
+[BACKEND] 🔧 Aiven Cloud: отключена проверка SSL сертификата
+[BACKEND] ⚠️ Не удалось прочитать CA сертификат: ENOENT: no such file or directory, open './ca.pem'
+[BACKEND] 🚀 Запуск исправленного сервера...
+[BACKEND] 🔧 Настроена расширенная CORS политика
+[BACKEND] node:events:496
+[BACKEND]       throw er; // Unhandled 'error' event
+[BACKEND]       ^
+[BACKEND] 
+[BACKEND] Error: listen EADDRINUSE: address already in use 0.0.0.0:3001
+[BACKEND]     at Server.setupListenHandle [as _listen2] (node:net:1940:16)
+[BACKEND]     at listenInCluster (node:net:1997:12)
+[BACKEND]     at node:net:2206:7
+[BACKEND]     at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+[BACKEND] Emitted 'error' event on Server instance at:
+[BACKEND]     at emitErrorNT (node:net:1976:8)
+[BACKEND]     at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+[BACKEND]   code: 'EADDRINUSE',
+[BACKEND]   errno: -98,
+[BACKEND]   syscall: 'listen',
+[BACKEND]   address: '0.0.0.0',
+[BACKEND]   port: 3001
+[BACKEND] }
+[BACKEND] 
+[BACKEND] Node.js v22.17.0
+[BACKEND] npm run server exited with code 1
+[FRONTEND] Port 3000 is in use, trying another one...
+[FRONTEND] Port 3001 is in use, trying another one...
+[FRONTEND] Port 3002 is in use, trying another one...
+[FRONTEND] 
+[FRONTEND]   VITE v7.0.4  ready in 417 ms
+[FRONTEND] 
+[FRONTEND]   ➜  Local:   http://localhost:3003/
+[FRONTEND]   ➜  Network: http://10.0.0.240:3003/
+[FRONTEND] 11:54:19 AM [vite] (client) hmr update /src/contexts/AuthContext.jsx, /src/layout/Dashboard/Header/HeaderContent/Profile/index.jsx, /src/layout/Dashboard/Header/HeaderContent/Profile/ProfileTab.jsx, /src/layout/Dashboard/Header/HeaderContent/Profile/tabs/EditProfileTab.jsx
+[FRONTEND] 11:54:38 AM [vite] vite.config.mjs changed, restarting server...
+[FRONTEND] 11:54:38 AM [vite] server restarted.
+[FRONTEND] Terminated
+[FRONTEND] npm run client exited with code 143

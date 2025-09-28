@@ -13,7 +13,15 @@ export default defineConfig(({ mode }) => {
     server: {
       open: true,
       port: PORT,
-      host: true
+      host: true,
+      proxy: {
+        '/api-proxy': {
+          target: 'http://localhost:3001',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api-proxy/, '/api'),
+          secure: false
+        }
+      }
     },
     preview: {
       open: true,

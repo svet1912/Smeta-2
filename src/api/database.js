@@ -1,6 +1,24 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+// Функция для получения правильного API URL
+const getApiBaseUrl = () => {
+  // Проверяем переменную окружения
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+  
+  // В GitHub Codespaces используем прокси через Vite
+  const currentHost = window.location.hostname;
+  if (currentHost.includes('.app.github.dev')) {
+    // Используем прокси через Vite dev server
+    return '/api-proxy';
+  }
+  
+  // Fallback для локальной разработки
+  return 'http://localhost:3001/api';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 // Создаем экземпляр axios с базовой конфигурацией
 const api = axios.create({

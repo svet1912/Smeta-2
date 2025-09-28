@@ -24,6 +24,27 @@ import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined, SearchOutlined
 const { Text } = Typography;
 const { Option } = Select;
 
+// Функция для получения правильного API URL
+const getApiBaseUrl = () => {
+  // Проверяем переменную окружения
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+  
+  // Автоматическое определение для GitHub Codespaces
+  const currentHost = window.location.hostname;
+  if (currentHost.includes('.app.github.dev')) {
+    // Заменяем порт 3000 на 3001 в GitHub Codespaces URL
+    return "/api-proxy";
+    // Используем прокси через Vite dev server
+  }
+  
+  // Fallback для локальной разработки
+  return 'http://localhost:3001/api';
+};
+
+const API_BASE_URL = getApiBaseUrl();
+
 // ==============================|| СПРАВОЧНИК РАБОТ ||============================== //
 
 export default function WorksPage() {
@@ -72,7 +93,7 @@ export default function WorksPage() {
   const loadWorks = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:3001/api/works');
+      const response = await fetch(`${API_BASE_URL}/works`);
       if (response.ok) {
         const data = await response.json();
         if (Array.isArray(data)) {
@@ -96,7 +117,7 @@ export default function WorksPage() {
 
   const loadPhases = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/phases');
+      const response = await fetch(`${API_BASE_URL}/phases`);
       if (response.ok) {
         const data = await response.json();
         if (Array.isArray(data)) {
@@ -115,7 +136,7 @@ export default function WorksPage() {
 
   const loadMaterials = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/materials');
+      const response = await fetch(`${API_BASE_URL}/materials`);
       if (response.ok) {
         const data = await response.json();
         if (Array.isArray(data)) {
@@ -131,7 +152,7 @@ export default function WorksPage() {
 
   const loadWorkMaterials = async (workId) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/works/${workId}/materials`);
+      const response = await fetch(`${API_BASE_URL}/works/${workId}/materials`);
       if (response.ok) {
         const data = await response.json();
         if (Array.isArray(data)) {
@@ -169,7 +190,7 @@ export default function WorksPage() {
 
   const handleSave = async (values) => {
     try {
-      const response = await fetch('http://localhost:3001/api/works', {
+      const response = await fetch(`${API_BASE_URL}/works`, {
         method: modalMode === 'create' ? 'POST' : 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -198,7 +219,7 @@ export default function WorksPage() {
 
   const handleAddMaterial = async (values) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/works/${selectedWork.id}/materials`, {
+      const response = await fetch(`${API_BASE_URL}/works/${selectedWork.id}/materials`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -221,7 +242,7 @@ export default function WorksPage() {
 
   const handleRemoveMaterial = async (materialId) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/works/${selectedWork.id}/materials/${materialId}`, {
+      const response = await fetch(`${API_BASE_URL}/works/${selectedWork.id}/materials/${materialId}`, {
         method: 'DELETE'
       });
 

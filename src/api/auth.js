@@ -1,6 +1,24 @@
 // API сервис для авторизации
 
-const API_BASE_URL = 'http://localhost:3001/api/auth';
+// Функция для получения правильного API URL
+const getApiBaseUrl = () => {
+  // Проверяем переменную окружения
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+  
+  // В GitHub Codespaces используем относительный URL или localhost
+  const currentHost = window.location.hostname;
+  if (currentHost.includes('.app.github.dev')) {
+    // Пробуем использовать относительный путь через прокси VS Code
+    return '/api-proxy';
+  }
+  
+  // Fallback для локальной разработки
+  return 'http://localhost:3001/api';
+};
+
+const API_BASE_URL = `${getApiBaseUrl()}/auth`;
 
 // Сохранение токена в localStorage
 export const setAuthToken = (token) => {

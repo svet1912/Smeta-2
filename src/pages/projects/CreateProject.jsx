@@ -22,6 +22,27 @@ import { getCurrentUser } from '../../api/auth';
 // assets
 import ProjectOutlined from '@ant-design/icons/ProjectOutlined';
 
+// Функция для получения правильного API URL
+const getApiBaseUrl = () => {
+  // Проверяем переменную окружения
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+  
+  // Автоматическое определение для GitHub Codespaces
+  const currentHost = window.location.hostname;
+  if (currentHost.includes('.app.github.dev')) {
+    // Заменяем порт 3000 на 3001 в GitHub Codespaces URL
+    return "/api-proxy";
+    // Используем прокси через Vite dev server
+  }
+  
+  // Fallback для локальной разработки
+  return 'http://localhost:3001/api';
+};
+
+const API_BASE_URL = getApiBaseUrl();
+
 // ==============================|| CREATE PROJECT PAGE ||============================== //
 
 export default function CreateProject() {
@@ -90,7 +111,7 @@ export default function CreateProject() {
         return;
       }
 
-      const response = await fetch('http://localhost:3001/api/projects', {
+      const response = await fetch(`${API_BASE_URL}/projects`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

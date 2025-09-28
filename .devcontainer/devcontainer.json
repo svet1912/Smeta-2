@@ -1,0 +1,14 @@
+{
+  "name": "SMETA360 Dev",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
+  "postCreateCommand": "bash .devcontainer/bootstrap_env.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode"]
+    }
+  },
+  "portsAttributes": {
+    "3000": { "label": "Vite", "visibility": "public" },
+    "3001": { "label": "API",  "visibility": "public" }
+  }
+}

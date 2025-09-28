@@ -44,7 +44,7 @@ app.use((req, res, next) => {
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://127.0.0.1:3000', 'http://127.0.0.1:3001', 'http://127.0.0.1:3002', 'file://'],
+  origin: true, // Временно разрешаем все origins для отладки
   credentials: true,
   optionsSuccessStatus: 200,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -1360,9 +1360,10 @@ app.delete('/api/projects/:id', simpleAuth, async (req, res) => {
 });
 
 // Запуск сервера
-app.listen(PORT, async () => {
+app.listen(PORT, '0.0.0.0', async () => {
   console.log(`🚀 Сервер запущен на http://localhost:${PORT}`);
   console.log(`📊 API доступно по адресу: http://localhost:${PORT}/api/test`);
+  console.log(`🌐 Внешний доступ через порт: ${PORT}`);
   
   // Простая проверка подключения без создания таблиц
   try {

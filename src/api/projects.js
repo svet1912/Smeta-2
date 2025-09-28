@@ -1,6 +1,25 @@
 // API сервис для проектов
 
-const API_BASE_URL = 'http://localhost:3001/api';
+// Функция для получения правильного API URL
+const getApiBaseUrl = () => {
+  // Проверяем переменную окружения
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+  
+  // Автоматическое определение для GitHub Codespaces
+  const currentHost = window.location.hostname;
+  if (currentHost.includes('.app.github.dev')) {
+    // Заменяем порт 3000 на 3001 в GitHub Codespaces URL
+    return "/api-proxy";
+    // Используем прокси через Vite dev server
+  }
+  
+  // Fallback для локальной разработки
+  return 'http://localhost:3001/api';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 // Получение токена из localStorage
 const getAuthToken = () => {
