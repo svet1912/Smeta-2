@@ -1,9 +1,10 @@
 // assets
-import { CalculatorOutlined } from '@ant-design/icons';
+import { CalculatorOutlined, HomeOutlined } from '@ant-design/icons';
 
 // icons
 const icons = {
-  CalculatorOutlined
+  CalculatorOutlined,
+  HomeOutlined
 };
 
 // ==============================|| MENU ITEMS - РАСЧЕТ ||============================== //
@@ -25,6 +26,13 @@ const calculations = {
           type: 'item',
           url: '/calculations/estimate',
           icon: icons.CalculatorOutlined
+        },
+        {
+          id: 'object-parameters',
+          title: 'Параметры объекта',
+          type: 'item',
+          url: '/calculations/object-parameters',
+          icon: icons.HomeOutlined
         }
       ]
     }

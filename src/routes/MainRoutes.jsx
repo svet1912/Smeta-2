@@ -20,6 +20,7 @@ const ProjectStorage = Loadable(lazy(() => import('pages/projects/ProjectStorage
 
 // render - calculations
 const EstimateCalculationPage = Loadable(lazy(() => import('pages/calculations/estimate')));
+const ObjectParametersPage = Loadable(lazy(() => import('pages/calculations/objectParameters')));
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -76,6 +77,10 @@ const MainRoutes = {
         {
           path: 'estimate',
           element: <EstimateCalculationPage />
+        },
+        {
+          path: 'object-parameters',
+          element: <ObjectParametersPage />
         }
       ]
     }

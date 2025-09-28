@@ -66,10 +66,14 @@ export default function DashboardDefault() {
       try {
         const [statsData, ordersData] = await Promise.all([getStatistics(), getOrders()]);
 
-        setStatistics(statsData);
-        setOrders(ordersData);
+        // Убеждаемся, что statistics это массив
+        setStatistics(Array.isArray(statsData) ? statsData : []);
+        setOrders(Array.isArray(ordersData) ? ordersData : []);
       } catch (error) {
         console.error('Ошибка загрузки данных:', error);
+        // В случае ошибки устанавливаем пустые массивы
+        setStatistics([]);
+        setOrders([]);
       } finally {
         setLoading(false);
       }
@@ -92,18 +96,26 @@ export default function DashboardDefault() {
       <Grid sx={{ mb: -2.25 }} size={12}>
         <Typography variant="h5">Панель управления</Typography>
       </Grid>
-      {statistics.map((stat, index) => (
-        <Grid key={stat.id} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-          <AnalyticEcommerce
-            title={stat.metric_name}
-            count={stat.metric_value.toLocaleString()}
-            percentage={Number(stat.percentage)}
-            extra={stat.extra_value?.toLocaleString()}
-            isLoss={stat.is_loss}
-            color={stat.color}
-          />
+      {Array.isArray(statistics) && statistics.length > 0 ? (
+        statistics.map((stat, index) => (
+          <Grid key={stat.id || index} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+            <AnalyticEcommerce
+              title={stat.metric_name}
+              count={stat.metric_value?.toLocaleString() || '0'}
+              percentage={Number(stat.percentage) || 0}
+              extra={stat.extra_value?.toLocaleString()}
+              isLoss={stat.is_loss || false}
+              color={stat.color || 'primary'}
+            />
+          </Grid>
+        ))
+      ) : (
+        <Grid size={12}>
+          <Typography variant="body2" color="text.secondary" align="center">
+            Загрузка статистики...
+          </Typography>
         </Grid>
-      ))}
+      )}
       <Grid sx={{ display: { sm: 'none', md: 'block', lg: 'none' } }} size={{ md: 8 }} />
       {/* row 2 */}
       <Grid size={{ xs: 12, md: 7, lg: 8 }}>
