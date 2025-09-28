@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 
 // material-ui
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -9,6 +9,7 @@ import Toolbar from '@mui/material/Toolbar';
 import AppBarStyled from './AppBarStyled';
 import HeaderContent from './HeaderContent';
 import IconButton from 'components/@extended/IconButton';
+import useScrollDirection from '../../../hooks/useScrollDirection';
 
 import { handlerDrawerOpen, useGetMenuMaster } from 'api/menu';
 import { DRAWER_WIDTH, MINI_DRAWER_WIDTH } from 'config';
@@ -21,9 +22,20 @@ import MenuUnfoldOutlined from '@ant-design/icons/MenuUnfoldOutlined';
 
 export default function Header() {
   const downLG = useMediaQuery((theme) => theme.breakpoints.down('lg'));
+  const scrollDirection = useScrollDirection();
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
 
   const { menuMaster } = useGetMenuMaster();
   const drawerOpen = menuMaster.isDashboardDrawerOpened;
+
+  // Управляем видимостью хедера на основе направления скролла
+  useEffect(() => {
+    if (scrollDirection === 'down') {
+      setIsHeaderVisible(false);
+    } else if (scrollDirection === 'up') {
+      setIsHeaderVisible(true);
+    }
+  }, [scrollDirection]);
 
   // header content
   const headerContent = useMemo(() => <HeaderContent />, []);
@@ -59,7 +71,9 @@ export default function Header() {
       borderBottom: '1px solid',
       borderBottomColor: 'divider',
       zIndex: 1200,
-      width: { xs: '100%', lg: drawerOpen ? `calc(100% - ${DRAWER_WIDTH}px)` : `calc(100% - ${MINI_DRAWER_WIDTH}px)` }
+      width: { xs: '100%', lg: drawerOpen ? `calc(100% - ${DRAWER_WIDTH}px)` : `calc(100% - ${MINI_DRAWER_WIDTH}px)` },
+      transform: isHeaderVisible ? 'translateY(0px)' : 'translateY(-100%)',
+      transition: 'transform 0.3s ease-in-out'
     }
   };
 

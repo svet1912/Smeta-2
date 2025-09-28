@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 
 import useMediaQuery from '@mui/material/useMediaQuery';
 import Toolbar from '@mui/material/Toolbar';
@@ -11,6 +11,8 @@ import Header from './Header';
 import Footer from './Footer';
 import Loader from 'components/Loader';
 import Breadcrumbs from 'components/@extended/Breadcrumbs';
+import SubNavTabs from 'components/SubNavTabs';
+import useScrollDirection from '../../hooks/useScrollDirection';
 
 import { handlerDrawerOpen, useGetMenuMaster } from 'api/menu';
 
@@ -19,11 +21,33 @@ import { handlerDrawerOpen, useGetMenuMaster } from 'api/menu';
 export default function DashboardLayout() {
   const { menuMasterLoading } = useGetMenuMaster();
   const downXL = useMediaQuery((theme) => theme.breakpoints.down('xl'));
+  const location = useLocation();
+  const scrollDirection = useScrollDirection();
+  const [activeSubTab, setActiveSubTab] = useState('editor');
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
 
   // set media wise responsive drawer
   useEffect(() => {
     handlerDrawerOpen(!downXL);
   }, [downXL]);
+
+  // Управляем видимостью хедера на основе направления скролла
+  useEffect(() => {
+    if (scrollDirection === 'down') {
+      setIsHeaderVisible(false);
+    } else if (scrollDirection === 'up') {
+      setIsHeaderVisible(true);
+    }
+  }, [scrollDirection]);
+
+  // Определяем, нужно ли показывать подвкладки (только на страницах расчетов)
+  const showSubNavTabs = location.pathname.includes('/calculations/') || location.pathname.includes('/projects/');
+
+  const handleSubTabChange = (key) => {
+    setActiveSubTab(key);
+    // Здесь можно добавить логику навигации по подвкладкам
+    console.log('Selected tab:', key);
+  };
 
   if (menuMasterLoading) return <Loader />;
 
@@ -33,14 +57,28 @@ export default function DashboardLayout() {
       <Drawer />
 
       <Box component="main" sx={{ width: 'calc(100% - 260px)', flexGrow: 1, p: { xs: 2, sm: 3 } }}>
-        <Toolbar sx={{ mt: 'inherit' }} />
+        <Toolbar sx={{ 
+          mt: 'inherit',
+          // Добавляем отступ только если хедер видим
+          display: isHeaderVisible ? 'block' : 'none'
+        }} />
+        
+        {/* Подвкладки для страниц расчетов и проектов */}
+        {showSubNavTabs && (
+          <SubNavTabs 
+            activeKey={activeSubTab} 
+            onChange={handleSubTabChange} 
+          />
+        )}
+        
         <Box
           sx={{
             ...{ px: { xs: 0, sm: 2 } },
             position: 'relative',
             minHeight: 'calc(100vh - 110px)',
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
+            paddingTop: showSubNavTabs ? '16px' : (isHeaderVisible ? '0px' : '24px') // Компенсируем скрытый хедер
           }}
         >
           <Breadcrumbs />
