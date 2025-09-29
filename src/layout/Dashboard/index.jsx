@@ -44,6 +44,8 @@ export default function DashboardLayout() {
   useEffect(() => {
     if (location.pathname.includes('/object-parameters')) {
       setActiveSubTab('object-parameters');
+    } else if (location.pathname.includes('/customer-estimate')) {
+      setActiveSubTab('customer-estimate');
     } else if (location.pathname.includes('/estimate')) {
       // Можем выбрать, какую вкладку показывать по умолчанию для /estimate
       // Пока оставим 'estimate-calculation' как основную для этой страницы
@@ -65,6 +67,9 @@ export default function DashboardLayout() {
         break;
       case 'estimate-calculation':
         navigate('/calculations/estimate');
+        break;
+      case 'customer-estimate':
+        navigate('/calculations/customer-estimate');
         break;
       case 'editor':
         navigate('/calculations/estimate');

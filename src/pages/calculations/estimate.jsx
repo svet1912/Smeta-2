@@ -22,7 +22,7 @@ import {
   Badge,
   Image
 } from 'antd';
-import { PlusOutlined, MinusOutlined, CalculatorOutlined, DeleteOutlined, EditOutlined, FileTextOutlined, DownloadOutlined, SaveOutlined } from '@ant-design/icons';
+import { PlusOutlined, MinusOutlined, CalculatorOutlined, DeleteOutlined, EditOutlined, FileTextOutlined, DownloadOutlined, SaveOutlined, CopyOutlined } from '@ant-design/icons';
 import { workMaterialsApi } from 'api/workMaterials';
 
 const { Title, Text } = Typography;
@@ -827,6 +827,65 @@ export default function EstimateCalculationPage() {
            message.success('Смета очищена');
          };
 
+         // Функция копирования блока в смету заказчика
+         const handleCopyBlockToCustomer = async (workRecord) => {
+           try {
+             // Получаем работу и все связанные с ней материалы
+             const workItems = [];
+             
+             // Добавляем саму работу
+             const workCopy = {
+               item_id: `work_${Date.now()}`,
+               type: 'work',
+               name: workRecord.name,
+               unit: workRecord.unit || 'шт.',
+               quantity: workRecord.quantity || 1,
+               unit_price: workRecord.unit_price || 0,
+               total: (workRecord.quantity || 1) * (workRecord.unit_price || 0),
+               isWork: true
+             };
+             workItems.push(workCopy);
+             
+             // Находим все материалы для этой работы
+             const relatedMaterials = estimateItems.filter(item => 
+               item.type === 'material' && item.work_id === workRecord.item_id
+             );
+             
+             // Добавляем материалы
+             relatedMaterials.forEach(material => {
+               const materialCopy = {
+                 item_id: `material_${Date.now()}_${Math.random()}`,
+                 type: 'material',
+                 name: material.name,
+                 unit: material.unit || 'шт.',
+                 quantity: material.quantity || 1,
+                 unit_price: material.unit_price || 0,
+                 total: (material.quantity || 1) * (material.unit_price || 0),
+                 isMaterial: true
+               };
+               workItems.push(materialCopy);
+             });
+             
+             // Сохраняем данные в localStorage (статический вариант)
+             const existingCustomerData = JSON.parse(localStorage.getItem('customerEstimate') || '[]');
+             const updatedCustomerData = [...existingCustomerData, ...workItems];
+             localStorage.setItem('customerEstimate', JSON.stringify(updatedCustomerData));
+             
+             const workName = workRecord.name?.substring(0, 50) + (workRecord.name?.length > 50 ? '...' : '');
+             const materialsCount = relatedMaterials.length;
+             const totalCost = workItems.reduce((sum, item) => sum + item.total, 0);
+             
+             message.success(
+               `Блок "${workName}" скопирован в смету заказчика! ` +
+               `Работ: 1, Материалов: ${materialsCount}, Сумма: ${formatNumberWithComma(totalCost)} ₽`
+             );
+             
+           } catch (error) {
+             console.error('Ошибка копирования блока:', error);
+             message.error('Ошибка при копировании блока');
+           }
+         };
+
          // Функция для переключения развернутости работы
          const toggleWorkExpansion = (workId) => {
            const newExpandedWorks = new Set(expandedWorks);
@@ -1050,6 +1109,21 @@ export default function EstimateCalculationPage() {
                         }
                         return null;
                       })()}
+                      <Tooltip title="Копировать работу со всеми материалами в смету заказчика" placement="top">
+                        <Button
+                          type="text"
+                          size="small"
+                          icon={<CopyOutlined />}
+                          onClick={() => handleCopyBlockToCustomer(record)}
+                          style={{ 
+                            color: '#722ed1', 
+                            marginLeft: '8px',
+                            padding: '2px 4px',
+                            minWidth: '20px',
+                            height: '20px'
+                          }}
+                        />
+                      </Tooltip>
                     </>
                   ) : (
                     <>

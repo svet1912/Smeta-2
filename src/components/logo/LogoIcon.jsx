@@ -1,39 +1,34 @@
 // material-ui
 import { useTheme } from '@mui/material/styles';
 
-// ==============================|| LOGO ICON SVG ||============================== //
+// ==============================|| SMETA 360° ICON SVG ||============================== //
 
 export default function LogoIcon() {
   const theme = useTheme();
 
   return (
-    <svg width="129" height="129" viewBox="0 0 129 129" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M7.27577 57.2242L17.5616 46.9384L17.5724 46.9276H36.9234L29.2238 54.6273L27.2358 56.6152L19.3511 64.5L20.3276 65.4792L64.5 109.649L109.649 64.5L101.761 56.6152L101.206 56.0572L92.0766 46.9276H111.428L111.438 46.9384L119.5 55.0002L129 64.5L64.5 129L0 64.5L7.27577 57.2242ZM64.5 0L101.77 37.2695H82.4185L64.5 19.3511L46.5816 37.2695H27.2305L64.5 0Z"
-        fill={theme.palette.primary.dark}
-      />
-      <path
-        d="M19.3509 64.5L27.2357 56.6152L29.2236 54.6273L21.5267 46.9276H17.5722L17.5615 46.9384L7.27561 57.2242L17.1483 67.0487L19.3509 64.5Z"
-        fill="url(#paint0_linear)"
-      />
-      <path
-        d="M101.762 56.6152L109.649 64.5L108.868 65.2807L108.871 65.2834L119.5 55.0002L111.438 46.9384L111.428 46.9276H110.644L101.206 56.0572L101.762 56.6152Z"
-        fill="url(#paint1_linear)"
-      />
-      <path
-        d="M17.5508 46.9276L17.5615 46.9384L27.2357 56.6152L64.4999 93.8767L111.449 46.9276H17.5508Z"
-        fill={theme.palette.primary.main}
-      />
-      <defs>
-        <linearGradient id="paint0_linear" x1="25.0225" y1="49.3259" x2="11.4189" y2="62.9295" gradientUnits="userSpaceOnUse">
-          <stop stopColor={theme.palette.primary.darker} />
-          <stop offset="0.9637" stopColor={theme.palette.primary.dark} stopOpacity="0" />
-        </linearGradient>
-        <linearGradient id="paint1_linear" x1="103.5" y1="49.5" x2="114.5" y2="62" gradientUnits="userSpaceOnUse">
-          <stop stopColor={theme.palette.primary.darker} />
-          <stop offset="1" stopColor={theme.palette.primary.dark} stopOpacity="0" />
-        </linearGradient>
-      </defs>
+    <svg width="40" height="40" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+      <clipPath id="cl_icon">
+        <rect x="0" width="400" height="400"/>
+      </clipPath>
+      <g clipPath="url(#cl_icon)">
+        {/* Центральный круг - основной элемент логотипа */}
+        <path fill="#3CA490" d="M200 80C155 80 120 115 120 160C120 205 155 240 200 240C245 240 280 205 280 160C280 115 245 80 200 80ZM200 220C165 220 140 195 140 160C140 125 165 100 200 100C235 100 260 125 260 160C260 195 235 220 200 220Z"/>
+        
+        {/* Буква S */}
+        <path fill="#FDFDFD" d="M180 140C185 135 195 135 200 140C205 145 205 155 200 160C195 165 185 165 180 160C175 155 175 145 180 140Z"/>
+        
+        {/* 360° текст упрощенный */}
+        <circle fill="#32869A" cx="320" cy="160" r="8"/>
+        <circle fill="#32869A" cx="340" cy="140" r="6"/>
+        <circle fill="#32869A" cx="340" cy="180" r="6"/>
+        
+        {/* Декоративные элементы по кругу */}
+        <path fill="#3CA490" d="M200 40C210 40 220 45 220 50C220 55 210 60 200 60C190 60 180 55 180 50C180 45 190 40 200 40Z"/>
+        <path fill="#3CA490" d="M200 340C210 340 220 345 220 350C220 355 210 360 200 360C190 360 180 355 180 350C180 345 190 340 200 340Z"/>
+        <path fill="#32869A" d="M60 200C65 190 70 180 75 180C80 180 85 190 85 200C85 210 80 220 75 220C70 220 65 210 60 200Z"/>
+        <path fill="#32869A" d="M315 200C320 190 325 180 330 180C335 180 340 190 340 200C340 210 335 220 330 220C325 220 320 210 315 200Z"/>
+      </g>
     </svg>
   );
 }
