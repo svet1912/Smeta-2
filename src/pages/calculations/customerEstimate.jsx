@@ -22,7 +22,7 @@ import {
   Badge,
   Image
 } from 'antd';
-import { PlusOutlined, MinusOutlined, CalculatorOutlined, DeleteOutlined, EditOutlined, FileTextOutlined, DownloadOutlined, SaveOutlined } from '@ant-design/icons';
+import { PlusOutlined, MinusOutlined, CalculatorOutlined, DeleteOutlined, EditOutlined, FileTextOutlined, DownloadOutlined, SaveOutlined, PercentageOutlined, ReloadOutlined } from '@ant-design/icons';
 import { workMaterialsApi } from 'api/workMaterials';
 
 const { Title, Text } = Typography;
@@ -82,6 +82,10 @@ export default function CustomerEstimatePage() {
   const [selectedMaterialToReplace, setSelectedMaterialToReplace] = useState(null);
   const [materialForm] = Form.useForm();
 
+  // Состояния для применения коэффициентов
+  const [coefficientModalVisible, setCoefficientModalVisible] = useState(false);
+  const [coefficientForm] = Form.useForm();
+
   // Загрузка данных
   useEffect(() => {
     loadWorks();
@@ -95,7 +99,12 @@ export default function CustomerEstimatePage() {
       const savedData = localStorage.getItem('customerEstimate');
       if (savedData) {
         const parsedData = JSON.parse(savedData);
-        setEstimateItems(parsedData);
+        // Добавляем original_unit_price для существующих позиций, если его нет
+        const itemsWithOriginalPrices = parsedData.map(item => ({
+          ...item,
+          original_unit_price: item.original_unit_price || item.unit_price
+        }));
+        setEstimateItems(itemsWithOriginalPrices);
       }
     } catch (error) {
       console.error('Ошибка загрузки сметы заказчика:', error);
@@ -208,7 +217,9 @@ export default function CustomerEstimatePage() {
             ? {
                 ...item,
                 ...values,
-                total: (values.quantity || 1) * (values.unit_price || 0)
+                total: (values.quantity || 1) * (values.unit_price || 0),
+                // Сохраняем оригинальную цену, если она еще не сохранена
+                original_unit_price: item.original_unit_price || item.unit_price
               }
             : item
         );
@@ -222,7 +233,9 @@ export default function CustomerEstimatePage() {
           type: 'work',
           ...values,
           total: (values.quantity || 1) * (values.unit_price || 0),
-          isWork: true
+          isWork: true,
+          // Сохраняем оригинальную цену при создании
+          original_unit_price: values.unit_price || 0
         };
         const newItems = [...estimateItems, newItem];
         setEstimateItems(newItems);
@@ -242,6 +255,94 @@ export default function CustomerEstimatePage() {
     setEstimateItems([]);
     saveCustomerEstimate([]);
     message.success('Смета очищена');
+  };
+
+  // Функция открытия модального окна коэффициентов
+  const handleOpenCoefficientModal = () => {
+    coefficientForm.setFieldsValue({
+      workCoefficient: 1,
+      materialCoefficient: 1
+    });
+    setCoefficientModalVisible(true);
+  };
+
+  // Функция применения коэффициентов
+  const handleApplyCoefficients = async () => {
+    try {
+      const values = await coefficientForm.validateFields();
+      const { workCoefficient, materialCoefficient } = values;
+
+      if (workCoefficient <= 0 || materialCoefficient <= 0) {
+        message.error('Коэффициенты должны быть больше нуля');
+        return;
+      }
+
+      const updatedItems = estimateItems.map(item => {
+        // Сохраняем оригинальную цену, если она еще не сохранена
+        const originalPrice = item.original_unit_price || item.unit_price;
+        
+        if (item.isWork) {
+          // Применяем коэффициент к работам
+          const newPrice = item.unit_price * workCoefficient;
+          return {
+            ...item,
+            unit_price: newPrice,
+            total: item.quantity * newPrice,
+            original_unit_price: originalPrice
+          };
+        } else {
+          // Применяем коэффициент к материалам
+          const newPrice = item.unit_price * materialCoefficient;
+          return {
+            ...item,
+            unit_price: newPrice,
+            total: item.quantity * newPrice,
+            original_unit_price: originalPrice
+          };
+        }
+      });
+
+      setEstimateItems(updatedItems);
+      saveCustomerEstimate(updatedItems);
+      setCoefficientModalVisible(false);
+      
+      message.success(`Коэффициенты применены: работы ×${workCoefficient}, материалы ×${materialCoefficient}`);
+    } catch (error) {
+      console.error('Ошибка применения коэффициентов:', error);
+      message.error('Ошибка применения коэффициентов');
+    }
+  };
+
+  // Функция отмены коэффициентов (восстановление оригинальных цен)
+  const handleResetCoefficients = () => {
+    const hasOriginalPrices = estimateItems.some(item => item.original_unit_price && item.original_unit_price !== item.unit_price);
+    
+    if (!hasOriginalPrices) {
+      message.info('Коэффициенты не применялись или цены уже в исходном состоянии');
+      return;
+    }
+
+    const resetItems = estimateItems.map(item => {
+      if (item.original_unit_price && item.original_unit_price !== item.unit_price) {
+        return {
+          ...item,
+          unit_price: item.original_unit_price,
+          total: item.quantity * item.original_unit_price
+        };
+      }
+      return item;
+    });
+
+    setEstimateItems(resetItems);
+    saveCustomerEstimate(resetItems);
+    
+    // Сбрасываем значения в форме
+    coefficientForm.setFieldsValue({
+      workCoefficient: 1,
+      materialCoefficient: 1
+    });
+    
+    message.success('Цены восстановлены к исходным значениям');
   };
 
   // Функция экспорта сметы
@@ -318,6 +419,15 @@ export default function CustomerEstimatePage() {
             size="middle"
           >
             Обновить справочники
+          </Button>
+          <Button
+            icon={<PercentageOutlined />}
+            onClick={handleOpenCoefficientModal}
+            size="middle"
+            disabled={estimateItems.length === 0}
+            style={{ color: '#fa8c16', borderColor: '#fa8c16' }}
+          >
+            Применить коэффициенты
           </Button>
           <Button
             icon={<DownloadOutlined />}
@@ -625,6 +735,174 @@ export default function CustomerEstimatePage() {
                   <Text strong style={{ fontSize: '16px', color: '#52c41a' }}>
                     Сумма: {formatNumberWithComma(total)} ₽
                   </Text>
+                </div>
+              );
+            }}
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* Модальное окно применения коэффициентов */}
+      <Modal
+        title="Применить коэффициенты"
+        open={coefficientModalVisible}
+        onCancel={() => setCoefficientModalVisible(false)}
+        onOk={handleApplyCoefficients}
+        okText="Применить"
+        cancelText="Отмена"
+        width={550}
+        footer={[
+          <Button 
+            key="reset" 
+            icon={<ReloadOutlined />}
+            onClick={handleResetCoefficients}
+            disabled={estimateItems.length === 0}
+          >
+            Отменить коэффициенты
+          </Button>,
+          <Button key="cancel" onClick={() => setCoefficientModalVisible(false)}>
+            Отмена
+          </Button>,
+          <Button key="apply" type="primary" onClick={handleApplyCoefficients}>
+            Применить
+          </Button>
+        ]}
+      >
+        <div style={{ marginBottom: 16 }}>
+          <Text type="secondary">
+            Коэффициенты будут применены ко всем позициям соответствующего типа в смете.
+          </Text>
+        </div>
+        
+        <Form
+          form={coefficientForm}
+          layout="vertical"
+          initialValues={{
+            workCoefficient: 1,
+            materialCoefficient: 1
+          }}
+        >
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="workCoefficient"
+                label="Коэффициент для работ"
+                rules={[
+                  { required: true, message: 'Введите коэффициент' },
+                  { type: 'number', min: 0.001, max: 1000, message: 'Коэффициент должен быть от 0.001 до 1000' }
+                ]}
+              >
+                <InputNumber
+                  placeholder="1.000"
+                  style={{ width: '100%', height: '32px' }}
+                  step={0.1}
+                  precision={3}
+                  min={0.001}
+                  max={1000}
+                  controls={true}
+                  addonAfter="×"
+                />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="materialCoefficient"
+                label="Коэффициент для материалов"
+                rules={[
+                  { required: true, message: 'Введите коэффициент' },
+                  { type: 'number', min: 0.001, max: 1000, message: 'Коэффициент должен быть от 0.001 до 1000' }
+                ]}
+              >
+                <InputNumber
+                  placeholder="1.000"
+                  style={{ width: '100%', height: '32px' }}
+                  step={0.1}
+                  precision={3}
+                  min={0.001}
+                  max={1000}
+                  controls={true}
+                  addonAfter="×"
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <div style={{
+            padding: '12px',
+            backgroundColor: '#fffbe6',
+            border: '1px solid #ffe58f',
+            borderRadius: '6px',
+            marginTop: '16px'
+          }}>
+            <Text style={{ fontSize: '14px' }}>
+              <strong>Примеры коэффициентов:</strong>
+              <br />
+              • Увеличить на 20% → 1.2
+              <br />
+              • Уменьшить на 10% → 0.9
+              <br />
+              • Удвоить → 2.0
+            </Text>
+          </div>
+
+          {/* Предварительный расчет */}
+          <Form.Item noStyle shouldUpdate>
+            {({ getFieldValue }) => {
+              const workCoeff = getFieldValue('workCoefficient') || 1;
+              const materialCoeff = getFieldValue('materialCoefficient') || 1;
+              
+              const currentTotal = estimateItems.reduce((sum, item) => sum + (item.total || 0), 0);
+              const workTotal = estimateItems
+                .filter(item => item.isWork)
+                .reduce((sum, item) => sum + (item.total || 0), 0);
+              const materialTotal = estimateItems
+                .filter(item => !item.isWork)
+                .reduce((sum, item) => sum + (item.total || 0), 0);
+              
+              const newWorkTotal = workTotal * workCoeff;
+              const newMaterialTotal = materialTotal * materialCoeff;
+              const newTotal = newWorkTotal + newMaterialTotal;
+              
+              return (
+                <div style={{
+                  padding: '12px',
+                  backgroundColor: '#f0f8ff',
+                  border: '1px solid #d6e4ff',
+                  borderRadius: '6px',
+                  marginTop: '16px'
+                }}>
+                  <Row gutter={16}>
+                    <Col span={8}>
+                      <Statistic
+                        title="Текущая сумма"
+                        value={currentTotal}
+                        precision={2}
+                        suffix="₽"
+                        valueStyle={{ fontSize: '14px' }}
+                      />
+                    </Col>
+                    <Col span={8}>
+                      <Statistic
+                        title="Новая сумма"
+                        value={newTotal}
+                        precision={2}
+                        suffix="₽"
+                        valueStyle={{ fontSize: '14px', color: '#1890ff' }}
+                      />
+                    </Col>
+                    <Col span={8}>
+                      <Statistic
+                        title="Изменение"
+                        value={((newTotal - currentTotal) / currentTotal * 100) || 0}
+                        precision={1}
+                        suffix="%"
+                        valueStyle={{ 
+                          fontSize: '14px',
+                          color: newTotal > currentTotal ? '#52c41a' : newTotal < currentTotal ? '#ff4d4f' : '#666'
+                        }}
+                      />
+                    </Col>
+                  </Row>
                 </div>
               );
             }}

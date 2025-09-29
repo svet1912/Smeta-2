@@ -842,7 +842,9 @@ export default function EstimateCalculationPage() {
                quantity: workRecord.quantity || 1,
                unit_price: workRecord.unit_price || 0,
                total: (workRecord.quantity || 1) * (workRecord.unit_price || 0),
-               isWork: true
+               isWork: true,
+               // Сохраняем оригинальную цену при копировании
+               original_unit_price: workRecord.unit_price || 0
              };
              workItems.push(workCopy);
              
@@ -861,7 +863,9 @@ export default function EstimateCalculationPage() {
                  quantity: material.quantity || 1,
                  unit_price: material.unit_price || 0,
                  total: (material.quantity || 1) * (material.unit_price || 0),
-                 isMaterial: true
+                 isMaterial: true,
+                 // Сохраняем оригинальную цену при копировании
+                 original_unit_price: material.unit_price || 0
                };
                workItems.push(materialCopy);
              });
