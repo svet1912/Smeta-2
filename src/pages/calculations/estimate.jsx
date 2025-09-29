@@ -49,6 +49,45 @@ const getApiBaseUrl = () => {
 
 const API_BASE_URL = getApiBaseUrl();
 
+// Функция для безопасного вычисления математических выражений
+const safeEvaluate = (expression) => {
+  try {
+    // Заменяем запятые на точки для правильных вычислений
+    const normalizedExpression = expression.toString().replace(/,/g, '.');
+    
+    // Проверяем, что выражение содержит только безопасные символы
+    if (!/^[0-9+\-*/.() ,]+$/.test(normalizedExpression)) {
+      return null;
+    }
+    
+    // Используем Function constructor для безопасного вычисления
+    const result = Function('"use strict"; return (' + normalizedExpression + ')')();
+    
+    // Проверяем, что результат является числом (включая 0)
+    if (typeof result === 'number' && !isNaN(result) && isFinite(result)) {
+      return result;
+    }
+    
+    return null;
+  } catch (error) {
+    return null;
+  }
+};
+
+// Функция для форматирования чисел с запятой (российский стандарт)
+const formatNumberWithComma = (number) => {
+  if (number === null || number === undefined || isNaN(number)) return '-';
+  return parseFloat(number).toFixed(2).replace('.', ',');
+};
+
+// Функция для парсинга чисел с запятой в точку
+const parseNumberWithComma = (value) => {
+  if (typeof value === 'string') {
+    return parseFloat(value.replace(',', '.'));
+  }
+  return parseFloat(value) || 0;
+};
+
 // ==============================|| ХУКИ И УТИЛИТЫ ||============================== //
 
 // Хук для debounce
@@ -196,18 +235,22 @@ export default function EstimateCalculationPage() {
             }
 
             if (item.material_name) {
+              const workQuantity = workGroups[item.work_id].work?.quantity || 1;
+              const consumptionPerWork = parseFloat(item.consumption_per_work_unit) || 0;
+              const materialQuantity = workQuantity * consumptionPerWork; // количество работ * расход
+              
               workGroups[item.work_id].materials.push({
                 type: 'material',
                 item_id: item.material_id,
                 name: item.material_name,
                 unit: item.material_unit || 'шт.',
-                quantity: (parseFloat(item.consumption_per_work_unit) || 1) * 1, // Умножаем на количество работ
+                quantity: materialQuantity,
                 unit_price: parseFloat(item.material_unit_price) || 0,
-                total: ((parseFloat(item.consumption_per_work_unit) || 1) * 1) * (parseFloat(item.material_unit_price) || 0),
+                total: materialQuantity * (parseFloat(item.material_unit_price) || 0),
                 work_id: item.work_id,
                 image_url: item.material_image_url,
                 item_url: item.material_item_url,
-                consumption_per_work_unit: parseFloat(item.consumption_per_work_unit) || 0
+                consumption_per_work_unit: consumptionPerWork
               });
             }
           });
@@ -275,18 +318,22 @@ export default function EstimateCalculationPage() {
             }
 
             if (item.material_name) {
+              const workQuantity = workGroups[item.work_id].work?.quantity || 1;
+              const consumptionPerWork = parseFloat(item.consumption_per_work_unit) || 0;
+              const materialQuantity = workQuantity * consumptionPerWork; // количество работ * расход
+              
               workGroups[item.work_id].materials.push({
                 type: 'material',
                 item_id: item.material_id,
                 name: item.material_name,
                 unit: item.material_unit || 'шт.',
-                quantity: (parseFloat(item.consumption_per_work_unit) || 1) * 1, // Умножаем на количество работ
+                quantity: materialQuantity,
                 unit_price: parseFloat(item.material_unit_price) || 0,
-                total: ((parseFloat(item.consumption_per_work_unit) || 1) * 1) * (parseFloat(item.material_unit_price) || 0),
+                total: materialQuantity * (parseFloat(item.material_unit_price) || 0),
                 work_id: item.work_id,
                 image_url: item.material_image_url,
                 item_url: item.material_item_url,
-                consumption_per_work_unit: parseFloat(item.consumption_per_work_unit) || 0
+                consumption_per_work_unit: consumptionPerWork
               });
             }
           });
@@ -324,6 +371,28 @@ export default function EstimateCalculationPage() {
     form.resetFields();
     setModalVisible(true);
   };
+
+  // Состояние для редактируемых полей количества
+  const [editingQuantities, setEditingQuantities] = useState({});
+
+  // Функция для пересчета материалов при изменении количества работы
+  const recalculateMaterialQuantities = useCallback((workId, newWorkQuantity) => {
+    setEstimateItems(prevItems => {
+      return prevItems.map(item => {
+        // Если это материал, связанный с данной работой
+        if (item.type === 'material' && item.work_id === workId) {
+          const newQuantity = newWorkQuantity * (item.consumption_per_work_unit || 0);
+          const newTotal = newQuantity * (item.unit_price || 0);
+          return {
+            ...item,
+            quantity: newQuantity,
+            total: newTotal
+          };
+        }
+        return item;
+      });
+    });
+  }, []);
 
   const handleEditItem = (record) => {
     setSelectedItem(record);
@@ -390,7 +459,6 @@ export default function EstimateCalculationPage() {
     // Правильно сбрасываем форму с начальными значениями
     materialForm.resetFields();
     materialForm.setFieldsValue({
-      quantity: 1,
       waste_coeff: 1,
       consumption_per_work_unit: 1,
       unit_price: 0
@@ -410,7 +478,6 @@ export default function EstimateCalculationPage() {
     // Правильно сбрасываем форму с начальными значениями
     materialForm.resetFields();
     materialForm.setFieldsValue({
-      quantity: 1,
       waste_coeff: 1,
       consumption_per_work_unit: 1,
       unit_price: 0
@@ -420,11 +487,19 @@ export default function EstimateCalculationPage() {
   };
 
   const handleSaveMaterial = async (values) => {
-    const quantity = parseFloat(values.quantity) || 1;
-    const unitPrice = parseFloat(values.unit_price) || 0;
-    const total = quantity * unitPrice;
     const consumptionPerWorkUnit = values.consumption_per_work_unit || 1;
     const wasteCoeff = values.waste_coeff || 1;
+    const unitPrice = parseFloat(values.unit_price) || 0;
+    
+    // Находим количество работ для выбранной работы
+    const selectedWork = estimateItems.find(item => 
+      item.type === 'work' && item.item_id === selectedWorkId
+    );
+    const workQuantity = selectedWork?.quantity || 1;
+    
+    // Рассчитываем количество материала: количество работ * расход на единицу работы * коэффициент потерь
+    const materialQuantity = workQuantity * consumptionPerWorkUnit * wasteCoeff;
+    const total = materialQuantity * unitPrice;
 
     const newMaterial = {
       type: 'material',
@@ -432,7 +507,7 @@ export default function EstimateCalculationPage() {
       name: values.name,
       unit: values.unit,
       unit_price: unitPrice,
-      quantity: quantity,
+      quantity: materialQuantity,
       total: total,
       work_id: selectedWorkId,
       consumption_per_work_unit: consumptionPerWorkUnit,
@@ -595,7 +670,8 @@ export default function EstimateCalculationPage() {
     if (values.type === 'work') {
       const workMats = workMaterials[values.item_id] || [];
       workMats.forEach((mat) => {
-        const materialQuantity = (mat.total_consumption || 0) * quantity;
+        // Рассчитываем количество материала: количество работ * расход на единицу работы
+        const materialQuantity = quantity * (mat.consumption_per_work_unit || 0);
         const materialTotal = materialQuantity * (mat.material_unit_price || 0);
 
         itemsToAdd.push({
@@ -766,76 +842,73 @@ export default function EstimateCalculationPage() {
   return (
     <MainCard title="Расчет сметы">
       {/* Статистика */}
-      <Row gutter={16} style={{ marginBottom: 24 }}>
+      <Row gutter={8} style={{ marginBottom: 16 }}>
         <Col span={4}>
-          <Card>
+          <Card size="small" style={{ padding: '8px' }}>
             <Statistic 
               title="Блоков работ" 
               value={stats.totalBlocks} 
-              valueStyle={{ color: '#1890ff' }}
-              prefix={<CalculatorOutlined />}
+              valueStyle={{ color: '#1890ff', fontSize: '16px' }}
+              prefix={<CalculatorOutlined style={{ fontSize: '14px' }} />}
             />
           </Card>
         </Col>
         <Col span={4}>
-          <Card>
+          <Card size="small" style={{ padding: '8px' }}>
             <Statistic 
               title="Работ" 
               value={stats.totalWorks} 
-              valueStyle={{ color: '#52c41a' }}
-              prefix={<CalculatorOutlined />}
+              valueStyle={{ color: '#52c41a', fontSize: '16px' }}
+              prefix={<CalculatorOutlined style={{ fontSize: '14px' }} />}
             />
           </Card>
         </Col>
         <Col span={4}>
-          <Card>
+          <Card size="small" style={{ padding: '8px' }}>
             <Statistic 
               title="Материалов" 
               value={stats.totalMaterials} 
-              valueStyle={{ color: '#faad14' }}
-              prefix={<FileTextOutlined />}
+              valueStyle={{ color: '#faad14', fontSize: '16px' }}
+              prefix={<FileTextOutlined style={{ fontSize: '14px' }} />}
             />
           </Card>
         </Col>
         <Col span={4}>
-          <Card>
+          <Card size="small" style={{ padding: '8px' }}>
             <Statistic 
               title="Сумма работ" 
-              value={stats.worksAmount} 
-              precision={2} 
+              value={formatNumberWithComma(stats.worksAmount)} 
               suffix="₽" 
-              valueStyle={{ color: '#52c41a' }}
+              valueStyle={{ color: '#52c41a', fontSize: '16px' }}
             />
           </Card>
         </Col>
         <Col span={4}>
-          <Card>
+          <Card size="small" style={{ padding: '8px' }}>
             <Statistic 
               title="Сумма материалов" 
-              value={stats.materialsAmount} 
-              precision={2} 
+              value={formatNumberWithComma(stats.materialsAmount)} 
               suffix="₽" 
-              valueStyle={{ color: '#faad14' }}
+              valueStyle={{ color: '#faad14', fontSize: '16px' }}
             />
           </Card>
         </Col>
         <Col span={4}>
-          <Card>
+          <Card size="small" style={{ padding: '8px' }}>
             <Statistic 
               title="Общая сумма" 
-              value={stats.totalAmount} 
-              precision={2} 
+              value={formatNumberWithComma(stats.totalAmount)} 
               suffix="₽" 
-              valueStyle={{ color: '#722ed1', fontSize: '20px' }}
+              valueStyle={{ color: '#722ed1', fontSize: '18px' }}
             />
           </Card>
         </Col>
       </Row>
 
       {/* Кнопки управления */}
-      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Space wrap>
-          <Button type="primary" icon={<PlusOutlined />} onClick={handleAddItem} size="large">
+      <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Space wrap size="small">
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleAddItem} size="middle">
             Добавить блок работ
           </Button>
           <Button
@@ -844,14 +917,14 @@ export default function EstimateCalculationPage() {
               loadWorks();
               loadMaterials();
             }}
-            size="large"
+            size="middle"
           >
             Обновить справочники
           </Button>
                  <Button
                    icon={<FileTextOutlined />}
                    onClick={loadOptimizedEstimateData}
-                   size="large"
+                   size="middle"
                    type="dashed"
                  >
                    Загрузить оптимизированно
@@ -859,7 +932,7 @@ export default function EstimateCalculationPage() {
           <Button
             icon={<DownloadOutlined />}
             onClick={handleExportEstimate}
-            size="large"
+            size="middle"
             disabled={estimateItems.length === 0}
           >
             Экспорт сметы
@@ -875,7 +948,7 @@ export default function EstimateCalculationPage() {
             <Button
               danger
               icon={<DeleteOutlined />}
-              size="large"
+              size="middle"
               disabled={estimateItems.length === 0}
             >
               Очистить смету
@@ -884,18 +957,19 @@ export default function EstimateCalculationPage() {
         </Space>
 
         <div style={{ textAlign: 'right' }}>
-          <Text type="secondary" style={{ fontSize: '14px' }}>
+          <Text type="secondary" style={{ fontSize: '12px' }}>
             Смета на {new Date().toLocaleDateString('ru-RU')}
           </Text>
           <br />
-          <Text strong style={{ color: '#722ed1', fontSize: '16px' }}>
-            Итого: {stats.totalAmount.toFixed(2)} ₽
+          <Text strong style={{ color: '#722ed1', fontSize: '14px' }}>
+            Итого: {formatNumberWithComma(stats.totalAmount)} ₽
           </Text>
         </div>
       </div>
 
       {/* Таблица сметы */}
       <Table
+        size="small"
         columns={[
           {
             title: '№',
@@ -934,12 +1008,12 @@ export default function EstimateCalculationPage() {
               <div style={{
                 paddingLeft: record.isMaterial ? '24px' : '0px',
                 backgroundColor: record.isWork ? '#f0f8ff' : record.isMaterial ? '#f6ffed' : 'transparent',
-                padding: '8px 12px',
+                padding: '4px 8px',
                 borderRadius: '4px',
                 border: record.isWork ? '1px solid #d6e4ff' : record.isMaterial ? '1px solid #d9f7be' : 'none',
                 borderLeft: record.isMaterial ? '3px solid #52c41a' : record.isWork ? '3px solid #1890ff' : 'none'
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   {record.isWork ? (
                     <>
                       <Button
@@ -949,14 +1023,15 @@ export default function EstimateCalculationPage() {
                         onClick={() => toggleWorkExpansion(record.item_id)}
                         style={{
                           padding: '2px 4px',
-                          minWidth: '20px',
-                          height: '20px',
+                          minWidth: '16px',
+                          height: '16px',
+                          fontSize: '10px',
                           backgroundColor: expandedWorks.has(record.item_id) ? '#e6f7ff' : '#f0f0f0'
                         }}
                         title={expandedWorks.has(record.item_id) ? 'Скрыть материалы' : 'Показать материалы'}
                       />
-                      <CalculatorOutlined style={{ color: '#1890ff', fontSize: '16px' }} />
-                      <Text strong style={{ fontSize: '14px', color: '#1890ff' }}>
+                      <CalculatorOutlined style={{ color: '#1890ff', fontSize: '14px' }} />
+                      <Text strong style={{ fontSize: '13px', color: '#1890ff' }}>
                         {text}
                       </Text>
                       {(() => {
@@ -968,7 +1043,7 @@ export default function EstimateCalculationPage() {
                             <Badge 
                               count={materialsCount} 
                               size="small" 
-                              style={{ backgroundColor: '#52c41a', marginLeft: '8px' }}
+                              style={{ backgroundColor: '#52c41a', marginLeft: '6px' }}
                               title={`${materialsCount} материалов`}
                             />
                           );
@@ -979,14 +1054,14 @@ export default function EstimateCalculationPage() {
                   ) : (
                     <>
                       <span style={{ 
-                        marginLeft: '24px',
+                        marginLeft: '20px',
                         color: '#999',
-                        fontSize: '12px'
+                        fontSize: '10px'
                       }}>
                         └─
                       </span>
-                      <FileTextOutlined style={{ color: '#52c41a', fontSize: '14px' }} />
-                      <Text style={{ fontSize: '13px', color: '#52c41a' }}>
+                      <FileTextOutlined style={{ color: '#52c41a', fontSize: '12px' }} />
+                      <Text style={{ fontSize: '12px', color: '#52c41a' }}>
                         {text}
                       </Text>
                     </>
@@ -999,7 +1074,7 @@ export default function EstimateCalculationPage() {
             title: 'Изображение',
             dataIndex: 'image_url',
             key: 'image_url',
-            width: 80,
+            width: 60,
             align: 'center',
             render: (imageUrl, record) => {
               if (record.isMaterial && imageUrl) {
@@ -1007,11 +1082,11 @@ export default function EstimateCalculationPage() {
                   <Image
                     src={imageUrl}
                     alt={record.name}
-                    width={30}
-                    height={30}
+                    width={24}
+                    height={24}
                     style={{
                       objectFit: 'cover',
-                      borderRadius: '4px',
+                      borderRadius: '3px',
                       border: '1px solid #d9d9d9'
                     }}
                     fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMIAAADDCAYAAADQvc6UAAABRWlDQ1BJQ0MgUHJvZmlsZQAAKJFjYGASSSwoyGFhYGDIzSspCnJ3UoiIjFJgf8LAwSDCIMogwMCcmFxc4BgQ4ANUwgCjUcG3awyMIPqyLsis7PPOq3QdDFcvjV3jOD1boQVTPQrgSkktTgbSf4A4LbmgqISBgTEFyFYuLykAsTuAbJEioKOA7DkgdjqEvQHEToKwj4DVhAQ5A9k3gGyB5IxEoBmML4BsnSQk8XQkNtReEOBxcfXxUQg1Mjc0dyHgXNJBSWpFCYh2zi+oLMpMzyhRcASGUqqCZ16yno6CkYGRAQMDKMwhqj/fAIcloxgHQqxAjIHBEugw5sUIsSQpBobtQPdLciLEVJYzMPBHMDBsayhILEqEO4DxG0txmrERhM29nYGBddr//5/DGRjYNRkY/l7////39v///y4Dmn+LgeHANwDrkl1AuO+pmgAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAwqADAAQAAAABAAAAwwAAAAD9b/HnAAAHlklEQVR4Ae3dP3Ik1RnG4W+FgYxN"
@@ -1020,14 +1095,14 @@ export default function EstimateCalculationPage() {
               } else if (record.isWork) {
                 return (
                   <div style={{
-                    width: '30px',
-                    height: '30px',
+                    width: '24px',
+                    height: '24px',
                     backgroundColor: '#1890ff',
                     borderRadius: '50%',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: '12px',
+                    fontSize: '10px',
                     color: 'white',
                     margin: '0 auto'
                   }}>
@@ -1037,14 +1112,14 @@ export default function EstimateCalculationPage() {
               } else {
                 return (
                   <div style={{
-                    width: '30px',
-                    height: '30px',
+                    width: '24px',
+                    height: '24px',
                     backgroundColor: '#52c41a',
                     borderRadius: '50%',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: '12px',
+                    fontSize: '10px',
                     color: 'white',
                     margin: '0 auto'
                   }}>
@@ -1062,11 +1137,132 @@ export default function EstimateCalculationPage() {
             render: (text) => <Text>{text}</Text>
           },
           {
-            title: 'Количество',
+            title: (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                Количество
+                <Tooltip title="Можно использовать математические выражения: 1+2, 3*4, 10/2, (5+3)*2" placement="top">
+                  <Badge count="🔢" style={{ backgroundColor: '#1890ff' }} size="small" />
+                </Tooltip>
+              </div>
+            ),
             dataIndex: 'quantity',
             key: 'quantity',
-            width: 100,
-            render: (value) => <Text strong>{value}</Text>
+            width: 110,
+            render: (value, record) => {
+              if (record.isWork) {
+                const editKey = `${record.item_id}_quantity`;
+                const displayValue = editingQuantities[editKey] !== undefined 
+                  ? editingQuantities[editKey] 
+                  : formatNumberWithComma(value);
+                
+                return (
+                  <Input
+                    size="small"
+                    value={displayValue}
+                    style={{ 
+                      width: '100px', 
+                      textAlign: 'center',
+                      fontSize: '12px'
+                    }}
+                    placeholder="1+2*3"
+                    onChange={(e) => {
+                      const inputValue = e.target.value;
+                      
+                      // Обновляем состояние редактирования
+                      setEditingQuantities(prev => ({
+                        ...prev,
+                        [editKey]: inputValue
+                      }));
+                      
+                      if (inputValue.trim()) {
+                        const calculatedValue = safeEvaluate(inputValue);
+                        
+                        // Меняем цвет рамки в зависимости от валидности
+                        if (calculatedValue !== null && calculatedValue >= 0) {
+                          e.target.style.borderColor = '#52c41a'; // зеленый для валидного выражения
+                          e.target.style.backgroundColor = '#f6ffed';
+                        } else {
+                          e.target.style.borderColor = '#ff4d4f'; // красный для невалидного
+                          e.target.style.backgroundColor = '#fff2f0';
+                        }
+                      } else {
+                        e.target.style.borderColor = '#d9d9d9'; // обычный цвет
+                        e.target.style.backgroundColor = '#fff';
+                      }
+                    }}
+                    onBlur={(e) => {
+                      const inputValue = e.target.value.trim();
+                      if (inputValue) {
+                        const calculatedValue = safeEvaluate(inputValue);
+                        
+                        if (calculatedValue !== null && calculatedValue >= 0) {
+                          // Обновляем состояние с результатом
+                          setEditingQuantities(prev => ({
+                            ...prev,
+                            [editKey]: formatNumberWithComma(calculatedValue)
+                          }));
+                          
+                          e.target.style.borderColor = '#d9d9d9';
+                          e.target.style.backgroundColor = '#fff';
+                          
+                          // Обновляем количество работы
+                          setEstimateItems(prevItems => {
+                            return prevItems.map(item => {
+                              if (item.item_id === record.item_id && item.type === 'work') {
+                                const newTotal = calculatedValue * (item.unit_price || 0);
+                                return { ...item, quantity: calculatedValue, total: newTotal };
+                              }
+                              return item;
+                            });
+                          });
+                          
+                          // Пересчитываем материалы
+                          recalculateMaterialQuantities(record.item_id, calculatedValue);
+                        } else {
+                          // Если вычисление неудачно, возвращаем исходное значение
+                          setEditingQuantities(prev => ({
+                            ...prev,
+                            [editKey]: formatNumberWithComma(value)
+                          }));
+                          e.target.style.borderColor = '#d9d9d9';
+                          e.target.style.backgroundColor = '#fff';
+                          message.warning('Неверное математическое выражение');
+                        }
+                      } else {
+                        // Если поле пустое, возвращаем исходное значение
+                        setEditingQuantities(prev => ({
+                          ...prev,
+                          [editKey]: formatNumberWithComma(value)
+                        }));
+                        e.target.style.borderColor = '#d9d9d9';
+                        e.target.style.backgroundColor = '#fff';
+                      }
+                    }}
+                    onPressEnter={(e) => {
+                      e.target.blur(); // Запускаем обработку onBlur при нажатии Enter
+                    }}
+                  />
+                );
+              } else {
+                // Для материалов находим количество родительской работы
+                const parentWork = estimateItems.find(item => 
+                  item.type === 'work' && item.item_id === record.work_id
+                );
+                const workQuantity = parentWork?.quantity || 1;
+                const consumption = record.consumption_per_work_unit || 0;
+                
+                return (
+                  <Tooltip 
+                    title={`Расчет: ${formatNumberWithComma(workQuantity)} работ × ${consumption.toFixed(6).replace('.', ',')} расход = ${formatNumberWithComma(value)}`}
+                    placement="top"
+                  >
+                    <Text strong style={{ fontSize: '12px', color: '#52c41a' }}>
+                      {formatNumberWithComma(value)}
+                    </Text>
+                  </Tooltip>
+                );
+              }
+            }
           },
           {
             title: 'Цена за единицу',
@@ -1075,7 +1271,7 @@ export default function EstimateCalculationPage() {
             width: 120,
             render: (value) => (
               <Text strong style={{ color: '#1890ff' }}>
-                {value ? `${parseFloat(value).toFixed(2)} ₽` : '-'}
+                {value ? `${formatNumberWithComma(value)} ₽` : '-'}
               </Text>
             )
           },
@@ -1084,7 +1280,24 @@ export default function EstimateCalculationPage() {
             dataIndex: 'consumption_per_work_unit',
             key: 'consumption_per_work_unit',
             width: 100,
-            render: (value) => value ? parseFloat(value).toFixed(6) : '-'
+            render: (value, record) => {
+              if (record.isWork) {
+                return '-';
+              } else if (value !== undefined && value !== null) {
+                return (
+                  <div>
+                    <Text style={{ fontSize: '12px' }}>
+                      {parseFloat(value).toFixed(6).replace('.', ',')}
+                    </Text>
+                    <br />
+                    <Text type="secondary" style={{ fontSize: '10px' }}>
+                      на ед. работы
+                    </Text>
+                  </div>
+                );
+              }
+              return '-';
+            }
           },
           {
             title: 'Сумма',
@@ -1093,37 +1306,34 @@ export default function EstimateCalculationPage() {
             width: 120,
             render: (value) => (
               <Text strong style={{ color: '#52c41a' }}>
-                {value ? `${parseFloat(value).toFixed(2)} ₽` : '-'}
+                {value ? `${formatNumberWithComma(value)} ₽` : '-'}
               </Text>
             )
           },
           {
             title: 'Действия',
             key: 'actions',
-            width: 180,
+            width: 120,
             render: (_, record) => {
               if (record.isWork) {
                 return (
-                  <Space size="small" direction="vertical">
+                  <Space size="small" wrap>
                     <Button
-                      type="primary"
+                      type="link"
                       size="small"
                       icon={<EditOutlined />}
                       onClick={() => handleEditItem(record)}
-                      block
-                    >
-                      Редактировать
-                    </Button>
+                      title="Редактировать работу"
+                      style={{ color: '#1890ff' }}
+                    />
                     <Button
-                      type="dashed"
+                      type="link"
                       size="small"
                       icon={<PlusOutlined />}
                       onClick={() => handleAddMaterial(record)}
-                      block
-                      style={{ color: '#52c41a', borderColor: '#52c41a' }}
-                    >
-                      Добавить материал
-                    </Button>
+                      title="Добавить материал"
+                      style={{ color: '#52c41a' }}
+                    />
                     <Popconfirm
                       title="Удалить блок?"
                       description="Удалить работу и все связанные материалы?"
@@ -1132,13 +1342,12 @@ export default function EstimateCalculationPage() {
                       cancelText="Нет"
                     >
                       <Button
+                        type="link"
                         danger
                         size="small"
                         icon={<DeleteOutlined />}
-                        block
-                      >
-                        Удалить
-                      </Button>
+                        title="Удалить блок"
+                      />
                     </Popconfirm>
                   </Space>
                 );
@@ -1199,7 +1408,7 @@ export default function EstimateCalculationPage() {
             </Table.Summary.Cell>
             <Table.Summary.Cell index={7}>
               <Text strong style={{ color: '#52c41a', fontSize: '16px' }}>
-                {stats.totalAmount.toFixed(2)} ₽
+                {formatNumberWithComma(stats.totalAmount)} ₽
               </Text>
             </Table.Summary.Cell>
             <Table.Summary.Cell index={8} />
@@ -1313,7 +1522,8 @@ export default function EstimateCalculationPage() {
               if (workId && workMaterials[workId]?.length > 0) {
                 const materials = workMaterials[workId];
                 const totalMaterialsCost = materials.reduce((sum, mat) => {
-                  const materialQuantity = (mat.total_consumption || 0) * quantity;
+                  // Рассчитываем количество материала: количество работ * расход на единицу работы
+                  const materialQuantity = quantity * (mat.consumption_per_work_unit || 0);
                   const materialCost = materialQuantity * (mat.material_unit_price || 0);
                   return sum + materialCost;
                 }, 0);
@@ -1333,7 +1543,8 @@ export default function EstimateCalculationPage() {
                   >
                     <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
                       {materials.map((mat) => {
-                        const materialQuantity = (mat.total_consumption || 0) * quantity;
+                        // Рассчитываем количество материала: количество работ * расход на единицу работы
+                        const materialQuantity = quantity * (mat.consumption_per_work_unit || 0);
                         const materialCost = materialQuantity * (mat.material_unit_price || 0);
                         return (
                           <div key={mat.material_id} style={{ 
@@ -1416,7 +1627,6 @@ export default function EstimateCalculationPage() {
           layout="vertical" 
           onFinish={handleSaveMaterial}
           initialValues={{
-            quantity: 1,
             waste_coeff: 1,
             consumption_per_work_unit: 1,
             unit_price: 0
@@ -1493,26 +1703,7 @@ export default function EstimateCalculationPage() {
               <Input type="hidden" />
             </Form.Item>
 
-            {/* Количество и цена */}
-            <Col span={8}>
-              <Form.Item 
-                name="quantity" 
-                label="Количество"
-                rules={[
-                  { required: true, message: 'Введите количество' },
-                  { type: 'number', min: 0.001, message: 'Количество должно быть больше 0' }
-                ]}
-              >
-                <InputNumber 
-                  placeholder="1.0" 
-                  style={{ width: '100%' }}
-                  step={0.1}
-                  precision={3}
-                  size="large"
-                />
-              </Form.Item>
-            </Col>
-
+            {/* Цена и расход */}
             <Col span={8}>
               <Form.Item 
                 name="unit_price" 
@@ -1595,9 +1786,19 @@ export default function EstimateCalculationPage() {
             <Col span={12}>
               <Form.Item noStyle shouldUpdate>
                 {({ getFieldValue }) => {
-                  const quantity = getFieldValue('quantity') || 0;
+                  // Получаем количество работ для выбранной работы
+                  const selectedWork = estimateItems.find(item => 
+                    item.type === 'work' && item.item_id === selectedWorkId
+                  );
+                  const workQuantity = selectedWork?.quantity || 1;
+                  
+                  const consumptionPerWork = getFieldValue('consumption_per_work_unit') || 0;
+                  const wasteCoeff = getFieldValue('waste_coeff') || 1;
                   const unitPrice = getFieldValue('unit_price') || 0;
-                  const total = quantity * unitPrice;
+                  
+                  // Рассчитываем количество материала и общую стоимость
+                  const materialQuantity = workQuantity * consumptionPerWork * wasteCoeff;
+                  const total = materialQuantity * unitPrice;
                   
                   return (
                     <Form.Item label="Общая стоимость">
@@ -1605,12 +1806,16 @@ export default function EstimateCalculationPage() {
                         padding: '8px 12px',
                         backgroundColor: '#f6ffed',
                         border: '1px solid #b7eb8f',
-                        borderRadius: '6px',
-                        textAlign: 'center'
+                        borderRadius: '6px'
                       }}>
-                        <Text strong style={{ fontSize: '16px', color: '#52c41a' }}>
-                          {total.toFixed(2)} ₽
-                        </Text>
+                        <div style={{ marginBottom: '4px', fontSize: '12px', color: '#666' }}>
+                          Количество: {materialQuantity.toFixed(3)} {getFieldValue('unit') || 'шт.'}
+                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                          <Text strong style={{ fontSize: '16px', color: '#52c41a' }}>
+                            {total.toFixed(2)} ₽
+                          </Text>
+                        </div>
                       </div>
                     </Form.Item>
                   );

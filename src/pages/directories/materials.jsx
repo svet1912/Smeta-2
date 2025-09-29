@@ -39,6 +39,35 @@ const useDebounce = (value, delay) => {
   return debouncedValue;
 };
 
+// Функция для естественной сортировки ID (m.1, m.2, m.10 и т.д.)
+const naturalSort = (arr) => {
+  return arr.sort((a, b) => {
+    const aId = a.id || '';
+    const bId = b.id || '';
+    
+    // Разбиваем строку на части (текст и числа)
+    const aParts = aId.split(/(\d+)/);
+    const bParts = bId.split(/(\d+)/);
+    
+    for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
+      const aPart = aParts[i] || '';
+      const bPart = bParts[i] || '';
+      
+      // Если обе части - числа, сравниваем как числа
+      if (!isNaN(aPart) && !isNaN(bPart)) {
+        const diff = parseInt(aPart) - parseInt(bPart);
+        if (diff !== 0) return diff;
+      } else {
+        // Иначе сравниваем как строки
+        const diff = aPart.localeCompare(bPart);
+        if (diff !== 0) return diff;
+      }
+    }
+    
+    return 0;
+  });
+};
+
 export default function MaterialsPage() {
   const [materials, setMaterials] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -56,14 +85,19 @@ export default function MaterialsPage() {
     setLoading(true);
     try {
       const data = await getMaterials();
+      let materialsData = [];
       if (Array.isArray(data)) {
-        setMaterials(data);
+        materialsData = data;
       } else if (data && Array.isArray(data.data)) {
-        setMaterials(data.data);
+        materialsData = data.data;
       } else {
         console.warn('⚠️ getMaterials вернул не-массив, устанавливаю []');
-        setMaterials([]);
+        materialsData = [];
       }
+      
+      // Применяем естественную сортировку к загруженным данным
+      const sortedMaterials = naturalSort([...materialsData]);
+      setMaterials(sortedMaterials);
     } catch (error) {
       console.error('Ошибка загрузки материалов:', error);
       message.error('Ошибка загрузки материалов');
@@ -77,10 +111,11 @@ export default function MaterialsPage() {
     const safe = Array.isArray(materials) ? materials : [];
 
     if (!debouncedSearchText) {
-      return safe;
+      // Если нет поискового запроса, возвращаем отсортированный список
+      return naturalSort([...safe]);
     }
 
-    return safe.filter(
+    const filtered = safe.filter(
       (material) =>
         material &&
         material.name &&
@@ -89,6 +124,9 @@ export default function MaterialsPage() {
           material.unit?.toLowerCase().includes(debouncedSearchText.toLowerCase()) ||
           material.id.toString().includes(debouncedSearchText))
     );
+    
+    // Применяем естественную сортировку к отфильтрованным результатам
+    return naturalSort(filtered);
   }, [materials, debouncedSearchText]);
 
   // Функция для поиска (без debounce, только обновляет состояние)

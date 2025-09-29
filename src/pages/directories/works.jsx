@@ -66,17 +66,132 @@ export default function WorksPage() {
   const handleSearch = useCallback(
     (value) => {
       setSearchText(value);
-      const filtered = works.filter(
+      let filtered = works.filter(
         (work) =>
           work.name.toLowerCase().includes(value.toLowerCase()) ||
           work.phase_name?.toLowerCase().includes(value.toLowerCase()) ||
           work.stage_name?.toLowerCase().includes(value.toLowerCase()) ||
           work.id.toString().includes(value)
       );
-      setFilteredWorks(filtered);
+      
+      // Создаем элементы для отображения с группировкой
+      const displayItems = createDisplayItems(filtered);
+      setFilteredWorks(displayItems);
     },
     [works]
   );
+
+  // Функция для естественной сортировки ID (w.1, w.2, w.10 и т.д.)
+  const naturalSort = (arr) => {
+    return arr.sort((a, b) => {
+      const aId = a.id || '';
+      const bId = b.id || '';
+      
+      // Разбиваем строку на части (текст и числа)
+      const aParts = aId.split(/(\d+)/);
+      const bParts = bId.split(/(\d+)/);
+      
+      for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
+        const aPart = aParts[i] || '';
+        const bPart = bParts[i] || '';
+        
+        // Если обе части - числа, сравниваем как числа
+        if (!isNaN(aPart) && !isNaN(bPart)) {
+          const diff = parseInt(aPart) - parseInt(bPart);
+          if (diff !== 0) return diff;
+        } else {
+          // Иначе сравниваем как строки
+          const diff = aPart.localeCompare(bPart);
+          if (diff !== 0) return diff;
+        }
+      }
+      
+      return 0;
+    });
+  };
+
+  // Функция для группировки работ по стадиям и подстадиям
+  const groupWorksByStages = (works) => {
+    const grouped = {};
+    
+    works.forEach(work => {
+      const stageName = work.stage_name || 'Без стадии';
+      const substageName = work.substage_name || null;
+      
+      if (!grouped[stageName]) {
+        grouped[stageName] = {
+          stage: stageName,
+          substages: {}
+        };
+      }
+      
+      if (substageName) {
+        if (!grouped[stageName].substages[substageName]) {
+          grouped[stageName].substages[substageName] = {
+            substage: substageName,
+            works: []
+          };
+        }
+        grouped[stageName].substages[substageName].works.push(work);
+      } else {
+        if (!grouped[stageName].substages['direct']) {
+          grouped[stageName].substages['direct'] = {
+            substage: null,
+            works: []
+          };
+        }
+        grouped[stageName].substages['direct'].works.push(work);
+      }
+    });
+    
+    // Сортируем работы внутри каждой группы
+    Object.values(grouped).forEach(stageGroup => {
+      Object.values(stageGroup.substages).forEach(substageGroup => {
+        substageGroup.works = naturalSort(substageGroup.works);
+      });
+    });
+    
+    return grouped;
+  };
+
+  // Создаем список элементов для отображения
+  const createDisplayItems = (works) => {
+    const grouped = groupWorksByStages(works);
+    const displayItems = [];
+    
+    Object.entries(grouped).forEach(([stageName, stageGroup]) => {
+      // Добавляем заголовок стадии
+      displayItems.push({
+        key: `stage-${stageName}`,
+        type: 'stage',
+        name: stageName,
+        isHeader: true
+      });
+      
+      Object.entries(stageGroup.substages).forEach(([substageKey, substageGroup]) => {
+        // Добавляем заголовок подстадии, если она есть
+        if (substageGroup.substage) {
+          displayItems.push({
+            key: `substage-${substageGroup.substage}`,
+            type: 'substage', 
+            name: substageGroup.substage,
+            isHeader: true
+          });
+        }
+        
+        // Добавляем работы
+        substageGroup.works.forEach(work => {
+          displayItems.push({
+            ...work,
+            type: 'work',
+            isHeader: false
+          });
+        });
+      });
+    });
+    
+    return displayItems;
+  };
 
   // Обновляем отфильтрованные работы при изменении основного списка
   useEffect(() => {
@@ -96,14 +211,19 @@ export default function WorksPage() {
       const response = await fetch(`${API_BASE_URL}/works`);
       if (response.ok) {
         const data = await response.json();
+        let worksData = [];
         if (Array.isArray(data)) {
-          setWorks(data);
+          worksData = data;
         } else if (data && Array.isArray(data.data)) {
-          setWorks(data.data);
+          worksData = data.data;
         } else {
           console.warn('⚠️ /api/works вернул не-массив, устанавливаю []');
-          setWorks([]);
+          worksData = [];
         }
+        
+        // Применяем естественную сортировку к загруженным данным
+        const sortedWorks = naturalSort([...worksData]);
+        setWorks(sortedWorks);
       } else {
         message.error('Ошибка загрузки работ');
       }
@@ -263,84 +383,107 @@ export default function WorksPage() {
       title: 'ID работы',
       dataIndex: 'id',
       key: 'id',
-      width: 100
+      width: 100,
+      render: (text, record) => {
+        if (record.isHeader) {
+          return null;
+        }
+        return text;
+      }
     },
     {
       title: 'Наименование работы',
       dataIndex: 'name',
       key: 'name',
       width: 300,
-      render: (text) => <Text strong>{text}</Text>
+      render: (text, record) => {
+        if (record.type === 'stage') {
+          return (
+            <div style={{ fontWeight: 'bold', fontSize: '16px', color: '#1890ff', padding: '8px 0' }}>
+              📁 {text}
+            </div>
+          );
+        }
+        if (record.type === 'substage') {
+          return (
+            <div style={{ fontWeight: '600', fontSize: '14px', color: '#52c41a', padding: '4px 0', paddingLeft: '20px' }}>
+              📂 {text}
+            </div>
+          );
+        }
+        return <Text strong>{text}</Text>;
+      }
     },
     {
       title: 'Фаза',
       dataIndex: 'phase_name',
       key: 'phase_name',
       width: 150,
-      render: (text) => (text ? <Tag color="blue">{text}</Tag> : '-')
-    },
-    {
-      title: 'Стадия',
-      dataIndex: 'stage_name',
-      key: 'stage_name',
-      width: 150,
-      render: (text) => (text ? <Tag color="green">{text}</Tag> : '-')
-    },
-    {
-      title: 'Подстадия',
-      dataIndex: 'substage_name',
-      key: 'substage_name',
-      width: 150,
-      render: (text) => (text ? <Tag color="orange">{text}</Tag> : '-')
+      render: (text, record) => {
+        if (record.isHeader) return null;
+        return text ? <Tag color="blue">{text}</Tag> : '-';
+      }
     },
     {
       title: 'Единица измерения',
       dataIndex: 'unit',
       key: 'unit',
-      width: 100
+      width: 100,
+      render: (text, record) => {
+        if (record.isHeader) return null;
+        return text;
+      }
     },
     {
       title: 'Цена за единицу',
       dataIndex: 'unit_price',
       key: 'unit_price',
       width: 120,
-      render: (value) => (value ? `${parseFloat(value).toFixed(2)} ₽` : '-')
+      render: (value, record) => {
+        if (record.isHeader) return null;
+        return value ? `${parseFloat(value).toFixed(2)} ₽` : '-';
+      }
     },
     {
       title: 'Действия',
       key: 'actions',
       width: 200,
-      render: (_, record) => (
-        <Space>
-          <Button type="link" icon={<EyeOutlined />} onClick={() => handleView(record)} size="small" />
-          <Button type="link" icon={<EditOutlined />} onClick={() => handleEdit(record)} size="small" />
-          <Button
-            type="link"
-            icon={<LinkOutlined />}
-            onClick={() => handleManageMaterials(record)}
-            size="small"
-            title="Управление материалами"
-          />
-          <Button type="link" icon={<DeleteOutlined />} danger size="small" />
-        </Space>
-      )
+      render: (_, record) => {
+        if (record.isHeader) return null;
+        return (
+          <Space>
+            <Button type="link" icon={<EyeOutlined />} onClick={() => handleView(record)} size="small" />
+            <Button type="link" icon={<EditOutlined />} onClick={() => handleEdit(record)} size="small" />
+            <Button
+              type="link"
+              icon={<LinkOutlined />}
+              onClick={() => handleManageMaterials(record)}
+              size="small"
+              title="Управление материалами"
+            />
+            <Button type="link" icon={<DeleteOutlined />} danger size="small" />
+          </Space>
+        );
+      }
     }
   ];
 
   // Статистика
+  const actualWorks = filteredWorks.filter(item => item.type === 'work');
   const stats = {
-    total: filteredWorks.length,
-    phases: [...new Set(filteredWorks.filter((w) => w.phase_name).map((w) => w.phase_name))].length,
+    total: actualWorks.length,
+    phases: [...new Set(actualWorks.filter((w) => w.phase_name).map((w) => w.phase_name))].length,
     avgPrice:
-      filteredWorks.length > 0
-        ? filteredWorks.filter((w) => w.unit_price).reduce((sum, w) => sum + w.unit_price, 0) /
-          filteredWorks.filter((w) => w.unit_price).length
+      actualWorks.length > 0
+        ? actualWorks.filter((w) => w.unit_price).reduce((sum, w) => sum + w.unit_price, 0) /
+          actualWorks.filter((w) => w.unit_price).length
         : 0
   };
 
   return (
-    <MainCard title="Справочник работ">
-      {/* Статистика */}
+    <>
+      <MainCard title="Справочник работ">
+        {/* Статистика */}
       <Row gutter={16} style={{ marginBottom: 24 }}>
         <Col span={6}>
           <Card>
@@ -388,14 +531,41 @@ export default function WorksPage() {
       <Table
         columns={columns}
         dataSource={filteredWorks}
-        rowKey="id"
+        rowKey={(record) => record.key || record.id}
         loading={loading}
         pagination={{
-          pageSize: 10,
+          pageSize: 50,
           showSizeChanger: true,
-          showTotal: (total, range) => `${range[0]}-${range[1]} из ${total} работ`
+          showTotal: (total, range) => `${range[0]}-${range[1]} из ${total} элементов`
         }}
-        scroll={{ x: 1200 }}
+        scroll={{ x: 900 }}
+        rowClassName={(record) => {
+          if (record.type === 'stage') return 'stage-row';
+          if (record.type === 'substage') return 'substage-row';
+          return 'work-row';
+        }}
+        onRow={(record) => {
+          if (record.isHeader) {
+            return {
+              style: { 
+                backgroundColor: record.type === 'stage' ? '#f0f8ff' : '#f6ffed',
+                cursor: 'default',
+                fontWeight: record.type === 'stage' ? 'bold' : '600'
+              }
+            };
+          }
+          return {
+            style: {
+              transition: 'background-color 0.2s'
+            },
+            onMouseEnter: (e) => {
+              e.target.parentElement.style.backgroundColor = '#fafafa';
+            },
+            onMouseLeave: (e) => {
+              e.target.parentElement.style.backgroundColor = '';
+            }
+          };
+        }}
       />
 
       {/* Модальное окно для создания/редактирования */}
@@ -562,5 +732,6 @@ export default function WorksPage() {
         />
       </Modal>
     </MainCard>
+    </>
   );
 }

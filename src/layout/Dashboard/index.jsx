@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 import useMediaQuery from '@mui/material/useMediaQuery';
 import Toolbar from '@mui/material/Toolbar';
@@ -10,7 +10,6 @@ import Drawer from './Drawer';
 import Header from './Header';
 import Footer from './Footer';
 import Loader from 'components/Loader';
-import Breadcrumbs from 'components/@extended/Breadcrumbs';
 import SubNavTabs from 'components/SubNavTabs';
 import useScrollDirection from '../../hooks/useScrollDirection';
 
@@ -22,6 +21,7 @@ export default function DashboardLayout() {
   const { menuMasterLoading } = useGetMenuMaster();
   const downXL = useMediaQuery((theme) => theme.breakpoints.down('xl'));
   const location = useLocation();
+  const navigate = useNavigate();
   const scrollDirection = useScrollDirection();
   const [activeSubTab, setActiveSubTab] = useState('editor');
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
@@ -40,13 +40,38 @@ export default function DashboardLayout() {
     }
   }, [scrollDirection]);
 
+  // Синхронизируем активную вкладку с текущим маршрутом
+  useEffect(() => {
+    if (location.pathname.includes('/object-parameters')) {
+      setActiveSubTab('object-parameters');
+    } else if (location.pathname.includes('/estimate')) {
+      // Можем выбрать, какую вкладку показывать по умолчанию для /estimate
+      // Пока оставим 'estimate-calculation' как основную для этой страницы
+      setActiveSubTab('estimate-calculation');
+    }
+    // Можно добавить другие маршруты по мере необходимости
+  }, [location.pathname]);
+
   // Определяем, нужно ли показывать подвкладки (только на страницах расчетов)
   const showSubNavTabs = location.pathname.includes('/calculations/') || location.pathname.includes('/projects/');
 
   const handleSubTabChange = (key) => {
     setActiveSubTab(key);
-    // Здесь можно добавить логику навигации по подвкладкам
-    console.log('Selected tab:', key);
+    
+    // Логика навигации по подвкладкам
+    switch (key) {
+      case 'object-parameters':
+        navigate('/calculations/object-parameters');
+        break;
+      case 'estimate-calculation':
+        navigate('/calculations/estimate');
+        break;
+      case 'editor':
+        navigate('/calculations/estimate');
+        break;
+      default:
+        console.log('Selected tab:', key);
+    }
   };
 
   if (menuMasterLoading) return <Loader />;
@@ -81,7 +106,6 @@ export default function DashboardLayout() {
             paddingTop: showSubNavTabs ? '16px' : (isHeaderVisible ? '0px' : '24px') // Компенсируем скрытый хедер
           }}
         >
-          <Breadcrumbs />
           <Outlet />
           <Footer />
         </Box>

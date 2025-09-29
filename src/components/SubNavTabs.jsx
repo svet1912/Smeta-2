@@ -7,18 +7,29 @@ import {
   CreditCardOutlined,
   ShoppingOutlined,
   ToolOutlined,
-  FolderOutlined 
+  FolderOutlined,
+  BuildOutlined,
+  CalculatorOutlined
 } from '@ant-design/icons';
 import './SubNavTabs.css';
 
 const SubNavTabs = ({ activeKey, onChange }) => {
   const items = [
     {
-      key: 'editor',
+      key: 'object-parameters',
       label: (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'inherit' }}>
-          <EditOutlined />
-          Редактор сметы
+          <BuildOutlined />
+          Параметры объекта
+        </span>
+      ),
+    },
+    {
+      key: 'estimate-calculation',
+      label: (
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'inherit' }}>
+          <CalculatorOutlined />
+          Расчет сметы
         </span>
       ),
     },
