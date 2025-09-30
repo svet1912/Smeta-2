@@ -830,63 +830,135 @@ export default function EstimateCalculationPage() {
          // Функция копирования блока в смету заказчика
          const handleCopyBlockToCustomer = async (workRecord) => {
            try {
-             // Получаем работу и все связанные с ней материалы
-             const workItems = [];
+             // Получаем ID активной сметы заказчика из localStorage
+             const activeEstimateId = localStorage.getItem('activeCustomerEstimateId');
              
-             // Добавляем саму работу
-             const workCopy = {
-               item_id: `work_${Date.now()}`,
-               type: 'work',
-               name: workRecord.name,
-               unit: workRecord.unit || 'шт.',
-               quantity: workRecord.quantity || 1,
-               unit_price: workRecord.unit_price || 0,
-               total: (workRecord.quantity || 1) * (workRecord.unit_price || 0),
-               isWork: true,
-               // Сохраняем оригинальную цену при копировании
-               original_unit_price: workRecord.unit_price || 0
-             };
-             workItems.push(workCopy);
+             if (!activeEstimateId) {
+               message.error('Нет активной сметы заказчика. Перейдите во вкладку "Смета заказчика" и создайте или выберите смету.');
+               return;
+             }
              
-             // Находим все материалы для этой работы
-             const relatedMaterials = estimateItems.filter(item => 
-               item.type === 'material' && item.work_id === workRecord.item_id
-             );
+             // Получаем информацию об активной смете
+             const estimateResponse = await fetch(`${API_BASE_URL}/customer-estimates/${activeEstimateId}`);
+             if (!estimateResponse.ok) {
+               message.error('Активная смета заказчика не найдена. Обновите смету во вкладке "Смета заказчика".');
+               return;
+             }
              
-             // Добавляем материалы
-             relatedMaterials.forEach(material => {
-               const materialCopy = {
-                 item_id: `material_${Date.now()}_${Math.random()}`,
-                 type: 'material',
-                 name: material.name,
-                 unit: material.unit || 'шт.',
-                 quantity: material.quantity || 1,
-                 unit_price: material.unit_price || 0,
-                 total: (material.quantity || 1) * (material.unit_price || 0),
-                 isMaterial: true,
-                 // Сохраняем оригинальную цену при копировании
-                 original_unit_price: material.unit_price || 0
+             const activeEstimate = await estimateResponse.json();
+             
+             // Сразу копируем в активную смету без диалога выбора
+             await performCopy(activeEstimate);
+             
+             // Функция выполнения копирования
+             async function performCopy(targetEstimate) {
+               // Получаем работу и все связанные с ней материалы
+               const relatedMaterials = estimateItems.filter(item => 
+                 item.type === 'material' && item.work_id === workRecord.item_id
+               );
+               
+               let successCount = 0;
+               let totalCost = 0;
+               
+               // Получаем текущие элементы сметы заказчика, чтобы определить следующий sort_order
+               const currentItemsResponse = await fetch(`${API_BASE_URL}/customer-estimates/${targetEstimate.id}/items`);
+               let nextSortOrder = 0;
+               if (currentItemsResponse.ok) {
+                 const currentItems = await currentItemsResponse.json();
+                 // Находим максимальный sort_order среди существующих элементов
+                 const maxSortOrder = currentItems.length > 0 
+                   ? Math.max(...currentItems.map(item => parseInt(item.sort_order) || 0)) 
+                   : -1;
+                 nextSortOrder = maxSortOrder + 1;
+               }
+               
+               // Генерируем уникальный идентификатор блока для связи работы и материалов
+               const blockId = `block_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+               
+               // Добавляем саму работу
+               const workData = {
+                 item_type: 'work',
+                 reference_id: blockId, // Связываем работу с блоком
+                 name: workRecord.name,
+                 unit: workRecord.unit || 'шт.',
+                 quantity: workRecord.quantity || 1,
+                 unit_price: workRecord.unit_price || 0,
+                 total_amount: (workRecord.quantity || 1) * (workRecord.unit_price || 0),
+                 original_unit_price: workRecord.unit_price || 0,
+                 sort_order: nextSortOrder
                };
-               workItems.push(materialCopy);
-             });
-             
-             // Сохраняем данные в localStorage (статический вариант)
-             const existingCustomerData = JSON.parse(localStorage.getItem('customerEstimate') || '[]');
-             const updatedCustomerData = [...existingCustomerData, ...workItems];
-             localStorage.setItem('customerEstimate', JSON.stringify(updatedCustomerData));
-             
-             const workName = workRecord.name?.substring(0, 50) + (workRecord.name?.length > 50 ? '...' : '');
-             const materialsCount = relatedMaterials.length;
-             const totalCost = workItems.reduce((sum, item) => sum + item.total, 0);
-             
-             message.success(
-               `Блок "${workName}" скопирован в смету заказчика! ` +
-               `Работ: 1, Материалов: ${materialsCount}, Сумма: ${formatNumberWithComma(totalCost)} ₽`
-             );
+               
+               try {
+                 const workResponse = await fetch(`${API_BASE_URL}/customer-estimates/${targetEstimate.id}/items`, {
+                   method: 'POST',
+                   headers: {
+                     'Content-Type': 'application/json'
+                   },
+                   body: JSON.stringify(workData)
+                 });
+                 
+                 if (workResponse.ok) {
+                   successCount++;
+                   totalCost += workData.total_amount;
+                   nextSortOrder++; // Увеличиваем для следующего элемента
+                 } else {
+                   const errorText = await workResponse.text();
+                   console.error('Ошибка добавления работы:', errorText);
+                 }
+                 
+                 // Добавляем материалы сразу после работы с тем же blockId
+                 for (let i = 0; i < relatedMaterials.length; i++) {
+                   const material = relatedMaterials[i];
+                   const materialData = {
+                     item_type: 'material',
+                     reference_id: blockId, // Связываем материал с тем же блоком
+                     name: material.name,
+                     unit: material.unit || 'шт.',
+                     quantity: material.quantity || 1,
+                     unit_price: material.unit_price || 0,
+                     total_amount: (material.quantity || 1) * (material.unit_price || 0),
+                     original_unit_price: material.unit_price || 0,
+                     sort_order: nextSortOrder + i // Материалы идут сразу после работы
+                   };
+                   
+                   const materialResponse = await fetch(`${API_BASE_URL}/customer-estimates/${targetEstimate.id}/items`, {
+                     method: 'POST',
+                     headers: {
+                       'Content-Type': 'application/json'
+                     },
+                     body: JSON.stringify(materialData)
+                   });
+                   
+                   if (materialResponse.ok) {
+                     successCount++;
+                     totalCost += materialData.total_amount;
+                   } else {
+                     const errorText = await materialResponse.text();
+                     console.error('Ошибка добавления материала:', errorText);
+                   }
+                 }
+                 
+                 const workName = workRecord.name?.substring(0, 40) + (workRecord.name?.length > 40 ? '...' : '');
+                 const materialsCount = relatedMaterials.length;
+                 
+                 if (successCount > 0) {
+                   message.success(
+                     `Блок "${workName}" скопирован в смету "${targetEstimate.name}"! ` +
+                     `Добавлено позиций: ${successCount}/${1 + materialsCount}, Сумма: ${formatNumberWithComma(totalCost)} ₽`
+                   );
+                 } else {
+                   message.error('Не удалось добавить ни одной позиции в смету заказчика');
+                 }
+                 
+               } catch (error) {
+                 console.error('Ошибка копирования:', error);
+                 message.error('Ошибка при копировании: ' + error.message);
+               }
+             }
              
            } catch (error) {
              console.error('Ошибка копирования блока:', error);
-             message.error('Ошибка при копировании блока');
+             message.error('Ошибка при копировании блока: ' + error.message);
            }
          };
 

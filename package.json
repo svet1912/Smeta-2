@@ -17,7 +17,10 @@
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "server": "cd server && node index.js",
     "client": "vite",
-    "start:all": "concurrently --names \"BACKEND,FRONTEND\" --prefix-colors \"bgBlue,bgGreen\" \"npm run server\" \"npm run client\""
+    "start:all": "concurrently --names \"BACKEND,FRONTEND\" --prefix-colors \"bgBlue,bgGreen\" \"npm run server\" \"npm run client\"",
+    "stop": "node scripts/stop-servers.js",
+    "restart": "npm run stop && npm run start:all",
+    "clean-start": "npm run stop && npm run start:all"
   },
   "dependencies": {
     "@ant-design/colors": "8.0.0",
@@ -41,6 +44,7 @@
     "antd": "^5.27.4",
     "axios": "^1.12.2",
     "date-fns": "^4.1.0",
+    "dotenv": "^17.2.3",
     "formik": "2.4.6",
     "framer-motion": "12.8.2",
     "lodash-es": "4.17.21",

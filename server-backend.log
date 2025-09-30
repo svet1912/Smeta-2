@@ -1,0 +1,208 @@
+nohup: ignoring input
+🔑 DATABASE_URL загружен: postgres:***@azap001-kiy026-3dfc.j.aivencloud.com:11433/defaultdb?sslmode=require
+🔍 DB META: {
+  host: 'azap001-kiy026-3dfc.j.aivencloud.com',
+  port: '11433',
+  user: 'avnadmin',
+  passwordLength: 24,
+  hasPassword: true,
+  database: 'defaultdb'
+}
+🔧 Aiven Cloud: используем sslmode=prefer
+⚠️ Не удалось прочитать CA сертификат: ENOENT: no such file or directory, open './ca.pem'
+🔧 Aiven Cloud: отключена проверка SSL сертификата
+🚀 Запуск исправленного сервера...
+🔧 Настроена расширенная CORS политика
+🚀 Сервер запущен на http://localhost:3001
+📊 API доступно по адресу: http://localhost:3001/api/test
+🌐 Внешний доступ через порт: 3001
+(node:58466) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✅ Подключение к PostgreSQL установлено (ssl: on )
+✅ Подключение к PostgreSQL установлено (ssl: on )
+✅ Выполнен запрос: {
+  text: 'SELECT NOW() as current_time...',
+  duration: '1451ms',
+  rows: 1
+}
+✅ Подключение к базе данных проверено: 2025-09-30T13:25:41.069Z
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS auth_users (\n   ...',
+  duration: '198ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS user_sessions (\n...',
+  duration: '197ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE INDEX IF NOT EXISTS idx_auth_users_e...',
+  duration: '199ms',
+  rows: undefined
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS users (\n        ...',
+  duration: '197ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS orders (\n       ...',
+  duration: '197ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS statistics (\n   ...',
+  duration: '197ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS work_materials (...',
+  duration: '197ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS construction_pro...',
+  duration: '198ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS user_roles (\n   ...',
+  duration: '197ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS user_role_assign...',
+  duration: '198ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS object_parameter...',
+  duration: '198ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS project_rooms (\n...',
+  duration: '202ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS constructive_ele...',
+  duration: '198ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS engineering_syst...',
+  duration: '197ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS customer_estimat...',
+  duration: '198ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS customer_estimat...',
+  duration: '197ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS customer_estimat...',
+  duration: '198ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS customer_estimat...',
+  duration: '198ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS audit_log (\n    ...',
+  duration: '197ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS permissions (\n  ...',
+  duration: '197ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS role_permissions...',
+  duration: '198ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE construction_projects ADD COLUMN IF NO...',
+  duration: '197ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE construction_projects ADD COLUMN IF NO...',
+  duration: '198ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE construction_projects ADD COLUMN IF NO...',
+  duration: '201ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE auth_users ADD COLUMN IF NOT EXISTS ph...',
+  duration: '197ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE auth_users ADD COLUMN IF NOT EXISTS po...',
+  duration: '198ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE auth_users ADD COLUMN IF NOT EXISTS lo...',
+  duration: '200ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE auth_users ADD COLUMN IF NOT EXISTS bi...',
+  duration: '198ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'CREATE INDEX IF NOT EXISTS idx_construction_projec...',
+  duration: '197ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'CREATE INDEX IF NOT EXISTS idx_construction_projec...',
+  duration: '198ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE INDEX IF NOT EXISTS idx_auth_users_e...',
+  duration: '398ms',
+  rows: undefined
+}
+✅ Выполнен запрос: {
+  text: 'SELECT COUNT(*) FROM permissions...',
+  duration: '200ms',
+  rows: 1
+}
+✅ Разрешения уже инициализированы
+📨 GET /api/customer-estimates/5 [s9hla0cwk] (1/10)
+📨 GET /api/customer-estimates/5 - 127.0.0.1
+✅ Выполнен запрос: {
+  text: 'SELECT COUNT(*) FROM auth_users...',
+  duration: '198ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: 'SELECT id FROM auth_users WHERE email = $1...',
+  duration: '201ms',
+  rows: 1
+}
+👤 Используем тестового пользователя ID: 6
+✅ Выполнен запрос: { text: 'SELECT COUNT(*) FROM orders...', duration: '198ms', rows: 1 }
+✅ Выполнен запрос: {
+  text: '\n      SELECT \n        ce.*\n      FROM customer_es...',
+  duration: '200ms',
+  rows: 1
+}

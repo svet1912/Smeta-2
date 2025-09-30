@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import MainCard from 'components/MainCard';
 import {
   Typography,
@@ -49,6 +49,12 @@ const getApiBaseUrl = () => {
 
 const API_BASE_URL = getApiBaseUrl();
 
+// Получить JWT токен из localStorage
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('authToken');
+  return token ? { 'Authorization': `Bearer ${token}` } : {};
+};
+
 // Функция для форматирования чисел с запятой (российский стандарт)
 const formatNumberWithComma = (number) => {
   if (number === null || number === undefined || isNaN(number)) return '-';
@@ -68,10 +74,17 @@ const parseNumberWithComma = (value) => {
 export default function CustomerEstimatePage() {
   const [works, setWorks] = useState([]);
   const [materials, setMaterials] = useState([]);
+  const [customerEstimates, setCustomerEstimates] = useState([]);
+  const [currentEstimate, setCurrentEstimate] = useState(null);
   const [estimateItems, setEstimateItems] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [loading, setLoading] = useState(false);
+  
+  // Refs для создания новой сметы
+  const newEstimateNameRef = useRef();
+  const newEstimateCustomerRef = useRef();
+  const [estimatesLoading, setEstimatesLoading] = useState(false);
   const [form] = Form.useForm();
   const [expandedWorks, setExpandedWorks] = useState(new Set());
 
@@ -86,43 +99,251 @@ export default function CustomerEstimatePage() {
   const [coefficientModalVisible, setCoefficientModalVisible] = useState(false);
   const [coefficientForm] = Form.useForm();
 
+  // Состояния для создания новой сметы
+  const [newEstimateModalVisible, setNewEstimateModalVisible] = useState(false);
+  const [newEstimateForm] = Form.useForm();
+
   // Загрузка данных
   useEffect(() => {
     loadWorks();
     loadMaterials();
-    loadCustomerEstimate();
+    loadCustomerEstimates();
   }, []);
 
-  // Загрузка сметы заказчика из localStorage
-  const loadCustomerEstimate = () => {
+  // Загрузка смет заказчика с сервера
+  const loadCustomerEstimates = async () => {
     try {
-      const savedData = localStorage.getItem('customerEstimate');
-      if (savedData) {
-        const parsedData = JSON.parse(savedData);
-        // Добавляем original_unit_price для существующих позиций, если его нет
-        const itemsWithOriginalPrices = parsedData.map(item => ({
-          ...item,
-          original_unit_price: item.original_unit_price || item.unit_price
-        }));
-        setEstimateItems(itemsWithOriginalPrices);
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/customer-estimates`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders()
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setCustomerEstimates(data);
+        
+        // Если есть сметы и нет текущей активной, установим первую
+        if (data.length > 0 && !currentEstimate) {
+          setCurrentEstimate(data[0]);
+          // Сохраняем ID активной сметы в localStorage для доступа из других компонентов
+          localStorage.setItem('activeCustomerEstimateId', data[0].id.toString());
+          loadEstimateItems(data[0].id);
+        }
+      } else {
+        message.error('Ошибка загрузки смет');
       }
     } catch (error) {
-      console.error('Ошибка загрузки сметы заказчика:', error);
+      console.error('Ошибка загрузки смет:', error);
+      message.error('Ошибка соединения при загрузке смет');
+    } finally {
+      setLoading(false);
+    }
+  };  // Загрузка позиций сметы
+  const loadEstimateItems = async (estimateId) => {
+    if (!estimateId) return;
+    
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/customer-estimates/${estimateId}/items`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders()
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const itemsWithFlags = data.map(item => ({
+          ...item,
+          item_id: item.id,
+          type: item.item_type,
+          isWork: item.item_type === 'work',
+          isMaterial: item.item_type === 'material',
+          total: item.total_amount,
+          image_url: item.image_url
+        }));
+        
+        // Группируем данные по блокам (работа + её материалы)
+        const groupedData = [];
+        const blockMap = new Map();
+        
+        // Сначала создаем карту блоков
+        itemsWithFlags.forEach(item => {
+          if (item.reference_id) {
+            if (!blockMap.has(item.reference_id)) {
+              blockMap.set(item.reference_id, { work: null, materials: [] });
+            }
+            
+            if (item.item_type === 'work') {
+              blockMap.get(item.reference_id).work = item;
+            } else {
+              blockMap.get(item.reference_id).materials.push(item);
+            }
+          } else {
+            // Элементы без reference_id добавляем как отдельные
+            groupedData.push(item);
+          }
+        });
+        
+        // Затем формируем окончательный массив в правильном порядке
+        const sortedItems = [];
+        
+        // Добавляем блоки в правильном порядке
+        Array.from(blockMap.entries())
+          .sort(([, a], [, b]) => {
+            const workA = a.work;
+            const workB = b.work;
+            if (!workA || !workB) return 0;
+            return (workA.sort_order || 0) - (workB.sort_order || 0);
+          })
+          .forEach(([blockId, block]) => {
+            if (block.work) {
+              sortedItems.push(block.work);
+              // Добавляем материалы этого блока сразу после работы
+              block.materials
+                .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+                .forEach(material => sortedItems.push(material));
+            }
+          });
+        
+        // Добавляем элементы без группировки в конце
+        groupedData
+          .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+          .forEach(item => sortedItems.push(item));
+        
+        setEstimateItems(sortedItems);
+      } else {
+        message.error('Ошибка загрузки позиций сметы');
+      }
+    } catch (error) {
+      console.error('Ошибка загрузки позиций сметы:', error);
+      message.error('Ошибка соединения при загрузке позиций');
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Сохранение сметы заказчика в localStorage
-  const saveCustomerEstimate = (items) => {
+  // Создание новой сметы
+  const createNewEstimate = async (estimateData) => {
     try {
-      localStorage.setItem('customerEstimate', JSON.stringify(items));
+      const response = await fetch(`${API_BASE_URL}/customer-estimates`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders()
+        },
+        body: JSON.stringify(estimateData),
+      });
+
+      if (response.ok) {
+        const newEstimate = await response.json();
+        await loadCustomerEstimates();
+        setCurrentEstimate(newEstimate);
+        // Сохраняем ID активной сметы в localStorage
+        localStorage.setItem('activeCustomerEstimateId', newEstimate.id.toString());
+        loadEstimateItems(newEstimate.id);
+        message.success('Смета создана успешно');
+        return newEstimate;
+      } else {
+        message.error('Ошибка создания сметы');
+        return null;
+      }
     } catch (error) {
-      console.error('Ошибка сохранения сметы заказчика:', error);
+      console.error('Ошибка создания сметы:', error);
+      message.error('Ошибка соединения при создании сметы');
+      return null;
     }
+  };
+
+  // Функция создания новой сметы с диалогом
+  const showCreateEstimateDialog = async () => {
+    Modal.confirm({
+      title: 'Создать новую смету',
+      content: (
+        <div>
+          <Input 
+            placeholder="Название сметы" 
+            ref={newEstimateNameRef}
+            style={{ marginBottom: 8 }}
+          />
+          <Input 
+            placeholder="Имя заказчика" 
+            ref={newEstimateCustomerRef}
+          />
+        </div>
+      ),
+      onOk: async () => {
+        const name = newEstimateNameRef.current?.input?.value;
+        const customerName = newEstimateCustomerRef.current?.input?.value;
+        
+        if (!name || !customerName) {
+          message.error('Заполните название сметы и имя заказчика');
+          return Promise.reject();
+        }
+
+        await createNewEstimate({ name, customer_name: customerName });
+      }
+    });
+  };
+
+  // Функция удаления текущей сметы
+  const handleDeleteEstimate = async () => {
+    if (!currentEstimate) return;
+
+    Modal.confirm({
+      title: 'Удалить смету?',
+      content: `Вы уверены, что хотите удалить смету "${currentEstimate.name}"? Это действие нельзя отменить.`,
+      okText: 'Удалить',
+      okType: 'danger',
+      cancelText: 'Отмена',
+      onOk: async () => {
+        try {
+          const response = await fetch(`${API_BASE_URL}/customer-estimates/${currentEstimate.id}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              ...getAuthHeaders()
+            }
+          });
+
+          if (response.ok) {
+            await loadCustomerEstimates();
+            if (customerEstimates.length > 1) {
+              const nextEstimate = customerEstimates.find(e => e.id !== currentEstimate.id);
+              if (nextEstimate) {
+                setCurrentEstimate(nextEstimate);
+                // Обновляем активную смету в localStorage
+                localStorage.setItem('activeCustomerEstimateId', nextEstimate.id.toString());
+                loadEstimateItems(nextEstimate.id);
+              }
+            } else {
+              setCurrentEstimate(null);
+              // Удаляем активную смету из localStorage, если смет больше нет
+              localStorage.removeItem('activeCustomerEstimateId');
+              setEstimateItems([]);
+            }
+            message.success('Смета удалена');
+          } else {
+            message.error('Ошибка удаления сметы');
+          }
+        } catch (error) {
+          console.error('Ошибка удаления сметы:', error);
+          message.error('Ошибка соединения при удалении сметы');
+        }
+      }
+    });
   };
 
   const loadWorks = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/works`);
+      const response = await fetch(`${API_BASE_URL}/works`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders()
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         if (Array.isArray(data)) {
@@ -143,7 +364,12 @@ export default function CustomerEstimatePage() {
 
   const loadMaterials = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/materials`);
+      const response = await fetch(`${API_BASE_URL}/materials`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders()
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         if (Array.isArray(data)) {
@@ -198,66 +424,124 @@ export default function CustomerEstimatePage() {
   };
 
   // Функция удаления позиции
-  const handleDeleteItem = (itemId) => {
-    const newItems = estimateItems.filter(item => item.item_id !== itemId);
-    setEstimateItems(newItems);
-    saveCustomerEstimate(newItems);
-    message.success('Позиция удалена');
+  const handleDeleteItem = async (itemId) => {
+    if (!currentEstimate) return;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/customer-estimates/${currentEstimate.id}/items/${itemId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders()
+        }
+      });
+
+      if (response.ok) {
+        // Обновляем локальный список
+        const newItems = estimateItems.filter(item => item.id !== itemId);
+        setEstimateItems(newItems);
+        message.success('Позиция удалена');
+      } else {
+        message.error('Ошибка удаления позиции');
+      }
+    } catch (error) {
+      console.error('Ошибка удаления позиции:', error);
+      message.error('Ошибка при удалении позиции');
+    }
   };
 
   // Функция сохранения позиции
   const handleSaveItem = async () => {
+    if (!currentEstimate) {
+      message.error('Сначала создайте смету');
+      return;
+    }
+
     try {
       const values = await form.validateFields();
+      const itemData = {
+        item_type: values.type,
+        name: values.name,
+        unit: values.unit,
+        quantity: values.quantity,
+        unit_price: values.unit_price,
+        total_amount: (values.quantity || 1) * (values.unit_price || 0),
+        original_unit_price: values.unit_price,
+        image_url: values.image_url || null,
+        notes: values.notes || null
+      };
       
       if (selectedItem) {
-        // Редактирование существующей позиции
+        // Редактирование существующей позиции - пока обновим локально
         const updatedItems = estimateItems.map(item => 
           item.item_id === selectedItem.item_id 
             ? {
                 ...item,
                 ...values,
                 total: (values.quantity || 1) * (values.unit_price || 0),
-                // Сохраняем оригинальную цену, если она еще не сохранена
+                isWork: values.type === 'work',
+                isMaterial: values.type === 'material',
                 original_unit_price: item.original_unit_price || item.unit_price
               }
             : item
         );
         setEstimateItems(updatedItems);
-        saveCustomerEstimate(updatedItems);
         message.success('Позиция обновлена');
       } else {
-        // Добавление новой позиции
-        const newItem = {
-          item_id: Date.now().toString(),
-          type: 'work',
-          ...values,
-          total: (values.quantity || 1) * (values.unit_price || 0),
-          isWork: true,
-          // Сохраняем оригинальную цену при создании
-          original_unit_price: values.unit_price || 0
-        };
-        const newItems = [...estimateItems, newItem];
-        setEstimateItems(newItems);
-        saveCustomerEstimate(newItems);
-        message.success('Позиция добавлена');
+        // Добавление новой позиции через API
+      const response = await fetch(`${API_BASE_URL}/customer-estimates/${currentEstimate.id}/items`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders()
+        },
+        body: JSON.stringify(itemData),
+      });        if (response.ok) {
+          await loadEstimateItems(currentEstimate.id);
+          message.success('Позиция добавлена');
+        } else {
+          message.error('Ошибка добавления позиции');
+        }
       }
       
       setModalVisible(false);
       form.resetFields();
     } catch (error) {
       console.error('Ошибка сохранения:', error);
+      message.error('Ошибка при сохранении позиции');
     }
   };
 
   // Функция очистки сметы
-  const handleClearEstimate = () => {
-    setEstimateItems([]);
-    saveCustomerEstimate([]);
-    message.success('Смета очищена');
-  };
+  const handleClearEstimate = async () => {
+    if (!currentEstimate) return;
 
-  // Функция открытия модального окна коэффициентов
+    Modal.confirm({
+      title: 'Очистить смету?',
+      content: 'Все позиции будут удалены. Это действие нельзя отменить.',
+      onOk: async () => {
+        try {
+          // Удаляем все элементы сметы через API
+          const deletePromises = estimateItems.map(item =>
+            fetch(`${API_BASE_URL}/customer-estimates/${currentEstimate.id}/items/${item.id}`, {
+              method: 'DELETE',
+              headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeaders()
+              }
+            })
+          );
+          
+          await Promise.all(deletePromises);
+          setEstimateItems([]);
+          message.success('Смета очищена');
+        } catch (error) {
+          console.error('Ошибка очистки сметы:', error);
+          message.error('Ошибка при очистке сметы');
+        }
+      }
+    });
+  };  // Функция открытия модального окна коэффициентов
   const handleOpenCoefficientModal = () => {
     coefficientForm.setFieldsValue({
       workCoefficient: 1,
@@ -303,7 +587,6 @@ export default function CustomerEstimatePage() {
       });
 
       setEstimateItems(updatedItems);
-      saveCustomerEstimate(updatedItems);
       setCoefficientModalVisible(false);
       
       message.success(`Коэффициенты применены: работы ×${workCoefficient}, материалы ×${materialCoefficient}`);
@@ -334,7 +617,6 @@ export default function CustomerEstimatePage() {
     });
 
     setEstimateItems(resetItems);
-    saveCustomerEstimate(resetItems);
     
     // Сбрасываем значения в форме
     coefficientForm.setFieldsValue({
@@ -360,6 +642,49 @@ export default function CustomerEstimatePage() {
 
   return (
     <MainCard title="Смета заказчика">
+      {/* Управление сметами */}
+      <Row gutter={16} style={{ marginBottom: 16 }}>
+        <Col span={16}>
+          <Select
+            placeholder="Выберите смету"
+            style={{ width: '100%' }}
+            value={currentEstimate?.id}
+            onChange={(value) => {
+              const estimate = customerEstimates.find(e => e.id === value);
+              if (estimate) {
+                setCurrentEstimate(estimate);
+                // Сохраняем ID активной сметы в localStorage
+                localStorage.setItem('activeCustomerEstimateId', estimate.id.toString());
+                loadEstimateItems(estimate.id);
+              }
+            }}
+            loading={loading}
+          >
+            {customerEstimates.map(estimate => (
+              <Select.Option key={`estimate-${estimate.id}`} value={estimate.id}>
+                {estimate.name} - {estimate.customer_name || 'Без имени'} 
+                ({new Date(estimate.created_at).toLocaleDateString()})
+              </Select.Option>
+            ))}
+          </Select>
+        </Col>
+        <Col span={4}>
+          <Button type="primary" onClick={showCreateEstimateDialog} loading={loading}>
+            Новая смета
+          </Button>
+        </Col>
+        <Col span={4}>
+          <Button 
+            danger 
+            onClick={handleDeleteEstimate} 
+            disabled={!currentEstimate}
+            loading={loading}
+          >
+            Удалить смету
+          </Button>
+        </Col>
+      </Row>
+      
       {/* Статистика */}
       <Row gutter={8} style={{ marginBottom: 16 }}>
         <Col span={6}>
@@ -470,6 +795,7 @@ export default function CustomerEstimatePage() {
       {/* Таблица сметы */}
       <Table
         size="small"
+        rowKey={(record) => `${record.item_id || record.id}-${record.type}`}
         columns={[
           {
             title: '№',
@@ -486,6 +812,36 @@ export default function CustomerEstimatePage() {
             )
           },
           {
+            title: '',
+            dataIndex: 'image_url',
+            key: 'image_url',
+            width: 60,
+            align: 'center',
+            render: (imageUrl, record) => {
+              if (record.type === 'material' && imageUrl) {
+                return (
+                  <Image
+                    src={imageUrl}
+                    alt={record.name}
+                    width={24}
+                    height={24}
+                    style={{
+                      objectFit: 'cover',
+                      borderRadius: '3px',
+                      border: '1px solid #d9d9d9'
+                    }}
+                    fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMIAAADDCAYAAADQvc6UAAABRWlDQ1BJQ0MgUHJvZmlsZQAAKJFjYGASSSwoyGFhYGDIzSspCnJ3UoiIjFJgf8LAwSDCIMogwMCcmFxc4BgQ4ANUwgCjUcG3awyMIPqyLsis7PPOq3QdDFcvjV3jOD1boQVTPQrgSkktTgbSf4A4LbmgqISBgTEFyFYuLykAsTuAbJEioKOA7DkgdjqEvQHEToKwj4DVhAQ5A9k3gGyB5IxEoBmML4BsnSQk8XQkNtReEOBxcfXxUQg1Mjc0dyHgXNJBSWpFCYh2zi+oLMpMzyhRcASGUqqCZ16yno6CkYGRAQMDKMwhqj/fAIcloxgHQqxAjIHBEugw5sUIsSQpBobtQPdLciLEVJYzMPBHMDBsayhILEqEO4DxG0txmrERhM29nYGBddr//5/DGRjYNRkY/l7////39v///y4Dmn+LgeHANwDrkl1AuO+pmgAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAwqADAAQAAAABAAAAwwAAAAD9b/HnAAAHlklEQVR4Ae3dP3Ik1RnG4W+FgYxN"
+                  />
+                );
+              } else if (record.type === 'work') {
+                return (
+                  <CalculatorOutlined style={{ color: '#1890ff', fontSize: '16px' }} />
+                );
+              }
+              return null;
+            }
+          },
+          {
             title: 'Наименование работ и материалов',
             dataIndex: 'name',
             key: 'name',
@@ -498,11 +854,6 @@ export default function CustomerEstimatePage() {
                 borderLeft: record.type === 'work' ? '3px solid #1890ff' : '3px solid #52c41a'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  {record.type === 'work' ? (
-                    <CalculatorOutlined style={{ color: '#1890ff', fontSize: '14px' }} />
-                  ) : (
-                    <FileTextOutlined style={{ color: '#52c41a', fontSize: '14px' }} />
-                  )}
                   <Text strong={record.type === 'work'} style={{ 
                     fontSize: '14px', 
                     color: record.type === 'work' ? '#1890ff' : '#52c41a' 
@@ -677,6 +1028,24 @@ export default function CustomerEstimatePage() {
               placeholder="Введите наименование работы или материала"
               rows={2}
             />
+          </Form.Item>
+
+          {/* Поле для URL изображения материала */}
+          <Form.Item noStyle shouldUpdate>
+            {({ getFieldValue }) => {
+              const type = getFieldValue('type');
+              return type === 'material' ? (
+                <Form.Item
+                  name="image_url"
+                  label="URL изображения материала (необязательно)"
+                >
+                  <Input
+                    placeholder="https://example.com/image.jpg"
+                    allowClear
+                  />
+                </Form.Item>
+              ) : null;
+            }}
           </Form.Item>
 
           <Row gutter={16}>
