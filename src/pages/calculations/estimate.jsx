@@ -1469,7 +1469,7 @@ export default function EstimateCalculationPage() {
           }
         ]}
         dataSource={flatEstimateItems}
-        rowKey={(record, index) => `${record.type}_${record.item_id}_${index}`}
+        rowKey={(record) => `${record.type}_${record.item_id}_${record.key || Math.random()}`}
         loading={loading}
         pagination={{
           pageSize: 20,
@@ -1698,7 +1698,7 @@ export default function EstimateCalculationPage() {
           </Button>
         ]}
         width={800}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form 
           form={materialForm} 
