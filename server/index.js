@@ -3,9 +3,15 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import compression from 'compression';
+import rateLimit from 'express-rate-limit';
+import pino from 'pino-http';
 import { query } from './database.js';
 import { config } from './config.js';
 import { tenantContextMiddleware, requireRole, getCurrentUser } from './middleware/tenantContext.js';
+import { observeRequestDuration, metricsEndpoint, activeConnections as activeConnectionsGauge } from './metrics.js';
+import { cacheGetOrSet, cacheInvalidateByPrefix, getCacheStats } from './cache/cache.js';
+import { getRedis, isRedisAvailable, getRedisStats } from './cache/redisClient.js';
 
 dotenv.config();
 
@@ -31,14 +37,62 @@ app.use((req, res, next) => {
   req.connectionId = connectionId;
   console.log(`📨 ${req.method} ${req.path} [${connectionId}] (${activeConnections.size}/${MAX_CONNECTIONS})`);
   
+  // Обновляем метрику активных соединений
+  activeConnectionsGauge.set(activeConnections.size);
+  
   res.on('finish', () => {
     activeConnections.delete(connectionId);
+    // Обновляем метрику при завершении соединения
+    activeConnectionsGauge.set(activeConnections.size);
   });
   
   res.on('close', () => {
     activeConnections.delete(connectionId);
+    // Обновляем метрику при закрытии соединения
+    activeConnectionsGauge.set(activeConnections.size);
   });
   
+  next();
+});
+
+// Быстрый неблокирующий логгер
+app.use(pino({
+  level: process.env.LOG_LEVEL || 'info',
+  // кореллируем запросы — полезно для трассировки
+  genReqId: (req, res) => `${Date.now()}-${Math.random().toString(16).slice(2)}`
+}));
+
+// Сжатие ответов (gzip/br) — экономия трафика и TTFB
+app.use(compression());
+
+// Эффективные ETag (силён на справочниках, неизменяемых ресурсах)
+app.set('etag', 'strong');
+
+// Keep-Alive (поддержка длительных TCP-сессий)
+app.use((req, res, next) => {
+  res.setHeader('Connection', 'keep-alive');
+  next();
+});
+
+// Rate limiting (мягкий лимит на /api)
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,    // 15 минут
+  max: 300,                    // до 300 запросов с IP в окно
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    error: 'Превышен лимит запросов',
+    retryAfter: '15 минут'
+  }
+});
+
+// Блок на слишком тяжёлые запросы (защита без влияния на UX)
+app.use((req, res, next) => {
+  // мягкая санитация параметров
+  const limit = Number(req.query.limit || 50);
+  if (limit > 200) {
+    return res.status(400).json({ error: 'Limit too large. Maximum allowed: 200' });
+  }
   next();
 });
 
@@ -50,8 +104,54 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
-app.use(express.json());
+
+// Строго ограничим размер JSON (защита от больших payload)
+app.use(express.json({ limit: '1mb' }));
 app.use(express.static('.'));
+
+// Rate limiting применяем к API эндпоинтам
+app.use('/api', apiLimiter);
+
+// Prometheus метрики
+app.use(observeRequestDuration);
+
+// ============ УТИЛИТАРНЫЕ ФУНКЦИИ КЕШИРОВАНИЯ ============
+
+function setCatalogCache(res) {
+  // публичный кеш 5 минут, можно отдавать «протухшее» ещё 60 сек пока обновляем
+  res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=60');
+}
+
+function setLastModified(res, lastUpdated) {
+  // lastUpdated — ISO строка или Date
+  res.setHeader('Last-Modified', new Date(lastUpdated).toUTCString());
+}
+
+function withCatalogCache(handler) {
+  return async (req, res, next) => {
+    try {
+      setCatalogCache(res);
+      await handler(req, res, next);
+    } catch (e) {
+      next(e);
+    }
+  };
+}
+
+// Проверка на изменения для 304 Not Modified
+function checkNotModified(req, res, lastUpdated) {
+  if (req.headers['if-modified-since']) {
+    const clientTime = new Date(req.headers['if-modified-since']);
+    const serverTime = new Date(lastUpdated);
+    if (clientTime >= serverTime) {
+      res.status(304).end();
+      return true;
+    }
+  }
+  return false;
+}
+
+// ============ API ENDPOINTS ============
 
 // Простой тест endpoint без БД
 app.get('/api/health', (req, res) => {
@@ -71,6 +171,9 @@ app.get('/api/health/db', async (req, res) => {
     res.status(503).json({ db: 'down', error: e.message });
   }
 });
+
+// Prometheus метрики endpoint
+app.get('/metrics', metricsEndpoint);
 
 // Middleware для логирования всех запросов
 app.use((req, res, next) => {
@@ -1210,38 +1313,175 @@ app.get('/api/phases', async (req, res) => {
   }
 });
 
-// Получение всех работ с их связями
-app.get('/api/works', async (req, res) => {
+// Получение всех работ с их связями (с кешированием Redis)
+app.get('/api/works', withCatalogCache(async (req, res) => {
   try {
-    const result = await query(`
-      SELECT 
-        w.*,
-        p.name as phase_name,
-        s.name as stage_name,
-        ss.name as substage_name
-      FROM works_ref w
-      LEFT JOIN phases p ON w.phase_id = p.id
-      LEFT JOIN stages s ON w.stage_id = s.id  
-      LEFT JOIN substages ss ON w.substage_id = ss.id
-      ORDER BY w.sort_order, w.id
-    `);
-    res.json(result.rows);
+    // Параметры запроса для ключа кэша
+    const search = req.query.search?.trim().toLowerCase() || '';
+    const page = Number(req.query.page || 1);
+    const limit = Math.min(Number(req.query.limit || 50), 200);
+
+    // Настройки кэша
+    const ttl = Number(process.env.CACHE_TTL_WORKS || 600);
+    const useCache = process.env.CACHE_ENABLED === 'true' && process.env.CACHE_WORKS === 'true';
+
+    // Уникальный ключ кэша
+    const key = `works:q=${encodeURIComponent(search)}:p=${page}:l=${limit}`;
+
+    const data = await cacheGetOrSet(
+      key,
+      ttl,
+      async () => {
+        console.log('🔄 Загрузка работ из базы данных...');
+        
+        // Получаем дату последнего изменения
+        const lastModResult = await query(`
+          SELECT COALESCE(MAX(updated_at), MAX(created_at)) as last_updated 
+          FROM works_ref
+        `);
+        const lastUpdated = lastModResult.rows[0]?.last_updated || new Date();
+
+        // Основной запрос с поиском
+        let whereClause = '';
+        let params = [];
+        let paramIndex = 1;
+
+        if (search) {
+          whereClause = `WHERE w.name ILIKE $${paramIndex}`;
+          params.push(`%${search}%`);
+          paramIndex++;
+        }
+
+        const offset = (page - 1) * limit;
+        const result = await query(`
+          SELECT 
+            w.*,
+            p.name as phase_name,
+            s.name as stage_name,
+            ss.name as substage_name
+          FROM works_ref w
+          LEFT JOIN phases p ON w.phase_id = p.id
+          LEFT JOIN stages s ON w.stage_id = s.id  
+          LEFT JOIN substages ss ON w.substage_id = ss.id
+          ${whereClause}
+          ORDER BY w.sort_order, w.id
+          LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+        `, [...params, limit, offset]);
+
+        // Подсчёт общего количества
+        const countResult = await query(`
+          SELECT COUNT(*) as total 
+          FROM works_ref w ${whereClause}
+        `, params);
+
+        return {
+          data: result.rows,
+          pagination: {
+            page,
+            limit,
+            total: parseInt(countResult.rows[0].total),
+            totalPages: Math.ceil(parseInt(countResult.rows[0].total) / limit)
+          },
+          lastUpdated: lastUpdated
+        };
+      },
+      { skip: !useCache }
+    );
+
+    setLastModified(res, data.lastUpdated);
+    
+    if (checkNotModified(req, res, data.lastUpdated)) {
+      return;
+    }
+
+    res.json(data);
   } catch (error) {
     console.error('Ошибка получения работ:', error);
     res.status(500).json({ error: 'Ошибка получения работ' });
   }
-});
+}));
 
-// Получение всех материалов
-app.get('/api/materials', async (req, res) => {
+// Получение всех материалов (с кешированием Redis)
+app.get('/api/materials', withCatalogCache(async (req, res) => {
   try {
-    const result = await query('SELECT * FROM materials ORDER BY name');
-    res.json(result.rows);
+    // Параметры запроса для ключа кэша
+    const search = req.query.search?.trim().toLowerCase() || '';
+    const page = Number(req.query.page || 1);
+    const limit = Math.min(Number(req.query.limit || 50), 200); // защита от больших limit
+
+    // Настройки кэша из переменных окружения
+    const ttl = Number(process.env.CACHE_TTL_MATERIALS || 600);
+    const useCache = process.env.CACHE_ENABLED === 'true' && process.env.CACHE_MATERIALS === 'true';
+
+    // Уникальный ключ кэша учитывающий параметры запроса
+    const key = `materials:q=${encodeURIComponent(search)}:p=${page}:l=${limit}`;
+
+    const data = await cacheGetOrSet(
+      key,
+      ttl,
+      async () => {
+        // Producer function - выполняется только при cache miss
+        console.log('🔄 Загрузка материалов из базы данных...');
+        
+        // Получаем дату последнего изменения для Last-Modified
+        const lastModResult = await query(`
+          SELECT COALESCE(MAX(updated_at), MAX(created_at)) as last_updated 
+          FROM materials
+        `);
+        const lastUpdated = lastModResult.rows[0]?.last_updated || new Date();
+        
+        // Основной запрос с поиском и пагинацией
+        let whereClause = '';
+        let params = [];
+        let paramIndex = 1;
+
+        if (search) {
+          whereClause = `WHERE name ILIKE $${paramIndex}`;
+          params.push(`%${search}%`);
+          paramIndex++;
+        }
+
+        const offset = (page - 1) * limit;
+        const result = await query(`
+          SELECT * FROM materials 
+          ${whereClause}
+          ORDER BY name 
+          LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+        `, [...params, limit, offset]);
+
+        // Подсчёт общего количества для пагинации
+        const countResult = await query(`
+          SELECT COUNT(*) as total FROM materials ${whereClause}
+        `, params);
+
+        return {
+          data: result.rows,
+          pagination: {
+            page,
+            limit,
+            total: parseInt(countResult.rows[0].total),
+            totalPages: Math.ceil(parseInt(countResult.rows[0].total) / limit)
+          },
+          lastUpdated: lastUpdated
+        };
+      },
+      { skip: !useCache }
+    );
+
+    // Устанавливаем заголовки кэширования и Last-Modified
+    setLastModified(res, data.lastUpdated);
+    
+    // Проверяем If-Modified-Since для 304 Not Modified
+    if (checkNotModified(req, res, data.lastUpdated)) {
+      return;
+    }
+
+    res.json(data);
   } catch (error) {
     console.error('Ошибка получения материалов:', error);
     res.status(500).json({ error: 'Ошибка получения материалов' });
   }
-});
+}));
 
 // Создание нового материала
 app.post('/api/materials', async (req, res) => {
@@ -1251,6 +1491,12 @@ app.post('/api/materials', async (req, res) => {
       'INSERT INTO materials (id, name, image_url, item_url, unit, unit_price, expenditure, weight) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
       [id, name, image_url, item_url, unit, unit_price, expenditure, weight]
     );
+    
+    // Инвалидируем кэш материалов после успешного создания
+    cacheInvalidateByPrefix('materials:').catch(err => 
+      console.warn('⚠️ Ошибка инвалидации кэша материалов:', err.message)
+    );
+    
     res.status(201).json(result.rows[0]);
   } catch (error) {
     console.error('Ошибка создания материала:', error);
@@ -1270,6 +1516,12 @@ app.put('/api/materials/:id', async (req, res) => {
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Материал не найден' });
     }
+    
+    // Инвалидируем кэш материалов после успешного обновления
+    cacheInvalidateByPrefix('materials:').catch(err => 
+      console.warn('⚠️ Ошибка инвалидации кэша материалов:', err.message)
+    );
+    
     res.json(result.rows[0]);
   } catch (error) {
     console.error('Ошибка обновления материала:', error);
@@ -2584,6 +2836,49 @@ app.delete('/api/customer-estimates/:estimateId/items/:itemId', async (req, res)
   } catch (error) {
     console.error('Ошибка удаления элемента сметы:', error);
     res.status(500).json({ message: 'Ошибка сервера' });
+  }
+});
+
+// Prometheus метрики эндпоинт
+app.get('/metrics', metricsEndpoint);
+
+// ============ CACHE MONITORING ENDPOINTS ============
+
+// Статистика кэша
+app.get('/api/cache/stats', async (req, res) => {
+  try {
+    const cacheStats = getCacheStats();
+    const redisAvailable = await isRedisAvailable();
+    const redisStats = await getRedisStats();
+    
+    res.json({
+      cache: cacheStats,
+      redis: {
+        available: redisAvailable,
+        ...redisStats
+      },
+      config: {
+        enabled: process.env.CACHE_ENABLED === 'true',
+        materials: process.env.CACHE_MATERIALS === 'true',
+        works: process.env.CACHE_WORKS === 'true',
+        ttl_materials: process.env.CACHE_TTL_MATERIALS,
+        ttl_works: process.env.CACHE_TTL_WORKS
+      }
+    });
+  } catch (error) {
+    console.error('Ошибка получения статистики кэша:', error);
+    res.status(500).json({ error: 'Ошибка получения статистики кэша' });
+  }
+});
+
+// Очистка кэша
+app.delete('/api/cache', async (req, res) => {
+  try {
+    await cacheInvalidateByPrefix('');
+    res.json({ message: 'Кэш полностью очищен' });
+  } catch (error) {
+    console.error('Ошибка очистки кэша:', error);
+    res.status(500).json({ error: 'Ошибка очистки кэша' });
   }
 });
 

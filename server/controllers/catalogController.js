@@ -25,7 +25,7 @@ export async function getMaterials(req, res) {
     let paramIndex = 1;
 
     if (search) {
-      whereCondition = `WHERE LOWER(name) LIKE LOWER($${paramIndex})`;
+      whereCondition = `WHERE name ILIKE $${paramIndex}`;
       params.push(`%${search}%`);
       paramIndex++;
     }
@@ -238,7 +238,7 @@ export async function getWorks(req, res) {
     let paramIndex = 1;
 
     if (search) {
-      whereCondition = `WHERE LOWER(name) LIKE LOWER($${paramIndex})`;
+      whereCondition = `WHERE name ILIKE $${paramIndex}`;
       params.push(`%${search}%`);
       paramIndex++;
     }

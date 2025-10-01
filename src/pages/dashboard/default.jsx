@@ -1,36 +1,38 @@
-// material-ui
-import Avatar from '@mui/material/Avatar';
-import AvatarGroup from '@mui/material/AvatarGroup';
-import Button from '@mui/material/Button';
-import Grid from '@mui/material/Grid';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemAvatar from '@mui/material/ListItemAvatar';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemText from '@mui/material/ListItemText';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
+// material-ui (оптимизированные импорты)
+import {
+  Avatar,
+  AvatarGroup, 
+  Button,
+  Grid,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemButton,
+  ListItemText,
+  Stack,
+  Typography,
+  Box
+} from 'utils/muiImports';
 
 // third-party
-import { useState, useEffect } from 'react';
+import { Suspense } from 'react';
 
 // project imports
 import MainCard from 'components/MainCard';
 import AnalyticEcommerce from 'components/cards/statistics/AnalyticEcommerce';
-import MonthlyBarChart from 'sections/dashboard/default/MonthlyBarChart';
-import ReportAreaChart from 'sections/dashboard/default/ReportAreaChart';
-import UniqueVisitorCard from 'sections/dashboard/default/UniqueVisitorCard';
-import SaleReportCard from 'sections/dashboard/default/SaleReportCard';
-import OrdersTable from 'sections/dashboard/default/OrdersTable';
+import {
+  LazyMonthlyBarChart,
+  LazyReportAreaChart,
+  LazyUniqueVisitorCard,
+  LazySaleReportCard,
+  LazyOrdersTable
+} from 'components/LazyDashboardComponents';
 
-// API imports
-import { getStatistics, getOrders } from 'api/database';
+// Оптимизированные API хуки с кэшированием
+import { useStatistics, useOrders } from 'hooks/useApiQueries';
 
-// assets
-import GiftOutlined from '@ant-design/icons/GiftOutlined';
-import MessageOutlined from '@ant-design/icons/MessageOutlined';
-import SettingOutlined from '@ant-design/icons/SettingOutlined';
+// assets (оптимизированные импорты иконок)
+import { GiftOutlined, MessageOutlined, SettingOutlined } from 'utils/antdIcons';
 
 import avatar1 from 'assets/images/users/avatar-1.png';
 import avatar2 from 'assets/images/users/avatar-2.png';
@@ -57,35 +59,26 @@ const actionSX = {
 // ==============================|| DASHBOARD - DEFAULT ||============================== //
 
 export default function DashboardDefault() {
-  const [statistics, setStatistics] = useState([]);
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Используем кэшированные запросы вместо прямых API вызовов
+  const { data: statistics = [], isLoading: statsLoading, error: statsError } = useStatistics();
+  const { data: orders = [], isLoading: ordersLoading, error: ordersError } = useOrders();
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [statsData, ordersData] = await Promise.all([getStatistics(), getOrders()]);
-
-        // Убеждаемся, что statistics это массив
-        setStatistics(Array.isArray(statsData) ? statsData : []);
-        setOrders(Array.isArray(ordersData) ? ordersData : []);
-      } catch (error) {
-        console.error('Ошибка загрузки данных:', error);
-        // В случае ошибки устанавливаем пустые массивы
-        setStatistics([]);
-        setOrders([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
-  }, []);
+  const loading = statsLoading || ordersLoading;
 
   if (loading) {
     return (
       <Grid container justifyContent="center" alignItems="center" style={{ minHeight: '200px' }}>
         <Typography variant="h6">Загрузка данных...</Typography>
+      </Grid>
+    );
+  }
+
+  if (statsError || ordersError) {
+    return (
+      <Grid container justifyContent="center" alignItems="center" style={{ minHeight: '200px' }}>
+        <Typography variant="h6" color="error">
+          Ошибка загрузки данных. Попробуйте обновить страницу.
+        </Typography>
       </Grid>
     );
   }
@@ -119,7 +112,7 @@ export default function DashboardDefault() {
       <Grid sx={{ display: { sm: 'none', md: 'block', lg: 'none' } }} size={{ md: 8 }} />
       {/* row 2 */}
       <Grid size={{ xs: 12, md: 7, lg: 8 }}>
-        <UniqueVisitorCard />
+        <LazyUniqueVisitorCard />
       </Grid>
       <Grid size={{ xs: 12, md: 5, lg: 4 }}>
         <Grid container alignItems="center" justifyContent="space-between">
@@ -137,7 +130,7 @@ export default function DashboardDefault() {
               <Typography variant="h3">$7,650</Typography>
             </Stack>
           </Box>
-          <MonthlyBarChart />
+          <LazyMonthlyBarChart />
         </MainCard>
       </Grid>
       {/* row 3 */}
@@ -149,7 +142,7 @@ export default function DashboardDefault() {
           <Grid />
         </Grid>
         <MainCard sx={{ mt: 2 }} content={false}>
-          <OrdersTable />
+          <LazyOrdersTable />
         </MainCard>
       </Grid>
       <Grid size={{ xs: 12, md: 5, lg: 4 }}>
@@ -174,12 +167,12 @@ export default function DashboardDefault() {
               <Typography variant="h5">Низкий</Typography>
             </ListItemButton>
           </List>
-          <ReportAreaChart />
+          <LazyReportAreaChart />
         </MainCard>
       </Grid>
       {/* row 4 */}
       <Grid size={{ xs: 12, md: 7, lg: 8 }}>
-        <SaleReportCard />
+        <LazySaleReportCard />
       </Grid>
       <Grid size={{ xs: 12, md: 5, lg: 4 }}>
         <Grid container alignItems="center" justifyContent="space-between">

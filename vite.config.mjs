@@ -1,6 +1,7 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import jsconfigPaths from 'vite-jsconfig-paths';
+import { visualizer } from 'rollup-plugin-visualizer';
 import path from 'path';
 
 export default defineConfig(({ mode }) => {
@@ -39,10 +40,17 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       jsconfigPaths(),
+      // Bundle analyzer - создает stats.html для анализа размера бандла
+      visualizer({ 
+        filename: 'dist/stats.html', 
+        open: false, // не открываем автоматически в headless окружении
+        gzipSize: true,
+        brotliSize: true 
+      })
     ],
     build: {
       chunkSizeWarningLimit: 1000,
-      sourcemap: true,
+      sourcemap: false, // Отключаем source maps для production
       cssCodeSplit: true,
       rollupOptions: {
         output: {
@@ -55,10 +63,37 @@ export default defineConfig(({ mode }) => {
             if (/\.(png|jpe?g|gif|svg|webp|ico)$/.test(name)) return `images/[name]-[hash].${ext}`;
             if (/\.(woff2?|eot|ttf|otf)$/.test(name)) return `fonts/[name]-[hash].${ext}`;
             return `assets/[name]-[hash].${ext}`;
+          },
+          // Разделение на чанки для оптимизации загрузки
+          manualChunks: (id) => {
+            // MUI библиотеки в отдельные чанки
+            if (id.includes('@mui/material')) return 'mui-core';
+            if (id.includes('@mui/icons-material')) return 'mui-icons';
+            
+            // Ant Design в отдельные чанки
+            if (id.includes('antd') && !id.includes('@ant-design/icons')) return 'antd-core';
+            if (id.includes('@ant-design/icons')) return 'antd-icons';
+            
+            // React экосистема
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+              return 'react-vendor';
+            }
+            
+            // Чарты (если они установлены)
+            if (id.includes('apexcharts') || id.includes('react-apexcharts')) {
+              return 'charts';
+            }
+            
+            // React Query
+            if (id.includes('@tanstack/react-query')) return 'react-query';
+            
+            // Vendor библиотеки в node_modules
+            if (id.includes('node_modules')) return 'vendor';
           }
-          // manualChunks: { ... } // Add if you want custom chunk splitting
         }
       },
+      // Минификация и оптимизация
+      minify: 'esbuild',
       // Only drop console/debugger in production
       ...(mode === 'production' && {
         esbuild: {
@@ -66,11 +101,22 @@ export default defineConfig(({ mode }) => {
           pure: ['console.log', 'console.info', 'console.debug', 'console.warn']
         }
       })
-      // No need to set build.target unless you need to support older browsers
-      // target: 'baseline-widely-available', // This is now the default
     },
     optimizeDeps: {
-      include: ['@mui/material/Tooltip', 'react', 'react-dom', 'react-router-dom']
+      include: [
+        'react',
+        'react-dom', 
+        'react-router-dom',
+        '@mui/material',
+        '@mui/material/Tooltip',
+        '@mui/material/Button',
+        '@mui/material/Typography',
+        '@mui/material/Grid',
+        '@mui/material/Box',
+        '@mui/material/Stack',
+        'antd',
+        '@ant-design/icons'
+      ]
     }
   };
 });
