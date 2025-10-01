@@ -1,33 +1,61 @@
 import { z } from 'zod';
 
 export const Material = z.object({
-  id: z.number(),
+  id: z.string(), // ID как строка в реальном API (например "m.84")
   name: z.string(),
   unit: z.string().optional(),
-  unit_price: z.number().optional(),
+  unit_price: z.string().optional(), // Цена как строка в реальном API
   // Дополнительные поля из реального API
-  code: z.string().optional(),
-  category: z.string().optional(),
-  group_name: z.string().optional(),
+  image_url: z.string().optional(),
+  item_url: z.string().optional(),
+  expenditure: z.string().nullable().optional(),
+  weight: z.string().nullable().optional(),
   created_at: z.string().optional(),
-  updated_at: z.string().optional()
+  updated_at: z.string().optional(),
+  tenant_id: z.string().nullable().optional()
 });
 
-export const Materials = z.array(Material);
+// Пагинированный ответ для материалов
+export const MaterialsResponse = z.object({
+  data: z.array(Material),
+  pagination: z.object({
+    page: z.number(),
+    limit: z.number(),
+    total: z.number(),
+    totalPages: z.number()
+  }),
+  lastUpdated: z.string().optional()
+});
 
 export const Work = z.object({
-  id: z.number(),
+  id: z.string(), // ID как строка в реальном API (например "w.1")
   name: z.string(),
-  code: z.string().optional(),
-  // Дополнительные поля из реального API
-  unit: z.string().optional(),
-  category: z.string().optional(),
-  group_name: z.string().optional(),
-  created_at: z.string().optional(),
-  updated_at: z.string().optional()
+  unit: z.string(),
+  unit_price: z.string(), // Цена как строка в реальном API
+  // Дополнительные поля из реального API  
+  phase_id: z.string(),
+  stage_id: z.string(),
+  substage_id: z.string().nullable(),
+  sort_order: z.number(),
+  created_at: z.string(),
+  updated_at: z.string(),
+  tenant_id: z.string().nullable(),
+  phase_name: z.string(),
+  stage_name: z.string(),
+  substage_name: z.string().nullable()
 });
 
-export const Works = z.array(Work);
+// Пагинированный ответ для работ
+export const WorksResponse = z.object({
+  data: z.array(Work),
+  pagination: z.object({
+    page: z.number(),
+    limit: z.number(), 
+    total: z.number(),
+    totalPages: z.number()
+  }),
+  lastUpdated: z.string()
+});
 
 export const Estimate = z.object({
   id: z.number(),

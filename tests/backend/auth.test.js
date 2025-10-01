@@ -1,7 +1,12 @@
-import { describe, it, expect } from 'vitest';
-import { api } from './utils/test-server.js';
+import { describe, it, expect, beforeAll } from 'vitest';
+import { api, waitForServer } from './utils/test-server.js';
 
 describe('Auth', () => {
+  beforeAll(async () => {
+    // Ждем готовности сервера перед тестами
+    console.log('⏳ Ожидание готовности сервера...');
+    await waitForServer();
+  });
   it('POST /api/auth/login returns token', async () => {
     const res = await api
       .post('/api/auth/login')

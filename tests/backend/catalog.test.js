@@ -1,7 +1,12 @@
-import { describe, it, expect } from 'vitest';
-import { api, loginAndGetToken } from './utils/test-server.js';
+import { describe, it, expect, beforeAll } from 'vitest';
+import { api, loginAndGetToken, waitForServer } from './utils/test-server.js';
 
 describe('Catalog endpoints', () => {
+  beforeAll(async () => {
+    // Ждем готовности сервера перед тестами
+    console.log('⏳ Ожидание готовности сервера...');
+    await waitForServer();
+  });
   it('GET /api/materials search+pagination returns <= limit and cache headers', async () => {
     // Материалы доступны без токена, проверим сначала без него
     const limit = 20;
