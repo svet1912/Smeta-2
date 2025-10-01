@@ -1,0 +1,260 @@
+name: CI/CD Pipeline
+on:
+  push:
+    branches: [ master, main, develop ]
+  pull_request:
+    branches: [ master, main, develop ]
+
+env:
+  NODE_VERSION: 20
+
+jobs:
+  test:
+    name: Unit & Integration Tests
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: testdb
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Run unit tests
+        run: npm run test
+
+      - name: Start API server for integration tests
+        run: |
+          cd server
+          DATABASE_URL=postgres://postgres:postgres@localhost:5432/testdb \
+          nohup node start.js > /tmp/api.log 2>&1 & 
+          echo $! > /tmp/api.pid
+
+      - name: Wait for API
+        run: npx wait-on http://localhost:3001/api/health -t 30000
+
+      - name: Run contract tests
+        run: npm run test:contracts
+
+      - name: Run cache headers tests
+        run: npm run test:cache
+
+      - name: Cleanup API server
+        if: always()
+        run: |
+          if [ -f /tmp/api.pid ]; then
+            kill $(cat /tmp/api.pid) || true
+          fi
+
+  e2e:
+    name: E2E Tests (Production Build)
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Build production assets
+        run: npm run build:web
+
+      - name: Run E2E tests
+        run: npm run e2e
+
+      - name: Upload E2E artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-results
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 7
+
+  performance:
+    name: Performance Budgets
+    runs-on: ubuntu-latest
+    needs: test
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: testdb
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build production assets
+        run: npm run build:web
+
+      - name: Start API server
+        run: |
+          cd server
+          DATABASE_URL=postgres://postgres:postgres@localhost:5432/testdb \
+          nohup node start.js > /tmp/api.log 2>&1 & 
+          echo $! > /tmp/api.pid
+
+      - name: Wait for API
+        run: npx wait-on http://localhost:3001/api/health -t 30000
+
+      - name: Run API performance tests
+        env:
+          PERF_P95_MAX: 300
+          PERF_RPS_MIN: 100
+          PERF_DURATION: 15
+        run: npm run ci:perf
+
+      - name: Run Lighthouse CI
+        run: npm run ci:web
+
+      - name: Upload performance artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-reports
+          path: |
+            lhci-report/
+            /tmp/api.log
+          retention-days: 7
+
+      - name: Cleanup
+        if: always()
+        run: |
+          if [ -f /tmp/api.pid ]; then
+            kill $(cat /tmp/api.pid) || true
+          fi
+
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        run: npm audit --audit-level moderate
+
+      - name: Run dependency check
+        run: |
+          # Проверяем на устаревшие зависимости
+          npx npm-check-updates --errorLevel 2 || echo "Some dependencies can be updated"
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [test, e2e, performance, security]
+    if: github.ref == 'refs/heads/develop'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build production assets
+        run: npm run build:web
+
+      - name: Deploy to staging
+        run: |
+          echo "🚀 Deploying to staging environment..."
+          echo "Build artifacts ready for deployment"
+          # Здесь будет реальный деплой (Docker, Vercel, etc.)
+
+  deploy-production:
+    name: Deploy to Production  
+    runs-on: ubuntu-latest
+    needs: [test, e2e, performance, security]
+    if: github.ref == 'refs/heads/master'
+    
+    environment:
+      name: production
+      url: https://smeta360.com
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build production assets
+        run: npm run build:web
+
+      - name: Deploy to production
+        run: |
+          echo "🚀 Deploying to production environment..."
+          echo "Build artifacts ready for deployment"
+          # Здесь будет реальный деплой

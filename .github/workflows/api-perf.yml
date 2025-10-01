@@ -1,0 +1,90 @@
+name: API Performance Budgets
+on: 
+  push:
+    branches: [ master, main, develop ]
+  pull_request:
+    branches: [ master, main, develop ]
+
+jobs:
+  api-performance:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: testdb
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build web assets
+        run: npm run build:web
+
+      - name: Start API server
+        run: |
+          cd server
+          DATABASE_URL=postgres://postgres:postgres@localhost:5432/testdb \
+          nohup node start.js > /tmp/api.log 2>&1 & 
+          echo $! > /tmp/api.pid
+        
+      - name: Wait for API to be ready
+        run: |
+          npx wait-on http://localhost:3001/api/health -t 30000
+          echo "API server is ready"
+
+      - name: Run API performance tests - Health
+        env:
+          PERF_P95_MAX: 300
+          PERF_RPS_MIN: 100
+          PERF_DURATION: 10
+        run: npm run perf:api:health
+
+      - name: Run API performance tests - Materials
+        env:
+          PERF_P95_MAX: 400
+          PERF_RPS_MIN: 50
+          PERF_DURATION: 10
+          PERF_URL: http://localhost:3001/api/materials?limit=50
+        run: npm run perf:api
+        continue-on-error: true
+
+      - name: Run API performance tests - Works  
+        env:
+          PERF_P95_MAX: 400
+          PERF_RPS_MIN: 50
+          PERF_DURATION: 10
+          PERF_URL: http://localhost:3001/api/works?limit=50
+        run: npm run perf:api
+        continue-on-error: true
+
+      - name: Upload API logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-performance-logs
+          path: /tmp/api.log
+          retention-days: 7
+
+      - name: Cleanup
+        if: always()
+        run: |
+          if [ -f /tmp/api.pid ]; then
+            kill $(cat /tmp/api.pid) || true
+          fi

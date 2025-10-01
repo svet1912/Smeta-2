@@ -15,12 +15,22 @@ export default defineConfig(({ mode }) => {
       open: true,
       port: PORT,
       host: true,
+      // T4-RECOVERY: Оптимизация dev сервера
+      hmr: {
+        overlay: false // Отключаем overlay для лучшей производительности
+      },
+      fs: {
+        strict: false // Разрешаем доступ к файлам вне root
+      },
       proxy: {
         '/api-proxy': {
           target: 'http://localhost:3001',
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api-proxy/, '/api'),
-          secure: false
+          secure: false,
+          // Оптимизация прокси
+          timeout: 30000,
+          proxyTimeout: 30000
         }
       }
     },
@@ -29,7 +39,9 @@ export default defineConfig(({ mode }) => {
       host: true
     },
     define: {
-      global: 'window'
+      global: 'window',
+      // Исправляем проблемы с process в браузере
+      'process.env': 'import.meta.env'
     },
     resolve: {
       alias: {
@@ -64,31 +76,31 @@ export default defineConfig(({ mode }) => {
             if (/\.(woff2?|eot|ttf|otf)$/.test(name)) return `fonts/[name]-[hash].${ext}`;
             return `assets/[name]-[hash].${ext}`;
           },
-          // Разделение на чанки для оптимизации загрузки
+          // T4-RECOVERY: Оптимизированное разделение на чанки
           manualChunks: (id) => {
-            // MUI библиотеки в отдельные чанки
-            if (id.includes('@mui/material')) return 'mui-core';
-            if (id.includes('@mui/icons-material')) return 'mui-icons';
-            
-            // Ant Design в отдельные чанки
-            if (id.includes('antd') && !id.includes('@ant-design/icons')) return 'antd-core';
-            if (id.includes('@ant-design/icons')) return 'antd-icons';
-            
-            // React экосистема
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
-              return 'react-vendor';
+            // Vendor chunk - основные библиотеки
+            if (id.includes('node_modules')) {
+              if (id.includes('react') || id.includes('react-dom')) {
+                return 'vendor-react';
+              }
+              if (id.includes('@tanstack/react-query')) {
+                return 'vendor-query';  
+              }
+              if (id.includes('antd') && !id.includes('@ant-design/icons')) {
+                return 'vendor-antd';
+              }
+              if (id.includes('@ant-design/icons')) {
+                return 'vendor-icons';
+              }
+              if (id.includes('@mui')) {
+                return 'vendor-mui';
+              }
+              if (id.includes('axios') || id.includes('lodash')) {
+                return 'vendor-utils';
+              }
+              // Остальные vendor libraries
+              return 'vendor-misc';
             }
-            
-            // Чарты (если они установлены)
-            if (id.includes('apexcharts') || id.includes('react-apexcharts')) {
-              return 'charts';
-            }
-            
-            // React Query
-            if (id.includes('@tanstack/react-query')) return 'react-query';
-            
-            // Vendor библиотеки в node_modules
-            if (id.includes('node_modules')) return 'vendor';
           }
         }
       },
@@ -103,20 +115,32 @@ export default defineConfig(({ mode }) => {
       })
     },
     optimizeDeps: {
+      // Явно предбандлим «тяжёлых» - решение проблемы 329 JS модулей
       include: [
-        'react',
-        'react-dom', 
-        'react-router-dom',
-        '@mui/material',
-        '@mui/material/Tooltip',
-        '@mui/material/Button',
-        '@mui/material/Typography',
-        '@mui/material/Grid',
-        '@mui/material/Box',
-        '@mui/material/Stack',
-        'antd',
-        '@ant-design/icons'
-      ]
+        'react', 'react-dom', 'react/jsx-runtime',
+        '@tanstack/react-query',
+        'antd/es/button', 'antd/es/input', 'antd/es/table', 'antd/es/layout',
+        'antd/es/menu', 'antd/es/card', 'antd/es/form', 'antd/es/select',
+        '@ant-design/icons',
+        '@mui/material', '@mui/material/Box', '@mui/material/Button',
+        '@mui/icons-material',
+        'hoist-non-react-statics',
+        '@emotion/react', '@emotion/styled',
+        'axios', 'react-router-dom'
+      ],
+      // Заставляем Vite предкомпилировать проблемные ESM пакеты
+      force: true
+    },
+    // Настройка для правильной обработки CommonJS модулей
+    esbuild: {
+      // Исправляем проблемы с default экспортами
+      ...(mode !== 'production' && {
+        keepNames: true
+      })
+    },
+    // Дополнительная конфигурация для resolve
+    ssr: {
+      noExternal: ['hoist-non-react-statics']
     }
   };
 });

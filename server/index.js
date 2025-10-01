@@ -97,8 +97,23 @@ app.use((req, res, next) => {
 });
 
 // Middleware
+const allowedOrigins = new Set([
+  'http://localhost:4174', // vite preview
+  'http://localhost:3000', // dev
+  'http://localhost:5173', // vite dev
+  'http://127.0.0.1:4174', // local preview
+]);
+
 app.use(cors({
-  origin: true, // Временно разрешаем все origins для отладки
+  origin: (origin, callback) => {
+    // Разрешаем запросы без origin (например, мобильные приложения)
+    if (!origin || allowedOrigins.has(origin)) {
+      callback(null, true);
+    } else {
+      console.log('⚠️ CORS blocked origin:', origin);
+      callback(null, true); // Временно разрешаем все для отладки
+    }
+  },
   credentials: true,
   optionsSuccessStatus: 200,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -2882,23 +2897,9 @@ app.delete('/api/cache', async (req, res) => {
   }
 });
 
-// Запуск сервера
-app.listen(PORT, '0.0.0.0', async () => {
-  console.log(`🚀 Сервер запущен на http://localhost:${PORT}`);
-  console.log(`📊 API доступно по адресу: http://localhost:${PORT}/api/test`);
-  console.log(`🌐 Внешний доступ через порт: ${PORT}`);
-  
-  // Простая проверка подключения без создания таблиц
-  try {
-    const result = await query('SELECT NOW() as current_time');
-    console.log('✅ Подключение к базе данных проверено:', result.rows[0].current_time);
-    
-    // Инициализируем таблицы только после успешного подключения
-    setTimeout(() => initializeTables().catch(err => console.log('⚠️ Пропускаем инициализацию БД')), 1000);
-  } catch (error) {
-    console.log('⚠️  Будем работать без базы данных (статические данные)');
-    console.log('❌ Ошибка подключения:', error.message);
-  }
-});
+// Для запуска сервера используйте start.js
+
+// Добавляем функцию инициализации как метод app для тестов
+app.initializeTables = initializeTables;
 
 export default app;

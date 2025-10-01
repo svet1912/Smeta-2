@@ -106,6 +106,7 @@ export default function AuthLogin({ isDemo = false }) {
                     placeholder="Введите email адрес"
                     fullWidth
                     error={Boolean(touched.email && errors.email)}
+                    data-testid="login-email-input"
                   />
                 </Stack>
                 {touched.email && errors.email && (
@@ -140,6 +141,7 @@ export default function AuthLogin({ isDemo = false }) {
                       </InputAdornment>
                     }
                     placeholder="Введите пароль"
+                    data-testid="login-password-input"
                   />
                 </Stack>
                 {touched.password && errors.password && (
@@ -169,7 +171,15 @@ export default function AuthLogin({ isDemo = false }) {
               </Grid>
               <Grid size={12}>
                 <AnimateButton>
-                  <Button fullWidth size="large" type="submit" variant="contained" color="primary" disabled={isSubmitting}>
+                  <Button 
+                    fullWidth 
+                    size="large" 
+                    type="submit" 
+                    variant="contained" 
+                    color="primary" 
+                    disabled={isSubmitting}
+                    data-testid="login-submit-button"
+                  >
                     {isSubmitting ? 'Вход...' : 'Войти'}
                   </Button>
                 </AnimateButton>

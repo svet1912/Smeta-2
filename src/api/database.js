@@ -195,7 +195,7 @@ export const createOrder = async (orderData) => {
 // Тестовый запрос
 export const testConnection = async () => {
   try {
-    const response = await api.get('/test');
+    const response = await api.get('/health');
     return response.data;
   } catch (error) {
     console.error('Ошибка тестового соединения:', error);

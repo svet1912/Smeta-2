@@ -11,12 +11,14 @@ import ScrollTop from 'components/ScrollTop';
 
 export default function App() {
   return (
-    <ThemeCustomization>
-      <AuthProvider>
-        <ScrollTop>
-          <RouterProvider router={router} />
-        </ScrollTop>
-      </AuthProvider>
-    </ThemeCustomization>
+    <div data-testid="app-root-ready">
+      <ThemeCustomization>
+        <AuthProvider>
+          <ScrollTop>
+            <RouterProvider router={router} />
+          </ScrollTop>
+        </AuthProvider>
+      </ThemeCustomization>
+    </div>
   );
 }
