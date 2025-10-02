@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Card,
   Row,
@@ -12,10 +12,8 @@ import {
   Space,
   Input,
   Typography,
-  Divider,
-  notification
+  Divider
 } from 'antd';
-import { getAuthToken, removeAuthToken } from '../../api/auth';
 import {
   BuildOutlined,
   HomeOutlined,
@@ -25,9 +23,7 @@ import {
   ThunderboltOutlined,
   FireOutlined,
   DropboxOutlined,
-  CalculatorOutlined,
-  SaveOutlined,
-  LoadingOutlined
+  CalculatorOutlined
 } from '@ant-design/icons';
 
 const { Option } = Select;
@@ -278,334 +274,6 @@ const ObjectParameters = () => {
     ventilation: false,
     airConditioning: false
   });
-
-  // Состояние загрузки
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [projectId, setProjectId] = useState(1); // TODO: получать из роутера или контекста
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  
-  // Проверка валидности токена
-  const checkTokenValidity = async (token) => {
-    try {
-      const response = await fetch('/api-proxy/auth/me', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      return response.ok;
-    } catch (error) {
-      return false;
-    }
-  };
-
-  // Создание тестового проекта, если его нет
-  const createTestProject = async () => {
-    try {
-      const token = getAuthToken();
-      const response = await fetch('/api-proxy/construction-projects', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          name: 'Тестовый проект',
-          description: 'Автоматически созданный проект для тестирования',
-          status: 'draft'
-        })
-      });
-      
-      if (response.ok) {
-        const project = await response.json();
-        setProjectId(project.data.id);
-        return project.data.id;
-      }
-    } catch (error) {
-      console.error('Ошибка создания проекта:', error);
-    }
-    return 1; // Используем ID по умолчанию
-  };
-
-  // Функции для работы с API
-  const loadObjectParameters = async (currentProjectId = projectId) => {
-    try {
-      setLoading(true);
-      
-      const token = getAuthToken();
-      if (!token) {
-        console.log('Токен не найден, работаем в режиме просмотра');
-        notification.info({
-          message: 'Режим просмотра',
-          description: 'Войдите в систему для сохранения данных'
-        });
-        setLoading(false);
-        return;
-      }
-
-      // Проверяем валидность токена
-      const isTokenValid = await checkTokenValidity(token);
-      if (!isTokenValid) {
-        console.log('Токен недействителен, работаем в режиме просмотра');
-        removeAuthToken(); // Удаляем недействительный токен
-        setIsAuthenticated(false);
-        notification.warning({
-          message: 'Сессия истекла',
-          description: 'Пожалуйста, войдите в систему заново'
-        });
-        setLoading(false);
-        return;
-      }
-
-      setIsAuthenticated(true);
-      
-      // Загружаем параметры объекта
-      const objectParamsResponse = await fetch(`/api-proxy/projects/${currentProjectId}/object-parameters`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (objectParamsResponse.status === 404) {
-        // Параметры не найдены - используем значения по умолчанию
-        console.log('Параметры объекта не найдены, используем значения по умолчанию');
-        setLoading(false);
-        return;
-      }
-
-      if (objectParamsResponse.status === 401) {
-        console.log('Токен недействителен или истек, используем значения по умолчанию');
-        notification.warning({
-          message: 'Не авторизован',
-          description: 'Пожалуйста, войдите в систему для сохранения данных'
-        });
-        setLoading(false);
-        return;
-      }
-
-      if (!objectParamsResponse.ok) {
-        throw new Error('Ошибка загрузки параметров объекта');
-      }
-
-      const objectParams = await objectParamsResponse.json();
-      
-      // Загружаем помещения
-      const roomsResponse = await fetch(`/api-proxy/object-parameters/${objectParams.id}/rooms`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (roomsResponse.ok) {
-        const roomsData = await roomsResponse.json();
-        if (roomsData.length > 0) {
-          // Преобразуем данные из БД в формат компонента
-          const formattedRooms = roomsData.map(room => ({
-            id: room.id,
-            name: room.room_name || room.name,
-            perimeter: room.perimeter || 0,
-            height: room.height || 2.7,
-            floorArea: room.area || room.floor_area || 0,
-            prostenki: room.prostenki || 0,
-            doorsCount: room.doors_count || 0,
-            window1Width: room.window1_width || 0,
-            window1Height: room.window1_height || 0,
-            window2Width: room.window2_width || 0,
-            window2Height: room.window2_height || 0,
-            window3Width: room.window3_width || 0,
-            window3Height: room.window3_height || 0,
-            portal1Width: room.portal1_width || 0,
-            portal1Height: room.portal1_height || 0,
-            portal2Width: room.portal2_width || 0,
-            portal2Height: room.portal2_height || 0
-          }));
-          setRooms(formattedRooms);
-        }
-      }
-
-      // Обновляем параметры здания если они есть в objectParams
-      if (objectParams.building_floors) {
-        setBuildingParams(prev => ({
-          ...prev,
-          floors: objectParams.building_floors,
-          purpose: objectParams.building_purpose || prev.purpose,
-          energyClass: objectParams.energy_class || prev.energyClass,
-          hasBasement: objectParams.has_basement || prev.hasBasement,
-          hasAttic: objectParams.has_attic || prev.hasAttic,
-          heatingType: objectParams.heating_type || prev.heatingType
-        }));
-      }
-
-    } catch (error) {
-      console.error('Ошибка загрузки данных:', error);
-      notification.error({
-        message: 'Ошибка загрузки',
-        description: 'Не удалось загрузить данные объекта'
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const saveObjectParameters = async () => {
-    try {
-      setSaving(true);
-      
-      const token = getAuthToken();
-      if (!token) {
-        notification.warning({
-          message: 'Не авторизован',
-          description: 'Пожалуйста, войдите в систему для сохранения данных'
-        });
-        setSaving(false);
-        return;
-      }
-
-      // Проверяем валидность токена перед сохранением
-      const isTokenValid = await checkTokenValidity(token);
-      if (!isTokenValid) {
-        removeAuthToken(); // Удаляем недействительный токен
-        notification.error({
-          message: 'Сессия истекла',
-          description: 'Пожалуйста, войдите в систему заново'
-        });
-        setSaving(false);
-        return;
-      }
-      
-      // Сохраняем параметры объекта
-      const objectParamsResponse = await fetch(`/api-proxy/projects/${projectId}/object-parameters`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          buildingFloors: buildingParams.floors,
-          buildingPurpose: buildingParams.purpose,
-          energyClass: buildingParams.energyClass,
-          hasBasement: buildingParams.hasBasement,
-          hasAttic: buildingParams.hasAttic,
-          heatingType: buildingParams.heatingType
-        })
-      });
-
-      if (objectParamsResponse.status === 401) {
-        notification.warning({
-          message: 'Не авторизован',
-          description: 'Пожалуйста, войдите в систему для сохранения данных'
-        });
-        setSaving(false);
-        return;
-      }
-
-      if (!objectParamsResponse.ok) {
-        throw new Error('Ошибка сохранения параметров объекта');
-      }
-
-      const savedObjectParams = await objectParamsResponse.json();
-      console.log('Saved object params:', savedObjectParams); // Для отладки
-      
-      // ID находится в data поле
-      const objectParamsId = savedObjectParams.data?.id;
-      if (!objectParamsId) {
-        throw new Error('Не удалось получить ID параметров объекта');
-      }
-      
-      // Сохраняем каждое помещение
-      for (const room of rooms) {
-        const roomData = {
-          roomName: room.name,
-          area: room.floorArea,
-          height: room.height,
-          volume: room.floorArea * room.height, // Вычисляем объем
-          finishClass: 'standard', // Значение по умолчанию
-          purpose: 'general', // Значение по умолчанию
-          sortOrder: 0, // Значение по умолчанию
-          perimeter: room.perimeter,
-          prostenki: room.prostenki,
-          doorsCount: room.doorsCount,
-          window1Width: room.window1Width,
-          window1Height: room.window1Height,
-          window2Width: room.window2Width,
-          window2Height: room.window2Height,
-          window3Width: room.window3Width,
-          window3Height: room.window3Height,
-          portal1Width: room.portal1Width,
-          portal1Height: room.portal1Height,
-          portal2Width: room.portal2Width,
-          portal2Height: room.portal2Height
-        };
-
-        // Проверяем, является ли помещение новым (ID сгенерирован локально или это дефолтные помещения)
-        const isNewRoom = room.id > 1000000 || room.id <= 3; // ID 1,2,3 - это дефолтные помещения
-        
-        if (isNewRoom) {
-          // Новое помещение - создаем через POST
-          const response = await fetch(`/api-proxy/object-parameters/${objectParamsId}/rooms`, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(roomData)
-          });
-          
-          if (response.ok) {
-            const newRoomData = await response.json();
-            // Обновляем ID в локальном состоянии
-            setRooms(prev => prev.map(r => 
-              r.id === room.id ? { ...r, id: newRoomData.data.id } : r
-            ));
-          }
-        } else {
-          // Существующее помещение пользователя - обновляем через PUT
-          await fetch(`/api-proxy/rooms/${room.id}`, {
-            method: 'PUT',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(roomData)
-          });
-        }
-      }
-
-      notification.success({
-        message: 'Сохранено',
-        description: 'Параметры объекта успешно сохранены'
-      });
-
-    } catch (error) {
-      console.error('Ошибка сохранения:', error);
-      notification.error({
-        message: 'Ошибка сохранения',
-        description: 'Не удалось сохранить данные объекта'
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  // Загрузка данных при монтировании компонента
-  useEffect(() => {
-    loadObjectParameters();
-  }, [projectId]);
-
-  // Автосохранение при изменении данных (с задержкой)
-  useEffect(() => {
-    if (loading || saving || !isAuthenticated) return; // Не сохраняем для неавторизованных пользователей
-    
-    const timeoutId = setTimeout(() => {
-      console.log('Автосохранение данных...');
-      saveObjectParameters();
-    }, 3000); // Автосохранение через 3 секунды после изменения
-
-    return () => clearTimeout(timeoutId);
-  }, [rooms, buildingParams, constructiveParams, engineeringParams, isAuthenticated]);
 
   // Функции для обновления данных
   const updateBuildingParam = (key, value) => {
@@ -863,26 +531,32 @@ const ObjectParameters = () => {
     {
       title: 'Окно 2 Ш×В (м)',
       key: 'window2',
-      width: 110,
+      width: 100,
       render: (_, record) => (
         <Space.Compact>
-          <FormulaInput
+          <InputNumber
             value={record.window2Width}
             onChange={(val) => updateRoom(record.id, 'window2Width', val || 0)}
-            style={{ 
-              width: '50%',
-              fontSize: '12px'
-            }}
-            placeholder="Ширина"
+            min={0}
+            step={0.1}
+            size="small"
+            style={{ width: '50%', ...compactInputStyles }}
+            precision={1}
+            placeholder="Ш"
+            controls={false}
+            title="Ширина окна 2 в метрах"
           />
-          <FormulaInput
+          <InputNumber
             value={record.window2Height}
             onChange={(val) => updateRoom(record.id, 'window2Height', val || 0)}
-            style={{ 
-              width: '50%',
-              fontSize: '12px'
-            }}
-            placeholder="Высота"
+            min={0}
+            step={0.1}
+            size="small"
+            style={{ width: '50%', ...compactInputStyles }}
+            precision={1}
+            placeholder="В"
+            controls={false}
+            title="Высота окна 2 в метрах"
           />
         </Space.Compact>
       ),
@@ -890,26 +564,32 @@ const ObjectParameters = () => {
     {
       title: 'Окно 3 Ш×В (м)',
       key: 'window3',
-      width: 110,
+      width: 100,
       render: (_, record) => (
         <Space.Compact>
-          <FormulaInput
+          <InputNumber
             value={record.window3Width}
             onChange={(val) => updateRoom(record.id, 'window3Width', val || 0)}
-            style={{ 
-              width: '50%',
-              fontSize: '12px'
-            }}
-            placeholder="Ширина"
+            min={0}
+            step={0.1}
+            size="small"
+            style={{ width: '50%', ...compactInputStyles }}
+            precision={1}
+            placeholder="Ш"
+            controls={false}
+            title="Ширина окна 3 в метрах"
           />
-          <FormulaInput
+          <InputNumber
             value={record.window3Height}
             onChange={(val) => updateRoom(record.id, 'window3Height', val || 0)}
-            style={{ 
-              width: '50%',
-              fontSize: '12px'
-            }}
-            placeholder="Высота"
+            min={0}
+            step={0.1}
+            size="small"
+            style={{ width: '50%', ...compactInputStyles }}
+            precision={1}
+            placeholder="В"
+            controls={false}
+            title="Высота окна 3 в метрах"
           />
         </Space.Compact>
       ),
@@ -917,26 +597,32 @@ const ObjectParameters = () => {
     {
       title: 'Портал 1 Ш×В (м)',
       key: 'portal1',
-      width: 110,
+      width: 100,
       render: (_, record) => (
         <Space.Compact>
-          <FormulaInput
+          <InputNumber
             value={record.portal1Width}
             onChange={(val) => updateRoom(record.id, 'portal1Width', val || 0)}
-            style={{ 
-              width: '50%',
-              fontSize: '12px'
-            }}
-            placeholder="Ширина"
+            min={0}
+            step={0.1}
+            size="small"
+            style={{ width: '50%', ...compactInputStyles }}
+            precision={1}
+            placeholder="Ш"
+            controls={false}
+            title="Ширина портала 1 в метрах"
           />
-          <FormulaInput
+          <InputNumber
             value={record.portal1Height}
             onChange={(val) => updateRoom(record.id, 'portal1Height', val || 0)}
-            style={{ 
-              width: '50%',
-              fontSize: '12px'
-            }}
-            placeholder="Высота"
+            min={0}
+            step={0.1}
+            size="small"
+            style={{ width: '50%', ...compactInputStyles }}
+            precision={1}
+            placeholder="В"
+            controls={false}
+            title="Высота портала 1 в метрах"
           />
         </Space.Compact>
       ),
@@ -944,26 +630,32 @@ const ObjectParameters = () => {
     {
       title: 'Портал 2 Ш×В (м)',
       key: 'portal2',
-      width: 110,
+      width: 100,
       render: (_, record) => (
         <Space.Compact>
-          <FormulaInput
+          <InputNumber
             value={record.portal2Width}
             onChange={(val) => updateRoom(record.id, 'portal2Width', val || 0)}
-            style={{ 
-              width: '50%',
-              fontSize: '12px'
-            }}
-            placeholder="Ширина"
+            min={0}
+            step={0.1}
+            size="small"
+            style={{ width: '50%', ...compactInputStyles }}
+            precision={1}
+            placeholder="Ш"
+            controls={false}
+            title="Ширина портала 2 в метрах"
           />
-          <FormulaInput
+          <InputNumber
             value={record.portal2Height}
             onChange={(val) => updateRoom(record.id, 'portal2Height', val || 0)}
-            style={{ 
-              width: '50%',
-              fontSize: '12px'
-            }}
-            placeholder="Высота"
+            min={0}
+            step={0.1}
+            size="small"
+            style={{ width: '50%', ...compactInputStyles }}
+            precision={1}
+            placeholder="В"
+            controls={false}
+            title="Высота портала 2 в метрах"
           />
         </Space.Compact>
       ),
@@ -983,27 +675,6 @@ const ObjectParameters = () => {
       ),
     },
   ];
-
-  // Показываем индикатор загрузки
-  if (loading) {
-    return (
-      <div style={{ 
-        padding: '24px', 
-        backgroundColor: '#f0f2f5', 
-        minHeight: '100vh',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center'
-      }}>
-        <Card>
-          <div style={{ textAlign: 'center', padding: '20px' }}>
-            <LoadingOutlined style={{ fontSize: '24px', marginBottom: '16px' }} />
-            <div>Загрузка параметров объекта...</div>
-          </div>
-        </Card>
-      </div>
-    );
-  }
 
   return (
     <div style={{ padding: '24px', backgroundColor: '#f0f2f5', minHeight: '100vh' }}>
@@ -1107,36 +778,15 @@ const ObjectParameters = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <HomeOutlined style={{ color: '#52c41a' }} />
             Габариты помещений
-            <Space style={{ marginLeft: 'auto' }}>
-              {!isAuthenticated && !loading && (
-                <span style={{ 
-                  fontSize: '12px', 
-                  color: '#999', 
-                  marginRight: '8px' 
-                }}>
-                  🔒 Режим просмотра
-                </span>
-              )}
-              <Button 
-                icon={saving ? <LoadingOutlined /> : <SaveOutlined />} 
-                onClick={saveObjectParameters}
-                size="small"
-                loading={saving}
-                disabled={loading || !isAuthenticated}
-                type={isAuthenticated ? "default" : "dashed"}
-              >
-                {saving ? 'Сохранение...' : isAuthenticated ? 'Сохранить' : 'Войдите для сохранения'}
-              </Button>
-              <Button 
-                type="primary" 
-                icon={<PlusOutlined />} 
-                onClick={addRoom}
-                size="small"
-                disabled={loading}
-              >
-                Добавить помещение
-              </Button>
-            </Space>
+            <Button 
+              type="primary" 
+              icon={<PlusOutlined />} 
+              onClick={addRoom}
+              size="small"
+              style={{ marginLeft: 'auto' }}
+            >
+              Добавить помещение
+            </Button>
           </div>
         }
         style={{ marginBottom: '24px' }}

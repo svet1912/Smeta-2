@@ -544,6 +544,21 @@ async function initializeTables() {
       await query(`ALTER TABLE auth_users ADD COLUMN IF NOT EXISTS location VARCHAR(255)`);
       await query(`ALTER TABLE auth_users ADD COLUMN IF NOT EXISTS bio TEXT`);
       
+      // Добавление полей для окон и порталов в таблицу project_rooms
+      await query(`ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS perimeter DECIMAL(10,2) DEFAULT 0`);
+      await query(`ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS prostenki DECIMAL(10,2) DEFAULT 0`);
+      await query(`ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS doors_count INTEGER DEFAULT 0`);
+      await query(`ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS window1_width DECIMAL(8,2) DEFAULT 0`);
+      await query(`ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS window1_height DECIMAL(8,2) DEFAULT 0`);
+      await query(`ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS window2_width DECIMAL(8,2) DEFAULT 0`);
+      await query(`ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS window2_height DECIMAL(8,2) DEFAULT 0`);
+      await query(`ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS window3_width DECIMAL(8,2) DEFAULT 0`);
+      await query(`ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS window3_height DECIMAL(8,2) DEFAULT 0`);
+      await query(`ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS portal1_width DECIMAL(8,2) DEFAULT 0`);
+      await query(`ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS portal1_height DECIMAL(8,2) DEFAULT 0`);
+      await query(`ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS portal2_width DECIMAL(8,2) DEFAULT 0`);
+      await query(`ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS portal2_height DECIMAL(8,2) DEFAULT 0`);
+      
       // Создание индексов для многопользовательской системы
       await query(`CREATE INDEX IF NOT EXISTS idx_construction_projects_tenant ON construction_projects(tenant_id)`);
       await query(`CREATE INDEX IF NOT EXISTS idx_construction_projects_user_tenant ON construction_projects(user_id, tenant_id)`);
@@ -1944,6 +1959,8 @@ app.post('/api/projects/:projectId/object-parameters', simpleAuth, async (req, r
     const { projectId } = req.params;
     const userId = req.user.userId || req.user.id || req.user.sub;
     const {
+      buildingFloors, buildingPurpose, energyClass, hasBasement, hasAttic, heatingType,
+      // Опциональные поля для совместимости
       buildingType, constructionCategory, floorsAboveGround, floorsBelowGround,
       heightAboveGround, heightBelowGround, totalArea, buildingArea,
       estimatedCost, constructionComplexity, seismicZone, windLoad, snowLoad,
@@ -1964,6 +1981,11 @@ app.post('/api/projects/:projectId/object-parameters', simpleAuth, async (req, r
         END IF;
       END $$;
     `);
+    
+    // Используем либо новый формат, либо старый для совместимости
+    const finalBuildingType = buildingType || buildingPurpose || 'residential';
+    const finalFloorsAbove = floorsAboveGround || buildingFloors || 1;
+    const finalEnergyClass = climateZone || energyClass || 'B';
     
     const result = await query(`
       INSERT INTO object_parameters (
@@ -1992,10 +2014,10 @@ app.post('/api/projects/:projectId/object-parameters', simpleAuth, async (req, r
         updated_at = CURRENT_TIMESTAMP
       RETURNING *
     `, [
-      projectId, buildingType, constructionCategory, floorsAboveGround, floorsBelowGround,
-      heightAboveGround, heightBelowGround, totalArea, buildingArea, estimatedCost,
-      constructionComplexity, seismicZone, windLoad, snowLoad, soilConditions,
-      groundwaterLevel, climateZone, userId
+      projectId, finalBuildingType, constructionCategory || 'standard', finalFloorsAbove, floorsBelowGround || (hasBasement ? 1 : 0),
+      heightAboveGround || 3.0, heightBelowGround || 0, totalArea || 100, buildingArea || 100, estimatedCost || 0,
+      constructionComplexity || 'normal', seismicZone || 0, windLoad || 0.5, snowLoad || 1.8, soilConditions || 'normal',
+      groundwaterLevel || 'normal', finalEnergyClass, userId
     ]);
     
     res.status(201).json({
@@ -2035,7 +2057,13 @@ app.post('/api/object-parameters/:objectParamsId/rooms', simpleAuth, async (req,
   try {
     const { objectParamsId } = req.params;
     const userId = req.user.userId || req.user.id || req.user.sub;
-    const { roomName, area, height, volume, finishClass, purpose, sortOrder = 0 } = req.body;
+    const { 
+      roomName, area, height, volume, finishClass, purpose, sortOrder = 0,
+      perimeter = 0, prostenki = 0, doorsCount = 0,
+      window1Width = 0, window1Height = 0, window2Width = 0, window2Height = 0,
+      window3Width = 0, window3Height = 0, portal1Width = 0, portal1Height = 0,
+      portal2Width = 0, portal2Height = 0
+    } = req.body;
     
     if (!roomName) {
       return res.status(400).json({ error: 'Название помещения обязательно' });
@@ -2044,10 +2072,18 @@ app.post('/api/object-parameters/:objectParamsId/rooms', simpleAuth, async (req,
     const result = await query(`
       INSERT INTO project_rooms (
         object_parameters_id, room_name, area, height, volume, 
-        finish_class, purpose, sort_order, user_id
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        finish_class, purpose, sort_order, user_id,
+        perimeter, prostenki, doors_count,
+        window1_width, window1_height, window2_width, window2_height,
+        window3_width, window3_height, portal1_width, portal1_height,
+        portal2_width, portal2_height
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
       RETURNING *
-    `, [objectParamsId, roomName, area, height, volume, finishClass, purpose, sortOrder, userId]);
+    `, [objectParamsId, roomName, area, height, volume, finishClass, purpose, sortOrder, userId,
+        perimeter, prostenki, doorsCount,
+        window1Width, window1Height, window2Width, window2Height,
+        window3Width, window3Height, portal1Width, portal1Height,
+        portal2Width, portal2Height]);
     
     res.status(201).json({
       success: true,
@@ -2064,15 +2100,29 @@ app.post('/api/object-parameters/:objectParamsId/rooms', simpleAuth, async (req,
 app.put('/api/rooms/:roomId', simpleAuth, async (req, res) => {
   try {
     const { roomId } = req.params;
-    const { roomName, area, height, volume, finishClass, purpose, sortOrder } = req.body;
+    const { 
+      roomName, area, height, volume, finishClass, purpose, sortOrder,
+      perimeter, prostenki, doorsCount,
+      window1Width, window1Height, window2Width, window2Height, 
+      window3Width, window3Height, portal1Width, portal1Height, 
+      portal2Width, portal2Height
+    } = req.body;
     
     const result = await query(`
       UPDATE project_rooms SET
         room_name = $1, area = $2, height = $3, volume = $4,
-        finish_class = $5, purpose = $6, sort_order = $7, updated_at = CURRENT_TIMESTAMP
-      WHERE id = $8
+        finish_class = $5, purpose = $6, sort_order = $7, 
+        perimeter = $8, prostenki = $9, doors_count = $10,
+        window1_width = $11, window1_height = $12, window2_width = $13, window2_height = $14,
+        window3_width = $15, window3_height = $16, portal1_width = $17, portal1_height = $18,
+        portal2_width = $19, portal2_height = $20, updated_at = CURRENT_TIMESTAMP
+      WHERE id = $21
       RETURNING *
-    `, [roomName, area, height, volume, finishClass, purpose, sortOrder, roomId]);
+    `, [roomName, area, height, volume, finishClass, purpose, sortOrder,
+        perimeter, prostenki, doorsCount,
+        window1Width, window1Height, window2Width, window2Height,
+        window3Width, window3Height, portal1Width, portal1Height,
+        portal2Width, portal2Height, roomId]);
     
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Помещение не найдено' });
