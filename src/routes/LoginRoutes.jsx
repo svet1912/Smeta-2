@@ -13,17 +13,12 @@ const LoginRoutes = {
   path: '/',
   children: [
     {
-      path: '/',
-      children: [
-        {
-          path: '/login',
-          element: <LoginPage />
-        },
-        {
-          path: '/register',
-          element: <RegisterPage />
-        }
-      ]
+      path: 'login',
+      element: <LoginPage />
+    },
+    {
+      path: 'register',
+      element: <RegisterPage />
     }
   ]
 };

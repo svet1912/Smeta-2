@@ -5,12 +5,13 @@ import pages from './page';
 import utilities from './utilities';
 import directories from './directories';
 import calculations from './calculations';
+// import profile from './profile'; // Временно отключено - пустые компоненты
 import support from './support';
 
 // ==============================|| MENU ITEMS ||============================== //
 
 const menuItems = {
-  items: [dashboard, projects, pages, utilities, directories, calculations, support]
+  items: [dashboard, projects, directories, calculations, pages, utilities, support]
 };
 
 export default menuItems;

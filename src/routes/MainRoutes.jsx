@@ -23,14 +23,17 @@ const EstimateCalculationPage = Loadable(lazy(() => import('pages/calculations/e
 const ObjectParametersPage = Loadable(lazy(() => import('pages/calculations/objectParameters')));
 const CustomerEstimatePage = Loadable(lazy(() => import('pages/calculations/customerEstimate')));
 
+// render - 404
+const NotFoundApp = Loadable(lazy(() => import('pages/NotFoundApp')));
+
 // ==============================|| MAIN ROUTING ||============================== //
 
 const MainRoutes = {
-  path: '/',
+  path: '/app',
   element: <DashboardLayout />,
   children: [
     {
-      path: '/',
+      path: '',
       element: <DashboardDefault />
     },
     {
@@ -88,6 +91,10 @@ const MainRoutes = {
           element: <CustomerEstimatePage />
         }
       ]
+    },
+    {
+      path: '*',
+      element: <NotFoundApp />
     }
   ]
 };

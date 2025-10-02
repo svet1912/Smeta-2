@@ -19,7 +19,7 @@ const support = {
       id: 'database-test',
       title: 'Тест БД',
       type: 'item',
-      url: '/database-test',
+      url: '/app/database-test',
       icon: icons.DatabaseOutlined
     },
     {

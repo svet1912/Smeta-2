@@ -24,14 +24,14 @@ const calculations = {
           id: 'estimate-calculation',
           title: 'Расчет сметы',
           type: 'item',
-          url: '/calculations/estimate',
+          url: '/app/calculations/estimate',
           icon: icons.CalculatorOutlined
         },
         {
           id: 'object-parameters',
           title: 'Параметры объекта',
           type: 'item',
-          url: '/calculations/object-parameters',
+          url: '/app/calculations/object-parameters',
           icon: icons.HomeOutlined
         }
       ]

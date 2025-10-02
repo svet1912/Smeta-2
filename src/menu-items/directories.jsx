@@ -25,14 +25,14 @@ const directories = {
           id: 'works',
           title: 'Работы',
           type: 'item',
-          url: '/directories/works',
+          url: '/app/directories/works',
           icon: icons.ToolOutlined
         },
         {
           id: 'materials',
           title: 'Материал',
           type: 'item',
-          url: '/directories/materials',
+          url: '/app/directories/materials',
           icon: icons.BuildOutlined
         }
       ]

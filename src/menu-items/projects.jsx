@@ -25,7 +25,7 @@ const projects = {
           id: 'create-project',
           title: 'Создать проект',
           type: 'item',
-          url: '/projects/create',
+          url: '/app/projects/create',
           icon: icons.PlusOutlined,
           breadcrumbs: false
         },
@@ -33,7 +33,7 @@ const projects = {
           id: 'projects-storage',
           title: 'Хранилище проектов',
           type: 'item',
-          url: '/projects/storage',
+          url: '/app/projects/storage',
           icon: icons.FolderOutlined,
           breadcrumbs: false
         }
