@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+# Главные страницы
+Allow: /
+Allow: /app
+
+# Исключить служебные файлы
+Disallow: /content/
+Disallow: /assets/
+Disallow: *.json
+
+# Sitemap
+Sitemap: https://smeta360-2.vercel.app/sitemap.xml

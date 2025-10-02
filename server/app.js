@@ -133,6 +133,13 @@ app.get('/api/health/db', async (req, res) => {
 // Prometheus метрики endpoint
 app.get('/metrics', metricsEndpoint);
 
+// Импорт контроллеров для лид-формы
+import { createLead, getLeadsStats, leadRateLimit, initializeLeadsTable } from './controllers/leadController.js';
+
+// Лид-форма endpoints
+app.post('/api/lead', leadRateLimit, createLead);
+app.get('/api/leads/stats', getLeadsStats);
+
 // Инициализация всех остальных маршрутов и таблиц
 // (весь остальной код из server/index.js...)
 // Для краткости добавлю только несколько ключевых эндпоинтов
@@ -160,8 +167,11 @@ app.get('/api/orders', async (req, res) => {
 
 // Инициализация таблиц при старте
 app.initializeTables = async function() {
-  // Вызов функции инициализации таблиц
   console.log('🔄 Инициализация таблиц...');
+  
+  // Инициализируем таблицу для заявок
+  await initializeLeadsTable();
+  
   // Здесь будет код инициализации из оригинального файла
 };
 

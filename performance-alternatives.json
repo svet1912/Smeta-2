@@ -1,0 +1,11 @@
+{
+  "name": "performance-monitoring-spa",
+  "scripts": {
+    "perf:lighthouse-spa": "node scripts/lighthouse-spa-test.sh",
+    "perf:web-vitals": "echo 'Рекомендуется использовать Chrome Web Vitals Extension для real-user metrics'",
+    "perf:bundle-analyze": "npx vite-bundle-analyzer dist/",
+    "perf:dev-tools": "echo 'Откройте Chrome DevTools → Performance tab для детального анализа'",
+    "perf:pagespeed": "echo 'Используйте Google PageSpeed Insights: https://pagespeed.web.dev/'",
+    "monitor:real-user": "echo 'Рассмотрите интеграцию Sentry Performance Monitoring для production'"
+  }
+}

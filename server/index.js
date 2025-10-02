@@ -12,6 +12,7 @@ import { tenantContextMiddleware, requireRole, getCurrentUser } from './middlewa
 import { observeRequestDuration, metricsEndpoint, activeConnections as activeConnectionsGauge } from './metrics.js';
 import { cacheGetOrSet, cacheInvalidateByPrefix, getCacheStats } from './cache/cache.js';
 import { getRedis, isRedisAvailable, getRedisStats } from './cache/redisClient.js';
+import { createLead, getLeadsStats, leadRateLimit, initializeLeadsTable } from './controllers/leadController.js';
 
 dotenv.config();
 
@@ -616,7 +617,8 @@ async function initializeTables() {
       await insertDemoData();
     }
 
-
+    // Инициализация таблицы лид-формы
+    await initializeLeadsTable();
 
   } catch (error) {
     console.error('❌ Ошибка при инициализации таблиц (БД недоступна):', error.message);
@@ -1275,15 +1277,16 @@ app.get('/api/orders', async (req, res) => {
 });
 
 // Получение пользователей
-app.get('/api/users', async (req, res) => {
-  try {
-    const result = await query('SELECT * FROM users ORDER BY created_at DESC');
-    res.json(result.rows);
-  } catch (error) {
-    console.error('Ошибка получения пользователей:', error);
-    res.status(500).json({ error: 'Ошибка сервера' });
-  }
-});
+// OLD API - закомментировано, используется новый API ниже
+// app.get('/api/users', async (req, res) => {
+//   try {
+//     const result = await query('SELECT * FROM users ORDER BY created_at DESC');
+//     res.json(result.rows);
+//   } catch (error) {
+//     console.error('Ошибка получения пользователей:', error);
+//     res.status(500).json({ error: 'Ошибка сервера' });
+//   }
+// });
 
 // Создание нового пользователя
 app.post('/api/users', async (req, res) => {
@@ -1792,6 +1795,23 @@ app.get('/api/test', async (req, res) => {
   } catch (error) {
     console.error('Ошибка тестового запроса:', error);
     res.status(500).json({ error: 'Ошибка подключения к базе данных' });
+  }
+});
+
+// ==============================|| ЛИДФОРМА API ||============================== //
+
+// Лид-форма endpoints
+app.post('/api/lead', leadRateLimit, createLead);
+app.get('/api/leads/stats', getLeadsStats);
+
+// Временный эндпоинт для инициализации таблицы лидов
+app.post('/api/init-leads', async (req, res) => {
+  try {
+    await initializeLeadsTable();
+    res.json({ success: true, message: 'Таблица лидов инициализирована' });
+  } catch (error) {
+    console.error('Ошибка инициализации таблицы лидов:', error);
+    res.status(500).json({ error: 'Ошибка инициализации' });
   }
 });
 
@@ -2336,6 +2356,177 @@ app.get('/api/users/:userId/roles', simpleAuth, async (req, res) => {
     res.json(result.rows);
   } catch (error) {
     console.error('Ошибка получения ролей пользователя:', error);
+    res.status(500).json({ error: 'Ошибка сервера' });
+  }
+});
+
+// Назначение роли пользователю
+app.post('/api/users/:userId/roles', simpleAuth, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { roleId } = req.body;
+    const assignerId = req.user?.id; // ID того, кто назначает роль
+
+    // Проверяем, существует ли пользователь
+    const userResult = await query('SELECT id FROM auth_users WHERE id = $1', [userId]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Пользователь не найден' });
+    }
+
+    // Проверяем, существует ли роль
+    const roleResult = await query('SELECT id, name FROM user_roles WHERE id = $1 AND is_active = true', [roleId]);
+    if (roleResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Роль не найдена' });
+    }
+
+    // Назначаем роль (или обновляем если уже есть)
+    const assignmentResult = await query(`
+      INSERT INTO user_role_assignments (user_id, role_id, assigned_by, is_active)
+      VALUES ($1, $2, $3, true)
+      ON CONFLICT (user_id, role_id, tenant_id) 
+      DO UPDATE SET is_active = true, assigned_by = $3, assigned_at = CURRENT_TIMESTAMP
+      RETURNING *
+    `, [userId, roleId, assignerId]);
+
+    res.json({
+      success: true,
+      message: `Роль "${roleResult.rows[0].name}" назначена пользователю`,
+      assignment: assignmentResult.rows[0]
+    });
+  } catch (error) {
+    console.error('Ошибка назначения роли:', error);
+    res.status(500).json({ error: 'Ошибка сервера' });
+  }
+});
+
+// Отзыв роли у пользователя
+app.delete('/api/users/:userId/roles/:roleId', simpleAuth, async (req, res) => {
+  try {
+    const { userId, roleId } = req.params;
+
+    const result = await query(`
+      UPDATE user_role_assignments 
+      SET is_active = false 
+      WHERE user_id = $1 AND role_id = $2
+      RETURNING *
+    `, [userId, roleId]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Назначение роли не найдено' });
+    }
+
+    res.json({
+      success: true,
+      message: 'Роль отозвана у пользователя'
+    });
+  } catch (error) {
+    console.error('Ошибка отзыва роли:', error);
+    res.status(500).json({ error: 'Ошибка сервера' });
+  }
+});
+
+// Получение всех пользователей (для админов) - ОТКЛЮЧЕНО - используется версия с roles массивом ниже
+/*
+app.get('/api/users', simpleAuth, async (req, res) => {
+  try {
+    const result = await query(`
+      SELECT 
+        au.id, 
+        au.email, 
+        au.firstname, 
+        au.lastname, 
+        au.company, 
+        au.is_active,
+        au.created_at,
+        au.last_login,
+        COUNT(ura.id) as roles_count,
+        STRING_AGG(ur.name, ', ') as role_names
+      FROM auth_users au
+      LEFT JOIN user_role_assignments ura ON au.id = ura.user_id AND ura.is_active = true
+      LEFT JOIN user_roles ur ON ura.role_id = ur.id
+      WHERE au.is_active = true
+      GROUP BY au.id
+      ORDER BY au.created_at DESC
+    `);
+    
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Ошибка получения пользователей:', error);
+    res.status(500).json({ error: 'Ошибка сервера' });
+  }
+});
+*/
+
+// Удаление роли у пользователя
+app.delete('/api/users/:userId/roles/:roleId', simpleAuth, async (req, res) => {
+  try {
+    const { userId, roleId } = req.params;
+
+    // Проверяем права на удаление роли (только админы и суперадмины)
+    // TODO: добавить проверку ролей
+
+    const result = await query(`
+      UPDATE user_role_assignments 
+      SET is_active = false, 
+          assigned_by = $1, 
+          assigned_at = CURRENT_TIMESTAMP
+      WHERE user_id = $2 AND role_id = $3 AND is_active = true
+      RETURNING *
+    `, [req.user?.id, userId, roleId]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Назначение роли не найдено' });
+    }
+
+    res.json({
+      success: true,
+      message: 'Роль отозвана'
+    });
+  } catch (error) {
+    console.error('Ошибка отзыва роли:', error);
+    res.status(500).json({ error: 'Ошибка сервера' });
+  }
+});
+
+// Получение всех пользователей с их ролями (только для админов)
+app.get('/api/users', simpleAuth, async (req, res) => {
+  console.log('🔥 USING NEW API ENDPOINT WITH ROLES ARRAY');
+  try {
+    const usersResult = await query(`
+      SELECT 
+        au.id,
+        au.email,
+        au.firstname,
+        au.lastname,
+        au.company,
+        au.phone,
+        au.position,
+        au.location,
+        au.is_active,
+        au.email_verified,
+        au.created_at,
+        au.updated_at
+      FROM auth_users au
+      WHERE au.id != 0  -- исключаем системных пользователей
+      ORDER BY au.created_at DESC
+    `);
+
+    // Для каждого пользователя получаем его роли
+    for (const user of usersResult.rows) {
+      const rolesResult = await query(`
+        SELECT ur.id, ur.name, ur.description, ura.assigned_at
+        FROM user_roles ur
+        JOIN user_role_assignments ura ON ur.id = ura.role_id
+        WHERE ura.user_id = $1 AND ura.is_active = true
+        ORDER BY ura.assigned_at DESC
+      `, [user.id]);
+      
+      user.roles = rolesResult.rows;
+    }
+
+    res.json(usersResult.rows);
+  } catch (error) {
+    console.error('Ошибка получения пользователей:', error);
     res.status(500).json({ error: 'Ошибка сервера' });
   }
 });

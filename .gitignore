@@ -7,7 +7,8 @@ node_modules/
 .env.local
 .env.development.local
 .env.test.local
-.env.production.local
+# .env.production - коммитим для Vercel
+# .env.preview - коммитим для Vercel
 
 # Logs
 npm-debug.log*

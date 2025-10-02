@@ -23,6 +23,9 @@ const EstimateCalculationPage = Loadable(lazy(() => import('pages/calculations/e
 const ObjectParametersPage = Loadable(lazy(() => import('pages/calculations/objectParameters')));
 const CustomerEstimatePage = Loadable(lazy(() => import('pages/calculations/customerEstimate')));
 
+// render - admin pages
+const UsersManagement = Loadable(lazy(() => import('pages/admin/UsersManagement')));
+
 // render - 404
 const NotFoundApp = Loadable(lazy(() => import('pages/NotFoundApp')));
 
@@ -89,6 +92,15 @@ const MainRoutes = {
         {
           path: 'customer-estimate',
           element: <CustomerEstimatePage />
+        }
+      ]
+    },
+    {
+      path: 'admin',
+      children: [
+        {
+          path: 'users',
+          element: <UsersManagement />
         }
       ]
     },

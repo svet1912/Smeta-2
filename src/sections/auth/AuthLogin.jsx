@@ -60,7 +60,7 @@ export default function AuthLogin({ isDemo = false }) {
           updateUser(response.data.user);
         }
         setStatus({ success: true });
-        navigate('/dashboard/default');
+        navigate('/app/dashboard/default');
       } else {
         setErrors({ submit: response.message || 'Ошибка входа в систему' });
       }
@@ -75,8 +75,8 @@ export default function AuthLogin({ isDemo = false }) {
     <>
       <Formik
         initialValues={{
-          email: 'admin@mantis.ru',
-          password: 'password123',
+          email: 'kiy026@yandex.ru',
+          password: 'Apsni09332',
           submit: null
         }}
         validationSchema={Yup.object().shape({

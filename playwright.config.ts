@@ -6,7 +6,7 @@ export default defineConfig({
   reporter: 'list',
   timeout: 60000,
   use: {
-    baseURL: 'http://localhost:4174',
+    baseURL: 'http://localhost:3000',
     actionTimeout: 30000,
     navigationTimeout: 60000,
   },
