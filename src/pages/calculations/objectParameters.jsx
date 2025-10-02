@@ -148,6 +148,8 @@ const FormulaInput = ({ value, onChange, style, ...props }) => {
         style={{ 
           paddingRight: isFormula ? '30px' : '8px',
           color: showResult && isFormula ? '#52c41a' : 'inherit',
+          fontSize: '12px',
+          fontFamily: 'Consolas, Monaco, "Courier New", monospace',
           fontWeight: showResult && isFormula ? 'bold' : 'normal'
         }}
         {...props}
@@ -263,10 +265,40 @@ const ObjectParameters = () => {
     setBuildingParams(prev => ({ ...prev, [key]: value }));
   };
 
+  // Функция валидации значений
+  const validateRoomValue = (field, value) => {
+    const numValue = parseFloat(value) || 0;
+    
+    switch (field) {
+      case 'perimeter':
+      case 'height':
+      case 'floorArea':
+        return Math.max(0, Math.min(1000, numValue)); // 0-1000 м
+      case 'window1Width':
+      case 'window1Height':
+      case 'window2Width':
+      case 'window2Height':
+      case 'window3Width':
+      case 'window3Height':
+      case 'portal1Width':
+      case 'portal1Height':
+      case 'portal2Width':
+      case 'portal2Height':
+        return Math.max(0, Math.min(10, numValue)); // 0-10 м для окон/порталов
+      case 'prostenki':
+        return Math.max(0, Math.min(500, numValue)); // 0-500 м.пог для простенков
+      case 'doorsCount':
+        return Math.max(0, Math.min(20, Math.floor(numValue))); // 0-20 шт, целое число
+      default:
+        return numValue;
+    }
+  };
+
   const updateRoom = (roomId, field, value) => {
+    const validatedValue = validateRoomValue(field, value);
     setRooms(prev => 
       prev.map(room => 
-        room.id === roomId ? { ...room, [field]: value } : room
+        room.id === roomId ? { ...room, [field]: validatedValue } : room
       )
     );
   };
@@ -315,7 +347,11 @@ const ObjectParameters = () => {
       key: 'name',
       width: 110,
       render: (text) => (
-        <span style={{ fontWeight: '500' }}>{text}</span>
+        <span style={{ 
+          fontWeight: '500',
+          fontSize: '12px',
+          color: '#2c3e50'
+        }}>{text}</span>
       ),
     },
     {
@@ -363,15 +399,29 @@ const ObjectParameters = () => {
       key: 'wallArea',
       width: 100,
       render: (_, record) => {
-        const wallArea = (
-          record.perimeter * record.height - 
-          (record.window1Width * record.window1Height) - 
-          (record.window2Width * record.window2Height) - 
-          (record.window3Width * record.window3Height) - 
-          (record.portal1Width * record.portal1Height) - 
-          (record.portal2Width * record.portal2Height)
-        ).toFixed(1);
-        return <span style={{ color: '#52c41a', fontWeight: 'bold' }}>{wallArea}</span>;
+        const totalOpeningsArea = 
+          (record.window1Width * record.window1Height) + 
+          (record.window2Width * record.window2Height) + 
+          (record.window3Width * record.window3Height) + 
+          (record.portal1Width * record.portal1Height) + 
+          (record.portal2Width * record.portal2Height);
+        
+        const grossWallArea = record.perimeter * record.height;
+        const wallArea = grossWallArea - totalOpeningsArea;
+        
+        // Проверка на логические ошибки
+        const hasError = wallArea < 0 || totalOpeningsArea > grossWallArea * 0.8; // Предупреждение если проемы > 80% стены
+        
+        return (
+          <span style={{ 
+            color: hasError ? '#ff4d4f' : '#52c41a', 
+            fontWeight: 'bold',
+            fontSize: '11px'
+          }}>
+            {wallArea.toFixed(1)}
+            {hasError && ' ⚠️'}
+          </span>
+        );
       },
     },
     {
@@ -380,17 +430,30 @@ const ObjectParameters = () => {
       key: 'slopes',
       width: 100,
       render: (value, record) => {
-        // Формула: для каждого окна (ширина + 2*высота) + простенки
-        const window1Slopes = (record.window1Width || 0) > 0 && (record.window1Height || 0) > 0 
-          ? (record.window1Width || 0) + 2 * (record.window1Height || 0) : 0;
-        const window2Slopes = (record.window2Width || 0) > 0 && (record.window2Height || 0) > 0 
-          ? (record.window2Width || 0) + 2 * (record.window2Height || 0) : 0;
-        const window3Slopes = (record.window3Width || 0) > 0 && (record.window3Height || 0) > 0 
-          ? (record.window3Width || 0) + 2 * (record.window3Height || 0) : 0;
+        // Формула откосов: для каждого окна (ширина + 2*высота) + простенки
+        const window1Slopes = (record.window1Width > 0 && record.window1Height > 0) 
+          ? record.window1Width + 2 * record.window1Height : 0;
+        const window2Slopes = (record.window2Width > 0 && record.window2Height > 0) 
+          ? record.window2Width + 2 * record.window2Height : 0;
+        const window3Slopes = (record.window3Width > 0 && record.window3Height > 0) 
+          ? record.window3Width + 2 * record.window3Height : 0;
         
         const totalSlopes = window1Slopes + window2Slopes + window3Slopes + (record.prostenki || 0);
         
-        return <span style={{ color: '#52c41a', fontWeight: 'bold' }}>{totalSlopes.toFixed(1)}</span>;
+        // Проверяем разумность значений
+        const maxReasonableSlopes = record.perimeter * 2; // Максимум - двойной периметр
+        const hasWarning = totalSlopes > maxReasonableSlopes;
+        
+        return (
+          <span style={{ 
+            color: hasWarning ? '#fa8c16' : '#52c41a', 
+            fontWeight: 'bold',
+            fontSize: '11px'
+          }}>
+            {totalSlopes.toFixed(1)}
+            {hasWarning && ' ⚠️'}
+          </span>
+        );
       }
     },
     {
@@ -432,12 +495,20 @@ const ObjectParameters = () => {
           <FormulaInput
             value={record.window1Width}
             onChange={(val) => updateRoom(record.id, 'window1Width', val || 0)}
-            style={{ width: '50%' }}
+            style={{ 
+              width: '50%',
+              fontSize: '12px'
+            }}
+            placeholder="Ширина"
           />
           <FormulaInput
             value={record.window1Height}
             onChange={(val) => updateRoom(record.id, 'window1Height', val || 0)}
-            style={{ width: '50%' }}
+            style={{ 
+              width: '50%',
+              fontSize: '12px'
+            }}
+            placeholder="Высота"
           />
         </Space.Compact>
       ),
@@ -704,8 +775,28 @@ const ObjectParameters = () => {
           pagination={false}
           size="small"
           bordered
+          scroll={{ x: 1500 }}
+          style={{
+            fontSize: '12px',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+          }}
         />
         
+        {/* Справочная информация */}
+        <div style={{ 
+          marginTop: '12px', 
+          padding: '8px 12px', 
+          backgroundColor: '#e6f7ff', 
+          border: '1px solid #91d5ff',
+          borderRadius: '4px',
+          fontSize: '11px',
+          color: '#1890ff'
+        }}>
+          💡 <strong>Формулы расчета:</strong> Площадь стен = Периметр × Высота - Площади всех проемов | 
+          Откосы = (Ширина окна + 2 × Высота окна) + Простенки | 
+          ⚠️ - предупреждение о возможных ошибках в данных
+        </div>
+
         <div style={{ 
           marginTop: '16px', 
           padding: '12px', 
