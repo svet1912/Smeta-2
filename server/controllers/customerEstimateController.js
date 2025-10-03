@@ -1,11 +1,11 @@
-const db = require('../database');
+import { query } from '../database.js';
 
 // Получить все сметы заказчика
-exports.getAllCustomerEstimates = async (req, res) => {
+export async function getAllCustomerEstimates(req, res) {
   try {
     console.log('📨 GET customer-estimates запрос получен');
     
-    let query = `
+    const sqlQuery = `
       SELECT 
         ce.*,
         COUNT(cei.id) as items_count
@@ -15,8 +15,8 @@ exports.getAllCustomerEstimates = async (req, res) => {
       ORDER BY ce.created_at DESC
     `;
     
-    console.log('🔍 Выполняем запрос:', query);
-    const result = await db.query(query);
+    console.log('🔍 Выполняем запрос:', sqlQuery);
+    const result = await query(sqlQuery);
     
     console.log('📊 Результат запроса:', result.rows.length, 'смет найдено');
     console.log('📋 Данные:', result.rows);
@@ -26,16 +26,16 @@ exports.getAllCustomerEstimates = async (req, res) => {
     console.error('❌ Ошибка получения смет заказчика:', error);
     res.status(500).json({ message: 'Ошибка сервера' });
   }
-};
+}
 
 // Получить смету заказчика по ID
-exports.getCustomerEstimateById = async (req, res) => {
+export async function getCustomerEstimateById(req, res) {
   try {
     const { id } = req.params;
     const { tenant_id } = req.tenantContext;
     const userRole = req.user.role;
     
-    let query = `
+    const sqlQuery = `
       SELECT 
         ce.*,
         cp.name as project_name,
@@ -54,7 +54,7 @@ exports.getCustomerEstimateById = async (req, res) => {
       params.push(req.user.id);
     }
     
-    const result = await db.query(query, params);
+    const result = await query(sqlQuery, params);
     
     if (result.rows.length === 0) {
       return res.status(404).json({ message: 'Смета не найдена' });
@@ -65,17 +65,17 @@ exports.getCustomerEstimateById = async (req, res) => {
     console.error('Ошибка получения сметы заказчика:', error);
     res.status(500).json({ message: 'Ошибка сервера' });
   }
-};
+}
 
 // Создать новую смету заказчика
-exports.createCustomerEstimate = async (req, res) => {
+export async function createCustomerEstimate(req, res) {
   try {
     console.log('📨 POST customer-estimates запрос получен:', req.body);
     
     const { name, description, status = 'draft' } = req.body;
     
     // Для тестирования используем пользователя kiy026@yandex.ru
-    const testUser = await db.query('SELECT id FROM auth_users WHERE email = $1', ['kiy026@yandex.ru']);
+    const testUser = await query('SELECT id FROM auth_users WHERE email = $1', ['kiy026@yandex.ru']);
     
     if (testUser.rows.length === 0) {
       return res.status(400).json({ message: 'Тестовый пользователь не найден' });
@@ -84,7 +84,7 @@ exports.createCustomerEstimate = async (req, res) => {
     const userId = testUser.rows[0].id;
     console.log('👤 Используем тестового пользователя ID:', userId);
     
-    const result = await db.query(`
+    const result = await query(`
       INSERT INTO customer_estimates (
         user_id, name, description, status, total_amount, 
         work_coefficient, material_coefficient, version
@@ -98,10 +98,10 @@ exports.createCustomerEstimate = async (req, res) => {
     console.error('Ошибка создания сметы заказчика:', error);
     res.status(500).json({ message: 'Ошибка сервера' });
   }
-};
+}
 
 // Обновить смету заказчика
-exports.updateCustomerEstimate = async (req, res) => {
+export async function updateCustomerEstimate(req, res) {
   try {
     const { id } = req.params;
     const { tenant_id } = req.tenantContext;
@@ -117,7 +117,7 @@ exports.updateCustomerEstimate = async (req, res) => {
       checkParams.push(req.user.id);
     }
     
-    const existingEstimate = await db.query(checkQuery, checkParams);
+    const existingEstimate = await query(checkQuery, checkParams);
     
     if (existingEstimate.rows.length === 0) {
       return res.status(404).json({ message: 'Смета не найдена или нет прав доступа' });
@@ -128,7 +128,7 @@ exports.updateCustomerEstimate = async (req, res) => {
       return res.status(403).json({ message: 'Недостаточно прав для редактирования' });
     }
     
-    const result = await db.query(`
+    const result = await query(`
       UPDATE customer_estimates 
       SET name = COALESCE($1, name),
           description = COALESCE($2, description),
@@ -145,10 +145,10 @@ exports.updateCustomerEstimate = async (req, res) => {
     console.error('Ошибка обновления сметы заказчика:', error);
     res.status(500).json({ message: 'Ошибка сервера' });
   }
-};
+}
 
 // Удалить смету заказчика
-exports.deleteCustomerEstimate = async (req, res) => {
+export async function deleteCustomerEstimate(req, res) {
   try {
     const { id } = req.params;
     const { tenant_id } = req.tenantContext;
@@ -159,7 +159,7 @@ exports.deleteCustomerEstimate = async (req, res) => {
       return res.status(403).json({ message: 'Недостаточно прав для удаления сметы' });
     }
     
-    const result = await db.query(
+    const result = await query(
       'DELETE FROM customer_estimates WHERE id = $1 AND tenant_id = $2 RETURNING *',
       [id, tenant_id]
     );
@@ -173,10 +173,10 @@ exports.deleteCustomerEstimate = async (req, res) => {
     console.error('Ошибка удаления сметы заказчика:', error);
     res.status(500).json({ message: 'Ошибка сервера' });
   }
-};
+}
 
 // Получить элементы сметы
-exports.getEstimateItems = async (req, res) => {
+export async function getEstimateItems(req, res) {
   try {
     const { estimateId } = req.params;
     const { tenant_id } = req.tenantContext;
@@ -191,13 +191,13 @@ exports.getEstimateItems = async (req, res) => {
       checkParams.push(req.user.id);
     }
     
-    const estimateCheck = await db.query(checkQuery, checkParams);
+    const estimateCheck = await query(checkQuery, checkParams);
     
     if (estimateCheck.rows.length === 0) {
       return res.status(404).json({ message: 'Смета не найдена или нет прав доступа' });
     }
     
-    const result = await db.query(`
+    const result = await query(`
       SELECT * FROM customer_estimate_items 
       WHERE estimate_id = $1 
       ORDER BY position ASC, created_at ASC
@@ -208,10 +208,10 @@ exports.getEstimateItems = async (req, res) => {
     console.error('Ошибка получения элементов сметы:', error);
     res.status(500).json({ message: 'Ошибка сервера' });
   }
-};
+}
 
 // Добавить элемент в смету
-exports.addEstimateItem = async (req, res) => {
+export async function addEstimateItem(req, res) {
   try {
     const { estimateId } = req.params;
     const { tenant_id } = req.tenantContext;
@@ -235,13 +235,13 @@ exports.addEstimateItem = async (req, res) => {
       checkParams.push(req.user.id);
     }
     
-    const estimateCheck = await db.query(checkQuery, checkParams);
+    const estimateCheck = await query(checkQuery, checkParams);
     
     if (estimateCheck.rows.length === 0) {
       return res.status(404).json({ message: 'Смета не найдена или нет прав доступа' });
     }
     
-    const result = await db.query(`
+    const result = await query(`
       INSERT INTO customer_estimate_items (
         estimate_id, item_type, reference_id, custom_name,
         unit, quantity, unit_price, total_cost, position, metadata
@@ -256,10 +256,10 @@ exports.addEstimateItem = async (req, res) => {
     console.error('Ошибка добавления элемента сметы:', error);
     res.status(500).json({ message: 'Ошибка сервера' });
   }
-};
+}
 
 // Обновить элемент сметы
-exports.updateEstimateItem = async (req, res) => {
+export async function updateEstimateItem(req, res) {
   try {
     const { estimateId, itemId } = req.params;
     const { tenant_id } = req.tenantContext;
@@ -287,13 +287,13 @@ exports.updateEstimateItem = async (req, res) => {
       checkParams.push(req.user.id);
     }
     
-    const itemCheck = await db.query(checkQuery, checkParams);
+    const itemCheck = await query(checkQuery, checkParams);
     
     if (itemCheck.rows.length === 0) {
       return res.status(404).json({ message: 'Элемент сметы не найден или нет прав доступа' });
     }
     
-    const result = await db.query(`
+    const result = await query(`
       UPDATE customer_estimate_items 
       SET custom_name = COALESCE($1, custom_name),
           unit = COALESCE($2, unit),
@@ -313,10 +313,10 @@ exports.updateEstimateItem = async (req, res) => {
     console.error('Ошибка обновления элемента сметы:', error);
     res.status(500).json({ message: 'Ошибка сервера' });
   }
-};
+}
 
 // Удалить элемент сметы
-exports.deleteEstimateItem = async (req, res) => {
+export async function deleteEstimateItem(req, res) {
   try {
     const { estimateId, itemId } = req.params;
     const { tenant_id } = req.tenantContext;
@@ -340,23 +340,23 @@ exports.deleteEstimateItem = async (req, res) => {
       checkParams.push(req.user.id);
     }
     
-    const itemCheck = await db.query(checkQuery, checkParams);
+    const itemCheck = await query(checkQuery, checkParams);
     
     if (itemCheck.rows.length === 0) {
       return res.status(404).json({ message: 'Элемент сметы не найден или нет прав доступа' });
     }
     
-    await db.query('DELETE FROM customer_estimate_items WHERE id = $1', [itemId]);
+    await query('DELETE FROM customer_estimate_items WHERE id = $1', [itemId]);
     
     res.json({ message: 'Элемент сметы успешно удален' });
   } catch (error) {
     console.error('Ошибка удаления элемента сметы:', error);
     res.status(500).json({ message: 'Ошибка сервера' });
   }
-};
+}
 
 // Получить историю изменений сметы
-exports.getEstimateHistory = async (req, res) => {
+export async function getEstimateHistory(req, res) {
   try {
     const { estimateId } = req.params;
     const { tenant_id } = req.tenantContext;
@@ -371,13 +371,13 @@ exports.getEstimateHistory = async (req, res) => {
       checkParams.push(req.user.id);
     }
     
-    const estimateCheck = await db.query(checkQuery, checkParams);
+    const estimateCheck = await query(checkQuery, checkParams);
     
     if (estimateCheck.rows.length === 0) {
       return res.status(404).json({ message: 'Смета не найдена или нет прав доступа' });
     }
     
-    const result = await db.query(`
+    const result = await query(`
       SELECT 
         ceh.*,
         u.username as user_name
@@ -392,15 +392,15 @@ exports.getEstimateHistory = async (req, res) => {
     console.error('Ошибка получения истории сметы:', error);
     res.status(500).json({ message: 'Ошибка сервера' });
   }
-};
+}
 
 // Получить шаблоны смет
-exports.getEstimateTemplates = async (req, res) => {
+export async function getEstimateTemplates(req, res) {
   try {
     const { tenant_id } = req.tenantContext;
     const userRole = req.user.role;
     
-    let query = `
+    const sqlQuery = `
       SELECT 
         cet.*,
         u.username as creator_name
@@ -419,16 +419,16 @@ exports.getEstimateTemplates = async (req, res) => {
     
     query += ' ORDER BY cet.name ASC';
     
-    const result = await db.query(query, params);
+    const result = await query(sqlQuery, params);
     res.json(result.rows);
   } catch (error) {
     console.error('Ошибка получения шаблонов смет:', error);
     res.status(500).json({ message: 'Ошибка сервера' });
   }
-};
+}
 
 // Создать шаблон сметы
-exports.createEstimateTemplate = async (req, res) => {
+export async function createEstimateTemplate(req, res) {
   try {
     const { tenant_id } = req.tenantContext;
     const { name, description, template_data, is_public = false } = req.body;
@@ -438,7 +438,7 @@ exports.createEstimateTemplate = async (req, res) => {
       return res.status(403).json({ message: 'Недостаточно прав для создания шаблонов' });
     }
     
-    const result = await db.query(`
+    const result = await query(`
       INSERT INTO customer_estimate_templates (
         tenant_id, user_id, name, description, template_data, is_public
       ) VALUES ($1, $2, $3, $4, $5, $6)
@@ -451,4 +451,20 @@ exports.createEstimateTemplate = async (req, res) => {
     console.error('Ошибка создания шаблона сметы:', error);
     res.status(500).json({ message: 'Ошибка сервера' });
   }
+}
+
+// Default export для совместимости с роутером
+export default {
+  getAllCustomerEstimates,
+  createCustomerEstimate,
+  updateCustomerEstimate,
+  deleteCustomerEstimate,
+  getCustomerEstimateById,
+  getEstimateItems,
+  addEstimateItem,
+  updateEstimateItem,
+  deleteEstimateItem,
+  getEstimateHistory,
+  getEstimateTemplates,
+  createEstimateTemplate
 };

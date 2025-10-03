@@ -142,11 +142,17 @@ export default function EstimateCalculationPage() {
 
   const loadWorks = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/works`);
+      // Загружаем все работы без ограничений
+      const response = await fetch(`${API_BASE_URL}/works?limit=2000&offset=0`);
       if (response.ok) {
-        const data = await response.json();
+        const result = await response.json();
+        console.log('🔨 API ответ works:', result);
+        
+        // Проверяем структуру ответа API
+        const data = result.success ? result.data : result;
         if (Array.isArray(data)) {
           setWorks(data);
+          console.log(`✅ Загружено ${data.length} работ`);
         } else {
           setWorks([]);
         }
@@ -159,11 +165,17 @@ export default function EstimateCalculationPage() {
 
   const loadMaterials = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/materials`);
+      // Загружаем все материалы без ограничений
+      const response = await fetch(`${API_BASE_URL}/materials?limit=2000&offset=0`);
       if (response.ok) {
-        const data = await response.json();
+        const result = await response.json();
+        console.log('🧱 API ответ materials:', result);
+        
+        // Проверяем структуру ответа API
+        const data = result.success ? result.data : result;
         if (Array.isArray(data)) {
           setMaterials(data);
+          console.log(`✅ Загружено ${data.length} материалов`);
         } else {
           setMaterials([]);
         }
@@ -287,10 +299,17 @@ export default function EstimateCalculationPage() {
   const loadAllWorkMaterials = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/work-materials`);
+      // Загружаем все данные без ограничений
+      const response = await fetch(`${API_BASE_URL}/work-materials?limit=2000&offset=0`);
       if (response.ok) {
-        const data = await response.json();
+        const result = await response.json();
+        console.log('📦 API ответ work-materials:', result);
+        
+        // Проверяем структуру ответа API
+        const data = result.success ? result.data : result;
         if (Array.isArray(data)) {
+          console.log(`📊 Получено ${data.length} записей work-materials`);
+          
           // Преобразуем данные в формат для отображения в таблице
           const flatItems = [];
 
@@ -357,6 +376,7 @@ export default function EstimateCalculationPage() {
 
           setEstimateItems(flatItems);
           console.log(`✅ Загружено ${flatItems.length} позиций из базы данных`);
+          console.log('📋 Пример данных:', flatItems.slice(0, 3));
         }
       }
     } catch (error) {

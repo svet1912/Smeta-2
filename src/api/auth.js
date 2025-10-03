@@ -86,8 +86,8 @@ export const registerUser = async (userData) => {
     })
   });
 
-  if (response.success && response.data.token) {
-    setAuthToken(response.data.token);
+  if (response.success && response.accessToken) {
+    setAuthToken(response.accessToken);
   }
 
   return response;
@@ -105,8 +105,8 @@ export const loginUser = async (credentials) => {
     })
   });
 
-  if (response.success && response.data.token) {
-    setAuthToken(response.data.token);
+  if (response.success && response.accessToken) {
+    setAuthToken(response.accessToken);
   }
 
   return response;
@@ -137,7 +137,7 @@ export const getCurrentUser = async () => {
 export const validateToken = async () => {
   try {
     const response = await getCurrentUser();
-    return response.success && response.data.user;
+    return response.success && response.user;
   } catch (error) {
     // Если токен невалиден, удаляем его
     removeAuthToken();

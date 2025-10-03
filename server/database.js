@@ -213,9 +213,9 @@ async function createOptimizedIndexes() {
 }
 
 // Выполним раннюю проверку и создание индексов
-ensureConnection()
-  .then(() => createOptimizedIndexes())
-  .catch(e => console.warn('⚠️ Первичная проверка подключения не удалась:', e.message));
+// ensureConnection()
+//   .then(() => createOptimizedIndexes())
+//   .catch(e => console.warn('⚠️ Первичная проверка подключения не удалась:', e.message));
 
 export const query = async (text, params) => {
   const start = Date.now();

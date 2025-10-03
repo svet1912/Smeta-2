@@ -27,8 +27,8 @@ export const AuthProvider = ({ children }) => {
       const isValid = await validateToken();
       if (isValid) {
         const response = await getCurrentUser();
-        if (response.success && response.data.user) {
-          setUser(response.data.user);
+        if (response.success && response.user) {
+          setUser(response.user);
           setIsAuthenticated(true);
         } else {
           clearAuth();

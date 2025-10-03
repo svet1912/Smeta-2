@@ -129,8 +129,11 @@ export const getUsers = async () => {
 // Получение материалов
 export const getMaterials = async () => {
   try {
-    const response = await api.get('/materials');
-    return response.data;
+    const response = await api.get('/materials?limit=2000&offset=0');
+    const result = response.data;
+    // Проверяем структуру ответа API
+    const data = result.success ? result.data : result;
+    return Array.isArray(data) ? data : [];
   } catch (error) {
     // Возвращаем пустой массив если API недоступен
     return [];

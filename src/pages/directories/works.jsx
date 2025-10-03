@@ -208,14 +208,18 @@ export default function WorksPage() {
   const loadWorks = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/works`);
+      // Загружаем все работы без ограничений
+      const response = await fetch(`${API_BASE_URL}/works?limit=2000&offset=0`);
       if (response.ok) {
-        const data = await response.json();
+        const result = await response.json();
+        console.log('🔨 API ответ works:', result);
+        
         let worksData = [];
+        // Проверяем структуру ответа API
+        const data = result.success ? result.data : result;
         if (Array.isArray(data)) {
           worksData = data;
-        } else if (data && Array.isArray(data.data)) {
-          worksData = data.data;
+          console.log(`✅ Загружено ${data.length} работ`);
         } else {
           console.warn('⚠️ /api/works вернул не-массив, устанавливаю []');
           worksData = [];
@@ -237,13 +241,17 @@ export default function WorksPage() {
 
   const loadPhases = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/phases`);
+      // Загружаем все фазы без ограничений
+      const response = await fetch(`${API_BASE_URL}/phases?limit=2000&offset=0`);
       if (response.ok) {
-        const data = await response.json();
+        const result = await response.json();
+        console.log('📋 API ответ phases:', result);
+        
+        // Проверяем структуру ответа API
+        const data = result.success ? result.data : result;
         if (Array.isArray(data)) {
           setPhases(data);
-        } else if (data && Array.isArray(data.data)) {
-          setPhases(data.data);
+          console.log(`✅ Загружено ${data.length} фаз`);
         } else {
           console.warn('⚠️ /api/phases вернул не-массив, устанавливаю []');
           setPhases([]);
@@ -256,12 +264,19 @@ export default function WorksPage() {
 
   const loadMaterials = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/materials`);
+      // Загружаем все материалы без ограничений
+      const response = await fetch(`${API_BASE_URL}/materials?limit=2000&offset=0`);
       if (response.ok) {
-        const data = await response.json();
+        const result = await response.json();
+        console.log('🧱 API ответ materials:', result);
+        
+        // Проверяем структуру ответа API
+        const data = result.success ? result.data : result;
         if (Array.isArray(data)) {
           setMaterials(data);
+          console.log(`✅ Загружено ${data.length} материалов`);
         } else {
+          console.warn('⚠️ /api/materials вернул не-массив, устанавливаю []');
           setMaterials([]);
         }
       }

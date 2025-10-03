@@ -9,6 +9,7 @@ import pino from 'pino-http';
 import { query } from './database.js';
 import { config } from './config.js';
 import { tenantContextMiddleware, requireRole, getCurrentUser } from './middleware/tenantContext.js';
+import { authMiddleware } from './middleware/auth.js';
 import { observeRequestDuration, metricsEndpoint, activeConnections as activeConnectionsGauge } from './metrics.js';
 import { cacheGetOrSet, cacheInvalidateByPrefix, getCacheStats } from './cache/cache.js';
 import { getRedis, isRedisAvailable, getRedisStats } from './cache/redisClient.js';
@@ -1832,31 +1833,10 @@ app.post('/api/init-leads', async (req, res) => {
 
 // ==============================|| ПРОЕКТЫ API ||============================== //
 
-// Простая проверка аутентификации без мультитенантности
-const simpleAuth = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ 
-      error: 'Требуется авторизация',
-      code: 'AUTHENTICATION_REQUIRED'
-    });
-  }
-
-  const token = authHeader.substring(7);
-  try {
-    const decoded = jwt.verify(token, config.jwtSecret);
-    req.user = decoded;
-    next();
-  } catch (error) {
-    return res.status(401).json({
-      error: 'Недействительный токен',
-      code: 'INVALID_TOKEN'
-    });
-  }
-};
+// authMiddleware удален - используется унифицированный authMiddleware
 
 // Обновление профиля пользователя
-app.put('/api/auth/profile', simpleAuth, async (req, res) => {
+app.put('/api/auth/profile', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.userId || req.user.sub;
     const { firstname, lastname, company, phone, position, location, bio } = req.body;
@@ -1928,7 +1908,7 @@ app.put('/api/auth/profile', simpleAuth, async (req, res) => {
 // ==============================|| OBJECT PARAMETERS API ||============================== //
 
 // Получение параметров объекта по ID проекта
-app.get('/api/projects/:projectId/object-parameters', simpleAuth, async (req, res) => {
+app.get('/api/projects/:projectId/object-parameters', authMiddleware, async (req, res) => {
   try {
     const { projectId } = req.params;
     
@@ -1954,7 +1934,7 @@ app.get('/api/projects/:projectId/object-parameters', simpleAuth, async (req, re
 });
 
 // Создание/обновление параметров объекта
-app.post('/api/projects/:projectId/object-parameters', simpleAuth, async (req, res) => {
+app.post('/api/projects/:projectId/object-parameters', authMiddleware, async (req, res) => {
   try {
     const { projectId } = req.params;
     const userId = req.user.userId || req.user.id || req.user.sub;
@@ -2032,7 +2012,7 @@ app.post('/api/projects/:projectId/object-parameters', simpleAuth, async (req, r
 });
 
 // Получение помещений проекта
-app.get('/api/object-parameters/:objectParamsId/rooms', simpleAuth, async (req, res) => {
+app.get('/api/object-parameters/:objectParamsId/rooms', authMiddleware, async (req, res) => {
   try {
     const { objectParamsId } = req.params;
     
@@ -2053,7 +2033,7 @@ app.get('/api/object-parameters/:objectParamsId/rooms', simpleAuth, async (req, 
 });
 
 // Создание помещения
-app.post('/api/object-parameters/:objectParamsId/rooms', simpleAuth, async (req, res) => {
+app.post('/api/object-parameters/:objectParamsId/rooms', authMiddleware, async (req, res) => {
   try {
     const { objectParamsId } = req.params;
     const userId = req.user.userId || req.user.id || req.user.sub;
@@ -2097,7 +2077,7 @@ app.post('/api/object-parameters/:objectParamsId/rooms', simpleAuth, async (req,
 });
 
 // Обновление помещения
-app.put('/api/rooms/:roomId', simpleAuth, async (req, res) => {
+app.put('/api/rooms/:roomId', authMiddleware, async (req, res) => {
   try {
     const { roomId } = req.params;
     const { 
@@ -2140,7 +2120,7 @@ app.put('/api/rooms/:roomId', simpleAuth, async (req, res) => {
 });
 
 // Удаление помещения
-app.delete('/api/rooms/:roomId', simpleAuth, async (req, res) => {
+app.delete('/api/rooms/:roomId', authMiddleware, async (req, res) => {
   try {
     const { roomId } = req.params;
     
@@ -2163,7 +2143,7 @@ app.delete('/api/rooms/:roomId', simpleAuth, async (req, res) => {
 // ==============================|| CONSTRUCTIVE ELEMENTS API ||============================== //
 
 // Получение конструктивных элементов объекта
-app.get('/api/object-parameters/:objectParamsId/constructive-elements', simpleAuth, async (req, res) => {
+app.get('/api/object-parameters/:objectParamsId/constructive-elements', authMiddleware, async (req, res) => {
   try {
     const { objectParamsId } = req.params;
     
@@ -2184,7 +2164,7 @@ app.get('/api/object-parameters/:objectParamsId/constructive-elements', simpleAu
 });
 
 // Создание конструктивного элемента
-app.post('/api/object-parameters/:objectParamsId/constructive-elements', simpleAuth, async (req, res) => {
+app.post('/api/object-parameters/:objectParamsId/constructive-elements', authMiddleware, async (req, res) => {
   try {
     const { objectParamsId } = req.params;
     const userId = req.user.userId || req.user.id || req.user.sub;
@@ -2214,7 +2194,7 @@ app.post('/api/object-parameters/:objectParamsId/constructive-elements', simpleA
 });
 
 // Обновление конструктивного элемента
-app.put('/api/constructive-elements/:elementId', simpleAuth, async (req, res) => {
+app.put('/api/constructive-elements/:elementId', authMiddleware, async (req, res) => {
   try {
     const { elementId } = req.params;
     const { elementType, material, characteristics, quantity, unit, notes } = req.body;
@@ -2243,7 +2223,7 @@ app.put('/api/constructive-elements/:elementId', simpleAuth, async (req, res) =>
 });
 
 // Удаление конструктивного элемента
-app.delete('/api/constructive-elements/:elementId', simpleAuth, async (req, res) => {
+app.delete('/api/constructive-elements/:elementId', authMiddleware, async (req, res) => {
   try {
     const { elementId } = req.params;
     
@@ -2266,7 +2246,7 @@ app.delete('/api/constructive-elements/:elementId', simpleAuth, async (req, res)
 // ==============================|| ENGINEERING SYSTEMS API ||============================== //
 
 // Получение инженерных систем объекта
-app.get('/api/object-parameters/:objectParamsId/engineering-systems', simpleAuth, async (req, res) => {
+app.get('/api/object-parameters/:objectParamsId/engineering-systems', authMiddleware, async (req, res) => {
   try {
     const { objectParamsId } = req.params;
     
@@ -2287,7 +2267,7 @@ app.get('/api/object-parameters/:objectParamsId/engineering-systems', simpleAuth
 });
 
 // Создание инженерной системы
-app.post('/api/object-parameters/:objectParamsId/engineering-systems', simpleAuth, async (req, res) => {
+app.post('/api/object-parameters/:objectParamsId/engineering-systems', authMiddleware, async (req, res) => {
   try {
     const { objectParamsId } = req.params;
     const userId = req.user.userId || req.user.id || req.user.sub;
@@ -2317,7 +2297,7 @@ app.post('/api/object-parameters/:objectParamsId/engineering-systems', simpleAut
 });
 
 // Обновление инженерной системы
-app.put('/api/engineering-systems/:systemId', simpleAuth, async (req, res) => {
+app.put('/api/engineering-systems/:systemId', authMiddleware, async (req, res) => {
   try {
     const { systemId } = req.params;
     const { systemType, characteristics, capacity, efficiency, notes } = req.body;
@@ -2346,7 +2326,7 @@ app.put('/api/engineering-systems/:systemId', simpleAuth, async (req, res) => {
 });
 
 // Удаление инженерной системы
-app.delete('/api/engineering-systems/:systemId', simpleAuth, async (req, res) => {
+app.delete('/api/engineering-systems/:systemId', authMiddleware, async (req, res) => {
   try {
     const { systemId } = req.params;
     
@@ -2369,7 +2349,7 @@ app.delete('/api/engineering-systems/:systemId', simpleAuth, async (req, res) =>
 // ==============================|| ROLES API ||============================== //
 
 // Получение всех ролей
-app.get('/api/roles', simpleAuth, async (req, res) => {
+app.get('/api/roles', authMiddleware, async (req, res) => {
   try {
     const result = await query(`
       SELECT ur.*, 
@@ -2389,7 +2369,7 @@ app.get('/api/roles', simpleAuth, async (req, res) => {
 });
 
 // Получение ролей пользователя
-app.get('/api/users/:userId/roles', simpleAuth, async (req, res) => {
+app.get('/api/users/:userId/roles', authMiddleware, async (req, res) => {
   try {
     const { userId } = req.params;
     
@@ -2411,7 +2391,7 @@ app.get('/api/users/:userId/roles', simpleAuth, async (req, res) => {
 });
 
 // Назначение роли пользователю
-app.post('/api/users/:userId/roles', simpleAuth, async (req, res) => {
+app.post('/api/users/:userId/roles', authMiddleware, async (req, res) => {
   try {
     const { userId } = req.params;
     const { roleId } = req.body;
@@ -2450,7 +2430,7 @@ app.post('/api/users/:userId/roles', simpleAuth, async (req, res) => {
 });
 
 // Отзыв роли у пользователя
-app.delete('/api/users/:userId/roles/:roleId', simpleAuth, async (req, res) => {
+app.delete('/api/users/:userId/roles/:roleId', authMiddleware, async (req, res) => {
   try {
     const { userId, roleId } = req.params;
 
@@ -2477,7 +2457,7 @@ app.delete('/api/users/:userId/roles/:roleId', simpleAuth, async (req, res) => {
 
 // Получение всех пользователей (для админов) - ОТКЛЮЧЕНО - используется версия с roles массивом ниже
 /*
-app.get('/api/users', simpleAuth, async (req, res) => {
+app.get('/api/users', authMiddleware, async (req, res) => {
   try {
     const result = await query(`
       SELECT 
@@ -2508,7 +2488,7 @@ app.get('/api/users', simpleAuth, async (req, res) => {
 */
 
 // Удаление роли у пользователя
-app.delete('/api/users/:userId/roles/:roleId', simpleAuth, async (req, res) => {
+app.delete('/api/users/:userId/roles/:roleId', authMiddleware, async (req, res) => {
   try {
     const { userId, roleId } = req.params;
 
@@ -2539,7 +2519,7 @@ app.delete('/api/users/:userId/roles/:roleId', simpleAuth, async (req, res) => {
 });
 
 // Получение всех пользователей с их ролями (только для админов)
-app.get('/api/users', simpleAuth, async (req, res) => {
+app.get('/api/users', authMiddleware, async (req, res) => {
   console.log('🔥 USING NEW API ENDPOINT WITH ROLES ARRAY');
   try {
     const usersResult = await query(`
@@ -2582,7 +2562,7 @@ app.get('/api/users', simpleAuth, async (req, res) => {
 });
 
 // Получение всех проектов (с аутентификацией)
-app.get('/api/projects', simpleAuth, async (req, res) => {
+app.get('/api/projects', authMiddleware, async (req, res) => {
   try {
     const result = await query(`
       SELECT 
@@ -2602,7 +2582,7 @@ app.get('/api/projects', simpleAuth, async (req, res) => {
 });
 
 // Создание нового проекта (с аутентификацией)
-app.post('/api/projects', simpleAuth, async (req, res) => {
+app.post('/api/projects', authMiddleware, async (req, res) => {
   try {
     const { customerName, objectAddress, contractorName, contractNumber, deadline } = req.body;
     const userId = req.user.userId || req.user.id || req.user.sub; // Поддержка разных форматов токенов
@@ -2642,7 +2622,7 @@ app.post('/api/projects', simpleAuth, async (req, res) => {
 });
 
 // Получение проекта по ID (с аутентификацией)
-app.get('/api/projects/:id', simpleAuth, async (req, res) => {
+app.get('/api/projects/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -2668,7 +2648,7 @@ app.get('/api/projects/:id', simpleAuth, async (req, res) => {
 });
 
 // Обновление проекта (с аутентификацией)
-app.put('/api/projects/:id', simpleAuth, async (req, res) => {
+app.put('/api/projects/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     const { customerName, objectAddress, contractorName, contractNumber, deadline, status } = req.body;
@@ -2714,7 +2694,7 @@ app.put('/api/projects/:id', simpleAuth, async (req, res) => {
 });
 
 // Удаление проекта (с аутентификацией)
-app.delete('/api/projects/:id', simpleAuth, async (req, res) => {
+app.delete('/api/projects/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id || req.user.sub;

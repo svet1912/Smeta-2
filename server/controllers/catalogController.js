@@ -1,9 +1,9 @@
 /**
  * API контроллеры для работы с каталогом материалов и работ
- * Шаг 9.4 — Защищенные каталог API эндпоинты с автоматическим tenant контекстом
+ * Исправленная версия для новой архитектуры
  */
 import { query } from '../database.js';
-import { getCurrentUser } from '../middleware/tenantContext.js';
+import { getCurrentUser } from '../middleware/auth.js';
 
 /**
  * Получение списка эффективных материалов с учетом тенанта
@@ -224,7 +224,6 @@ export async function resetMaterialOverride(req, res) {
  */
 export async function getWorks(req, res) {
   try {
-    const user = getCurrentUser(req);
     const { 
       search = '', 
       limit = 50, 
@@ -248,7 +247,7 @@ export async function getWorks(req, res) {
       whereCondition += ` ${andOr} tenant_id IS NOT NULL`;
     }
 
-    // Выполняем запрос к VIEW works_effective (автоматически учитывает tenant_id из app.tenant_id)
+    // Выполняем запрос к таблице works_ref
     const result = await query(`
       SELECT 
         id, 
@@ -258,7 +257,7 @@ export async function getWorks(req, res) {
         tenant_id IS NOT NULL as is_tenant_override,
         created_at,
         updated_at
-      FROM works_effective 
+      FROM works_ref 
       ${whereCondition}
       ORDER BY name
       LIMIT $${paramIndex} OFFSET $${paramIndex + 1};
@@ -267,7 +266,7 @@ export async function getWorks(req, res) {
     // Подсчитываем общее количество
     const countResult = await query(`
       SELECT COUNT(*) as total
-      FROM works_effective 
+      FROM works_ref 
       ${whereCondition};
     `, params);
 
@@ -281,7 +280,7 @@ export async function getWorks(req, res) {
       updatedAt: row.updated_at
     }));
 
-    console.log(`🔨 Получено работ: ${works.length}, tenant=${user.tenantId.substring(0,8)}`);
+    console.log(`🔨 Получено работ: ${works.length} из ${countResult.rows[0].total}`);
 
     res.json({
       success: true,
@@ -411,13 +410,310 @@ export async function health(req, res) {
   }
 }
 
+/**
+ * Создание нового материала
+ * POST /materials
+ */
+export async function createMaterial(req, res) {
+  try {
+    const user = getCurrentUser(req);
+    const { name, unit, unit_price, expenditure, weight, image_url, item_url } = req.body;
+
+    if (!name || !unit) {
+      return res.status(400).json({
+        error: 'Название и единица измерения обязательны',
+        code: 'MISSING_REQUIRED_FIELDS'
+      });
+    }
+
+    const result = await query(`
+      INSERT INTO materials (name, unit, unit_price, expenditure, weight, image_url, item_url, tenant_id)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      RETURNING *
+    `, [name, unit, parseFloat(unit_price) || 0, parseFloat(expenditure) || 0, parseFloat(weight) || 0, image_url, item_url, user?.tenantId || null]);
+
+    res.status(201).json({
+      success: true,
+      data: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error('❌ Ошибка создания материала:', error);
+    res.status(500).json({
+      error: 'Ошибка создания материала',
+      code: 'MATERIAL_CREATE_ERROR'
+    });
+  }
+}
+
+/**
+ * Обновление материала
+ * PUT /materials/:id
+ */
+export async function updateMaterial(req, res) {
+  try {
+    const user = getCurrentUser(req);
+    const { id } = req.params;
+    const { name, unit, unit_price, expenditure, weight, image_url, item_url } = req.body;
+
+    const result = await query(`
+      UPDATE materials 
+      SET name = COALESCE($2, name),
+          unit = COALESCE($3, unit),
+          unit_price = COALESCE($4, unit_price),
+          expenditure = COALESCE($5, expenditure),
+          weight = COALESCE($6, weight),
+          image_url = COALESCE($7, image_url),
+          item_url = COALESCE($8, item_url),
+          updated_at = CURRENT_TIMESTAMP
+      WHERE id = $1
+      RETURNING *
+    `, [id, name, unit, unit_price, expenditure, weight, image_url, item_url]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        error: 'Материал не найден',
+        code: 'MATERIAL_NOT_FOUND'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error('❌ Ошибка обновления материала:', error);
+    res.status(500).json({
+      error: 'Ошибка обновления материала',
+      code: 'MATERIAL_UPDATE_ERROR'
+    });
+  }
+}
+
+/**
+ * Удаление материала
+ * DELETE /materials/:id
+ */
+export async function deleteMaterial(req, res) {
+  try {
+    const { id } = req.params;
+
+    const result = await query(`
+      DELETE FROM materials WHERE id = $1
+    `, [id]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({
+        error: 'Материал не найден',
+        code: 'MATERIAL_NOT_FOUND'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Материал удален'
+    });
+
+  } catch (error) {
+    console.error('❌ Ошибка удаления материала:', error);
+    res.status(500).json({
+      error: 'Ошибка удаления материала',
+      code: 'MATERIAL_DELETE_ERROR'
+    });
+  }
+}
+
+/**
+ * Создание новой работы
+ * POST /works
+ */
+export async function createWork(req, res) {
+  try {
+    const user = getCurrentUser(req);
+    const { name, unit, unit_price, phase_id, stage_id } = req.body;
+
+    if (!name || !unit) {
+      return res.status(400).json({
+        error: 'Название и единица измерения обязательны',
+        code: 'MISSING_REQUIRED_FIELDS'
+      });
+    }
+
+    const result = await query(`
+      INSERT INTO works_ref (name, unit, unit_price, phase_id, stage_id, tenant_id)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING *
+    `, [name, unit, parseFloat(unit_price) || 0, phase_id, stage_id, user?.tenantId || null]);
+
+    res.status(201).json({
+      success: true,
+      data: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error('❌ Ошибка создания работы:', error);
+    res.status(500).json({
+      error: 'Ошибка создания работы',
+      code: 'WORK_CREATE_ERROR'
+    });
+  }
+}
+
+/**
+ * Получение этапов работ
+ * GET /phases
+ */
+export async function getPhases(req, res) {
+  try {
+    const { limit = 50, offset = 0 } = req.query;
+
+    const result = await query(`
+      SELECT id, name, description, sort_order
+      FROM phases
+      ORDER BY sort_order, name
+      LIMIT $1 OFFSET $2
+    `, [parseInt(limit), parseInt(offset)]);
+
+    const countResult = await query(`SELECT COUNT(*) as total FROM phases`);
+
+    res.json({
+      success: true,
+      data: result.rows,
+      pagination: {
+        total: parseInt(countResult.rows[0].total),
+        limit: parseInt(limit),
+        offset: parseInt(offset)
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Ошибка получения этапов:', error);
+    res.status(500).json({
+      error: 'Ошибка получения этапов',
+      code: 'PHASES_FETCH_ERROR'
+    });
+  }
+}
+
+/**
+ * Добавление материала к работе
+ * POST /works/:workId/materials
+ */
+export async function addWorkMaterial(req, res) {
+  try {
+    const { workId } = req.params;
+    const { material_id, consumption_per_work_unit, waste_coeff } = req.body;
+
+    if (!material_id || !consumption_per_work_unit) {
+      return res.status(400).json({
+        error: 'ID материала и расход обязательны',
+        code: 'MISSING_REQUIRED_FIELDS'
+      });
+    }
+
+    const result = await query(`
+      INSERT INTO work_materials (work_id, material_id, consumption_per_work_unit, waste_coeff)
+      VALUES ($1, $2, $3, $4)
+      RETURNING *
+    `, [workId, material_id, parseFloat(consumption_per_work_unit), parseFloat(waste_coeff) || 1.0]);
+
+    res.status(201).json({
+      success: true,
+      data: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error('❌ Ошибка добавления материала к работе:', error);
+    res.status(500).json({
+      error: 'Ошибка добавления материала к работе',
+      code: 'WORK_MATERIAL_ADD_ERROR'
+    });
+  }
+}
+
+/**
+ * Обновление связи работы и материала
+ * PUT /works/:workId/materials/:materialId
+ */
+export async function updateWorkMaterial(req, res) {
+  try {
+    const { workId, materialId } = req.params;
+    const { consumption_per_work_unit, waste_coeff } = req.body;
+
+    const result = await query(`
+      UPDATE work_materials 
+      SET consumption_per_work_unit = COALESCE($3, consumption_per_work_unit),
+          waste_coeff = COALESCE($4, waste_coeff)
+      WHERE work_id = $1 AND material_id = $2
+      RETURNING *
+    `, [workId, materialId, consumption_per_work_unit, waste_coeff]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        error: 'Связь работы и материала не найдена',
+        code: 'WORK_MATERIAL_NOT_FOUND'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error('❌ Ошибка обновления связи работы и материала:', error);
+    res.status(500).json({
+      error: 'Ошибка обновления связи работы и материала',
+      code: 'WORK_MATERIAL_UPDATE_ERROR'
+    });
+  }
+}
+
+/**
+ * Удаление связи работы и материала
+ * DELETE /works/:workId/materials/:materialId
+ */
+export async function deleteWorkMaterial(req, res) {
+  try {
+    const { workId, materialId } = req.params;
+
+    const result = await query(`
+      DELETE FROM work_materials WHERE work_id = $1 AND material_id = $2
+    `, [workId, materialId]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({
+        error: 'Связь работы и материала не найдена',
+        code: 'WORK_MATERIAL_NOT_FOUND'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Связь работы и материала удалена'
+    });
+
+  } catch (error) {
+    console.error('❌ Ошибка удаления связи работы и материала:', error);
+    res.status(500).json({
+      error: 'Ошибка удаления связи работы и материала',
+      code: 'WORK_MATERIAL_DELETE_ERROR'
+    });
+  }
+}
+
 // Экспорт всех контроллеров
 export default {
   getMaterials,
-  overrideMaterial,
-  resetMaterialOverride,
+  createMaterial,
+  updateMaterial,
+  deleteMaterial,
   getWorks,
+  createWork,
+  getPhases,
   getWorkMaterials,
-  getMaterialPrice,
-  health
+  addWorkMaterial,
+  updateWorkMaterial,
+  deleteWorkMaterial
 };

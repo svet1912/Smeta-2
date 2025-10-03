@@ -56,8 +56,8 @@ export default function AuthLogin({ isDemo = false }) {
 
       if (response.success) {
         // Обновляем контекст авторизации с данными пользователя
-        if (response.data && response.data.user) {
-          updateUser(response.data.user);
+        if (response.user) {
+          updateUser(response.user);
         }
         setStatus({ success: true });
         navigate('/app/dashboard/default');

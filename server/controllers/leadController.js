@@ -247,23 +247,76 @@ export const createLead = async (req, res) => {
   }
 };
 
+// Получение списка заявок
+export const getLeads = async (req, res) => {
+  try {
+    const { limit = 50, offset = 0 } = req.query;
+    
+    // Получаем список заявок
+    const leadsResult = await query(`
+      SELECT 
+        id,
+        name,
+        email,
+        phone,
+        company,
+        project_type,
+        budget,
+        message,
+        utm_source,
+        utm_medium,
+        utm_campaign,
+        page_path,
+        env_name,
+        consent,
+        created_at,
+        updated_at
+      FROM leads 
+      ORDER BY created_at DESC
+      LIMIT $1 OFFSET $2
+    `, [limit, offset]);
+
+    // Получаем общее количество заявок
+    const countResult = await query(`SELECT COUNT(*) as total FROM leads`);
+    const total = parseInt(countResult.rows[0].total);
+
+    res.json({
+      success: true,
+      data: leadsResult.rows,
+      pagination: {
+        total,
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+        hasMore: (parseInt(offset) + parseInt(limit)) < total
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Ошибка получения заявок:', error);
+    res.status(500).json({
+      error: 'Ошибка получения заявок',
+      code: 'LEADS_FETCH_ERROR'
+    });
+  }
+};
+
 // Получение статистики по заявкам (для админки)
 export const getLeadsStats = async (req, res) => {
   try {
-    const stats = await query(`
-      SELECT 
-        COUNT(*) as total,
-        COUNT(*) FILTER (WHERE created_at > NOW() - INTERVAL '24 hours') as today,
-        COUNT(*) FILTER (WHERE created_at > NOW() - INTERVAL '7 days') as week,
-        COUNT(DISTINCT email) as unique_emails,
-        COUNT(*) FILTER (WHERE env_name = 'production') as production,
-        COUNT(*) FILTER (WHERE env_name != 'production') as preview
-      FROM leads
-    `);
-    
-    res.json(stats.rows[0]);
+    const { default: queryOptimizer } = await import('../services/queryOptimizer.js');
+    const result = await queryOptimizer.getLeadsStatsOptimized();
+    res.json(result.rows[0]);
   } catch (error) {
     console.error('Ошибка получения статистики заявок:', error);
     res.status(500).json({ error: 'Ошибка сервера' });
   }
+};
+
+// Default export для совместимости с роутером
+export default {
+  createLead,
+  getLeads,
+  getLeadsStats,
+  leadRateLimit,
+  initializeLeadsTable
 };
