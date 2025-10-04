@@ -92,8 +92,8 @@ const apiLimiter = rateLimit({
 app.use((req, res, next) => {
   // мягкая санитация параметров
   const limit = Number(req.query.limit || 50);
-  if (limit > 200) {
-    return res.status(400).json({ error: 'Limit too large. Maximum allowed: 200' });
+  if (limit > 3000) {  // Увеличено для справочников (works: 540, materials: 1448)
+    return res.status(400).json({ error: 'Limit too large. Maximum allowed: 3000' });
   }
   next();
 });
@@ -1006,13 +1006,15 @@ app.post('/api/auth/register', async (req, res) => {
       company
     });
 
-    // Генерация JWT токена
+    // Генерация JWT токена с дефолтной ролью и tenant
     const token = jwt.sign(
       { 
         userId: newUser.id, 
         email: newUser.email,
         firstname: newUser.firstname,
-        lastname: newUser.lastname 
+        lastname: newUser.lastname,
+        role: 'estimator',  // Дефолтная роль для новых пользователей
+        tenantId: 'default-tenant'  // Дефолтный tenant
       },
   config.jwtSecret,
       { expiresIn: '24h' }
@@ -1104,13 +1106,34 @@ app.post('/api/auth/login', async (req, res) => {
     // Обновление времени последнего входа
     await updateLastLogin(user.id);
 
-    // Генерация JWT токена
+    // Получаем роль пользователя
+    let userRole = 'estimator';  // По умолчанию
+    try {
+      const roleResult = await query(`
+        SELECT ur.name as role_name
+        FROM user_role_assignments ura
+        JOIN user_roles ur ON ur.id = ura.role_id
+        WHERE ura.user_id = $1 AND ura.is_active = true
+        ORDER BY ura.assigned_at DESC
+        LIMIT 1
+      `, [user.id]);
+      
+      if (roleResult.rows.length > 0) {
+        userRole = roleResult.rows[0].role_name;
+      }
+    } catch (e) {
+      console.log('⚠️ Не удалось получить роль, используем estimator');
+    }
+
+    // Генерация JWT токена с ролью и tenantId
     const token = jwt.sign(
       { 
         userId: user.id, 
         email: user.email,
         firstname: user.firstname,
-        lastname: user.lastname 
+        lastname: user.lastname,
+        role: userRole,  // Добавляем роль в токен
+        tenantId: 'default-tenant'  // Добавляем дефолтный tenant
       },
   config.jwtSecret,
       { expiresIn: '24h' }
@@ -1162,18 +1185,28 @@ app.post('/api/auth/login', async (req, res) => {
 app.post('/api/auth/logout', async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
+    
+    // Если нет токена, все равно возвращаем успех (пользователь хочет выйти)
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ 
-        success: false, 
-        message: 'Токен авторизации не предоставлен' 
+      console.log('⚠️ Logout без токена - возвращаем успех');
+      return res.json({ 
+        success: true, 
+        message: 'Успешный выход из системы' 
       });
     }
 
     const token = authHeader.substring(7);
-  const decoded = jwt.verify(token, config.jwtSecret);
     
-    // Удаление активных сессий пользователя
-    await query('DELETE FROM user_sessions WHERE user_id = $1', [decoded.userId]);
+    try {
+      const decoded = jwt.verify(token, config.jwtSecret);
+      
+      // Удаление активных сессий пользователя
+      await query('DELETE FROM user_sessions WHERE user_id = $1', [decoded.userId]);
+      console.log(`🔐 Logout пользователя: ${decoded.email || decoded.userId}`);
+    } catch (tokenError) {
+      // Если токен невалиден или истек, все равно возвращаем успех
+      console.log('⚠️ Невалидный токен при logout, но возвращаем успех:', tokenError.message);
+    }
 
     res.json({
       success: true,
@@ -1182,9 +1215,10 @@ app.post('/api/auth/logout', async (req, res) => {
 
   } catch (error) {
     console.error('❌ Ошибка выхода:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Внутренняя ошибка сервера' 
+    // Даже при ошибке возвращаем успех - важно чтобы frontend мог выйти
+    res.json({ 
+      success: true, 
+      message: 'Успешный выход из системы' 
     });
   }
 });
@@ -1353,7 +1387,7 @@ app.get('/api/works', withCatalogCache(async (req, res) => {
     // Параметры запроса для ключа кэша
     const search = req.query.search?.trim().toLowerCase() || '';
     const page = Number(req.query.page || 1);
-    const limit = Math.min(Number(req.query.limit || 50), 200);
+    const limit = Math.min(Number(req.query.limit || 50), 3000);  // Увеличено для полной загрузки справочников
 
     // Настройки кэша
     const ttl = Number(process.env.CACHE_TTL_WORKS || 600);
@@ -1441,7 +1475,7 @@ app.get('/api/materials', withCatalogCache(async (req, res) => {
     // Параметры запроса для ключа кэша
     const search = req.query.search?.trim().toLowerCase() || '';
     const page = Number(req.query.page || 1);
-    const limit = Math.min(Number(req.query.limit || 50), 200); // защита от больших limit
+    const limit = Math.min(Number(req.query.limit || 50), 3000);  // Увеличено для полной загрузки справочников
 
     // Настройки кэша из переменных окружения
     const ttl = Number(process.env.CACHE_TTL_MATERIALS || 600);
@@ -1947,58 +1981,88 @@ app.post('/api/projects/:projectId/object-parameters', authMiddleware, async (re
       soilConditions, groundwaterLevel, climateZone
     } = req.body;
     
+    console.log(`📝 Сохранение параметров для проекта ID: ${projectId}, пользователь: ${userId}`);
+    
     // Проверяем существование проекта
     const projectExists = await query('SELECT id FROM construction_projects WHERE id = $1', [projectId]);
     if (projectExists.rows.length === 0) {
+      console.error(`❌ Проект ID=${projectId} не найден!`);
       return res.status(404).json({ error: 'Проект не найден' });
     }
     
-    // Создаем ограничение уникальности для project_id если его нет
-    await query(`
-      DO $$ BEGIN
-        IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'object_parameters_project_id_unique') THEN
-          ALTER TABLE object_parameters ADD CONSTRAINT object_parameters_project_id_unique UNIQUE (project_id);
-        END IF;
-      END $$;
-    `);
+    console.log('✅ Проект существует');
     
     // Используем либо новый формат, либо старый для совместимости
     const finalBuildingType = buildingType || buildingPurpose || 'residential';
     const finalFloorsAbove = floorsAboveGround || buildingFloors || 1;
     const finalEnergyClass = climateZone || energyClass || 'B';
+    const finalConstructionCategory = constructionCategory || 1;  // INTEGER, не строка!
     
-    const result = await query(`
-      INSERT INTO object_parameters (
-        project_id, building_type, construction_category, floors_above_ground, floors_below_ground,
-        height_above_ground, height_below_ground, total_area, building_area, estimated_cost,
-        construction_complexity, seismic_zone, wind_load, snow_load, soil_conditions,
-        groundwater_level, climate_zone, user_id
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
-      ON CONFLICT (project_id) DO UPDATE SET
-        building_type = EXCLUDED.building_type,
-        construction_category = EXCLUDED.construction_category,
-        floors_above_ground = EXCLUDED.floors_above_ground,
-        floors_below_ground = EXCLUDED.floors_below_ground,
-        height_above_ground = EXCLUDED.height_above_ground,
-        height_below_ground = EXCLUDED.height_below_ground,
-        total_area = EXCLUDED.total_area,
-        building_area = EXCLUDED.building_area,
-        estimated_cost = EXCLUDED.estimated_cost,
-        construction_complexity = EXCLUDED.construction_complexity,
-        seismic_zone = EXCLUDED.seismic_zone,
-        wind_load = EXCLUDED.wind_load,
-        snow_load = EXCLUDED.snow_load,
-        soil_conditions = EXCLUDED.soil_conditions,
-        groundwater_level = EXCLUDED.groundwater_level,
-        climate_zone = EXCLUDED.climate_zone,
-        updated_at = CURRENT_TIMESTAMP
-      RETURNING *
-    `, [
-      projectId, finalBuildingType, constructionCategory || 'standard', finalFloorsAbove, floorsBelowGround || (hasBasement ? 1 : 0),
-      heightAboveGround || 3.0, heightBelowGround || 0, totalArea || 100, buildingArea || 100, estimatedCost || 0,
-      constructionComplexity || 'normal', seismicZone || 0, windLoad || 0.5, snowLoad || 1.8, soilConditions || 'normal',
-      groundwaterLevel || 'normal', finalEnergyClass, userId
-    ]);
+    console.log('📊 Данные для сохранения:', {
+      projectId,
+      buildingType: finalBuildingType,
+      category: finalConstructionCategory,
+      floors: finalFloorsAbove,
+      userId
+    });
+    
+    // Сначала проверим существуют ли уже параметры
+    const existingParams = await query(`
+      SELECT id FROM object_parameters WHERE project_id = $1
+    `, [projectId]);
+    
+    let result;
+    
+    if (existingParams.rows.length > 0) {
+      // Обновляем существующие параметры
+      console.log('🔄 Обновление существующих параметров...');
+      result = await query(`
+        UPDATE object_parameters SET
+          building_type = $2,
+          construction_category = $3,
+          floors_above_ground = $4,
+          floors_below_ground = $5,
+          height_above_ground = $6,
+          height_below_ground = $7,
+          total_area = $8,
+          building_area = $9,
+          estimated_cost = $10,
+          construction_complexity = $11,
+          seismic_zone = $12,
+          wind_load = $13,
+          snow_load = $14,
+          soil_conditions = $15,
+          groundwater_level = $16,
+          climate_zone = $17,
+          updated_at = CURRENT_TIMESTAMP
+        WHERE project_id = $1
+        RETURNING *
+      `, [
+        projectId, finalBuildingType, finalConstructionCategory, finalFloorsAbove, floorsBelowGround || (hasBasement ? 1 : 0),
+        heightAboveGround || 3.0, heightBelowGround || 0, totalArea || 100, buildingArea || 100, estimatedCost || 0,
+        constructionComplexity || 'normal', seismicZone || 0, windLoad || 1, snowLoad || 2, soilConditions || 'normal',
+        groundwaterLevel || 0, finalEnergyClass  // groundwater_level - numeric, не string!
+      ]);
+    } else {
+      // Создаем новые параметры
+      console.log('➕ Создание новых параметров...');
+      result = await query(`
+        INSERT INTO object_parameters (
+          project_id, building_type, construction_category, floors_above_ground, floors_below_ground,
+          height_above_ground, height_below_ground, total_area, building_area, estimated_cost,
+          construction_complexity, seismic_zone, wind_load, snow_load, soil_conditions,
+          groundwater_level, climate_zone, user_id
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+        RETURNING *
+      `, [
+        projectId, finalBuildingType, finalConstructionCategory, finalFloorsAbove, floorsBelowGround || (hasBasement ? 1 : 0),
+        heightAboveGround || 3.0, heightBelowGround || 0, totalArea || 100, buildingArea || 100, estimatedCost || 0,
+        constructionComplexity || 'normal', seismicZone || 0, windLoad || 1, snowLoad || 2, soilConditions || 'normal',
+        groundwaterLevel || 0, finalEnergyClass, userId  // groundwater_level - numeric!
+      ]);
+    }
+    
+    console.log('✅ Параметры сохранены успешно!');
     
     res.status(201).json({
       success: true,
@@ -2006,8 +2070,13 @@ app.post('/api/projects/:projectId/object-parameters', authMiddleware, async (re
       data: result.rows[0]
     });
   } catch (error) {
-    console.error('Ошибка создания параметров объекта:', error);
-    res.status(500).json({ error: 'Ошибка сервера' });
+    console.error('❌ Ошибка создания параметров объекта:', error.message);
+    console.error('📜 Stack:', error.stack);
+    res.status(500).json({ 
+      error: 'Ошибка сервера', 
+      message: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 
@@ -2049,6 +2118,24 @@ app.post('/api/object-parameters/:objectParamsId/rooms', authMiddleware, async (
       return res.status(400).json({ error: 'Название помещения обязательно' });
     }
     
+    console.log('📝 Создание помещения:', {
+      objectParamsId,
+      roomName,
+      area,
+      userId
+    });
+    
+    // Убираем tenant_id из INSERT - поле nullable
+    const params = [
+      objectParamsId, roomName, area, height, volume, finishClass, purpose, sortOrder, userId,
+      perimeter, prostenki, doorsCount,
+      window1Width, window1Height, window2Width, window2Height,
+      window3Width, window3Height, portal1Width, portal1Height,
+      portal2Width, portal2Height
+    ];
+    
+    console.log('📊 Параметры SQL:', params.length, 'параметров');
+    
     const result = await query(`
       INSERT INTO project_rooms (
         object_parameters_id, room_name, area, height, volume, 
@@ -2059,11 +2146,7 @@ app.post('/api/object-parameters/:objectParamsId/rooms', authMiddleware, async (
         portal2_width, portal2_height
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
       RETURNING *
-    `, [objectParamsId, roomName, area, height, volume, finishClass, purpose, sortOrder, userId,
-        perimeter, prostenki, doorsCount,
-        window1Width, window1Height, window2Width, window2Height,
-        window3Width, window3Height, portal1Width, portal1Height,
-        portal2Width, portal2Height]);
+    `, params);
     
     res.status(201).json({
       success: true,
@@ -2071,8 +2154,13 @@ app.post('/api/object-parameters/:objectParamsId/rooms', authMiddleware, async (
       data: result.rows[0]
     });
   } catch (error) {
-    console.error('Ошибка создания помещения:', error);
-    res.status(500).json({ error: 'Ошибка сервера' });
+    console.error('❌ Ошибка создания помещения:', error.message);
+    console.error('📜 Stack:', error.stack);
+    res.status(500).json({ 
+      error: 'Ошибка сервера',
+      message: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 
@@ -2174,6 +2262,7 @@ app.post('/api/object-parameters/:objectParamsId/constructive-elements', authMid
       return res.status(400).json({ error: 'Тип конструктивного элемента обязателен' });
     }
     
+    // Убираем tenant_id - поле nullable
     const result = await query(`
       INSERT INTO constructive_elements (
         object_parameters_id, element_type, material, characteristics, 
@@ -2277,6 +2366,7 @@ app.post('/api/object-parameters/:objectParamsId/engineering-systems', authMiddl
       return res.status(400).json({ error: 'Тип инженерной системы обязателен' });
     }
     
+    // Убираем tenant_id - поле nullable
     const result = await query(`
       INSERT INTO engineering_systems (
         object_parameters_id, system_type, characteristics, 
@@ -2564,16 +2654,46 @@ app.get('/api/users', authMiddleware, async (req, res) => {
 // Получение всех проектов (с аутентификацией)
 app.get('/api/projects', authMiddleware, async (req, res) => {
   try {
-    const result = await query(`
-      SELECT 
-        cp.*,
-        au.firstname || ' ' || au.lastname as created_by_name,
-        au.email as created_by_email
-      FROM construction_projects cp
-      LEFT JOIN auth_users au ON cp.user_id = au.id
-      ORDER BY cp.created_at DESC
-    `);
+    const userId = req.user?.userId || req.user?.id;
+    const userRole = req.user?.role || 'user';
     
+    console.log(`📋 Запрос проектов от пользователя ID: ${userId}, роль: ${userRole}`);
+    
+    // Супер-админ видит ВСЕ проекты, остальные только свои
+    let queryText, params;
+    
+    if (userRole === 'super_admin' || userRole === 'admin') {
+      // Супер-админ и админ видят все проекты
+      queryText = `
+        SELECT 
+          cp.*,
+          au.firstname || ' ' || au.lastname as created_by_name,
+          au.email as created_by_email
+        FROM construction_projects cp
+        LEFT JOIN auth_users au ON cp.user_id = au.id
+        ORDER BY cp.created_at DESC
+      `;
+      params = [];
+      console.log(`✅ ${userRole} - загружаем ВСЕ проекты`);
+    } else {
+      // Обычный пользователь видит только свои проекты
+      queryText = `
+        SELECT 
+          cp.*,
+          au.firstname || ' ' || au.lastname as created_by_name,
+          au.email as created_by_email
+        FROM construction_projects cp
+        LEFT JOIN auth_users au ON cp.user_id = au.id
+        WHERE cp.user_id = $1
+        ORDER BY cp.created_at DESC
+      `;
+      params = [userId];
+      console.log(`🔒 Обычный пользователь - только свои проекты`);
+    }
+    
+    const result = await query(queryText, params);
+    
+    console.log(`📊 Найдено проектов: ${result.rows.length}`);
     res.json(result.rows);
   } catch (error) {
     console.error('Ошибка получения проектов:', error);

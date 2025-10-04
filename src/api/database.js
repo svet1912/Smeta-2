@@ -131,10 +131,22 @@ export const getMaterials = async () => {
   try {
     const response = await api.get('/materials?limit=2000&offset=0');
     const result = response.data;
-    // Проверяем структуру ответа API
-    const data = result.success ? result.data : result;
-    return Array.isArray(data) ? data : [];
+    
+    console.log('🧱 getMaterials API ответ:', result);
+    
+    // API возвращает {data: Array, pagination: {...}}
+    if (result.data && Array.isArray(result.data)) {
+      console.log(`✅ getMaterials: Загружено ${result.data.length} материалов`);
+      return result.data;
+    } else if (Array.isArray(result)) {
+      console.log(`✅ getMaterials: Загружено ${result.length} материалов`);
+      return result;
+    } else {
+      console.warn('⚠️ getMaterials: Неожиданный формат ответа:', result);
+      return [];
+    }
   } catch (error) {
+    console.error('❌ getMaterials ошибка:', error.message);
     // Возвращаем пустой массив если API недоступен
     return [];
   }

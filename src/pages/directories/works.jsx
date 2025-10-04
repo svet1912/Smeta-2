@@ -215,13 +215,15 @@ export default function WorksPage() {
         console.log('🔨 API ответ works:', result);
         
         let worksData = [];
-        // Проверяем структуру ответа API
-        const data = result.success ? result.data : result;
-        if (Array.isArray(data)) {
-          worksData = data;
-          console.log(`✅ Загружено ${data.length} работ`);
+        // API возвращает {data: Array, pagination: {...}}
+        if (result.data && Array.isArray(result.data)) {
+          worksData = result.data;
+          console.log(`✅ Загружено ${result.data.length} работ`);
+        } else if (Array.isArray(result)) {
+          worksData = result;
+          console.log(`✅ Загружено ${result.length} работ`);
         } else {
-          console.warn('⚠️ /api/works вернул не-массив, устанавливаю []');
+          console.warn('⚠️ /api/works вернул неожиданный формат:', result);
           worksData = [];
         }
         
@@ -247,13 +249,15 @@ export default function WorksPage() {
         const result = await response.json();
         console.log('📋 API ответ phases:', result);
         
-        // Проверяем структуру ответа API
-        const data = result.success ? result.data : result;
-        if (Array.isArray(data)) {
-          setPhases(data);
-          console.log(`✅ Загружено ${data.length} фаз`);
+        // API может вернуть {data: Array} или просто Array
+        if (result.data && Array.isArray(result.data)) {
+          setPhases(result.data);
+          console.log(`✅ Загружено ${result.data.length} фаз`);
+        } else if (Array.isArray(result)) {
+          setPhases(result);
+          console.log(`✅ Загружено ${result.length} фаз`);
         } else {
-          console.warn('⚠️ /api/phases вернул не-массив, устанавливаю []');
+          console.warn('⚠️ /api/phases вернул неожиданный формат:', result);
           setPhases([]);
         }
       }
@@ -270,13 +274,15 @@ export default function WorksPage() {
         const result = await response.json();
         console.log('🧱 API ответ materials:', result);
         
-        // Проверяем структуру ответа API
-        const data = result.success ? result.data : result;
-        if (Array.isArray(data)) {
-          setMaterials(data);
-          console.log(`✅ Загружено ${data.length} материалов`);
+        // API возвращает {data: Array, pagination: {...}}
+        if (result.data && Array.isArray(result.data)) {
+          setMaterials(result.data);
+          console.log(`✅ Загружено ${result.data.length} материалов`);
+        } else if (Array.isArray(result)) {
+          setMaterials(result);
+          console.log(`✅ Загружено ${result.length} материалов`);
         } else {
-          console.warn('⚠️ /api/materials вернул не-массив, устанавливаю []');
+          console.warn('⚠️ /api/materials вернул неожиданный формат:', result);
           setMaterials([]);
         }
       }

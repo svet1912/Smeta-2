@@ -148,12 +148,15 @@ export default function EstimateCalculationPage() {
         const result = await response.json();
         console.log('🔨 API ответ works:', result);
         
-        // Проверяем структуру ответа API
-        const data = result.success ? result.data : result;
-        if (Array.isArray(data)) {
-          setWorks(data);
-          console.log(`✅ Загружено ${data.length} работ`);
+        // API возвращает {data: Array, pagination: {...}}
+        if (result.data && Array.isArray(result.data)) {
+          setWorks(result.data);
+          console.log(`✅ Загружено ${result.data.length} работ`);
+        } else if (Array.isArray(result)) {
+          setWorks(result);
+          console.log(`✅ Загружено ${result.length} работ`);
         } else {
+          console.warn('⚠️ /api/works вернул неожиданный формат:', result);
           setWorks([]);
         }
       }
@@ -171,12 +174,15 @@ export default function EstimateCalculationPage() {
         const result = await response.json();
         console.log('🧱 API ответ materials:', result);
         
-        // Проверяем структуру ответа API
-        const data = result.success ? result.data : result;
-        if (Array.isArray(data)) {
-          setMaterials(data);
-          console.log(`✅ Загружено ${data.length} материалов`);
+        // API возвращает {data: Array, pagination: {...}}
+        if (result.data && Array.isArray(result.data)) {
+          setMaterials(result.data);
+          console.log(`✅ Загружено ${result.data.length} материалов`);
+        } else if (Array.isArray(result)) {
+          setMaterials(result);
+          console.log(`✅ Загружено ${result.length} материалов`);
         } else {
+          console.warn('⚠️ /api/materials вернул неожиданный формат:', result);
           setMaterials([]);
         }
       }

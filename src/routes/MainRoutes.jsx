@@ -16,6 +16,7 @@ const MaterialsPage = Loadable(lazy(() => import('pages/directories/materials'))
 
 // render - projects
 const CreateProject = Loadable(lazy(() => import('pages/projects/CreateProject')));
+const CreateProjectWizard = Loadable(lazy(() => import('pages/projects/CreateProjectWizard')));
 const ProjectStorage = Loadable(lazy(() => import('pages/projects/ProjectStorage')));
 
 // render - calculations
@@ -71,6 +72,10 @@ const MainRoutes = {
         {
           path: 'create',
           element: <CreateProject />
+        },
+        {
+          path: 'create-wizard',
+          element: <CreateProjectWizard />
         },
         {
           path: 'storage',

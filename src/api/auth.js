@@ -61,7 +61,13 @@ const apiRequest = async (url, options = {}) => {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || 'Произошла ошибка при выполнении запроса');
+      // Если токен невалиден (401), удаляем его
+      if (response.status === 401 && token) {
+        console.warn('⚠️ Токен невалиден или истек, удаляем локально');
+        removeAuthToken();
+      }
+      
+      throw new Error(data.message || data.error || 'Произошла ошибка при выполнении запроса');
     }
 
     return data;
@@ -86,8 +92,9 @@ export const registerUser = async (userData) => {
     })
   });
 
-  if (response.success && response.accessToken) {
-    setAuthToken(response.accessToken);
+  // Backend возвращает токен в data.token, не в accessToken
+  if (response.success && response.data && response.data.token) {
+    setAuthToken(response.data.token);
   }
 
   return response;
@@ -105,8 +112,9 @@ export const loginUser = async (credentials) => {
     })
   });
 
-  if (response.success && response.accessToken) {
-    setAuthToken(response.accessToken);
+  // Backend возвращает токен в data.token, не в accessToken
+  if (response.success && response.data && response.data.token) {
+    setAuthToken(response.data.token);
   }
 
   return response;
@@ -136,12 +144,21 @@ export const getCurrentUser = async () => {
 // Проверка валидности токена
 export const validateToken = async () => {
   try {
+    const token = getAuthToken();
+    if (!token) {
+      return false;
+    }
+    
     const response = await getCurrentUser();
     return response.success && response.user;
   } catch (error) {
-    // Если токен невалиден, удаляем его
-    removeAuthToken();
-    return false;
+    // НЕ удаляем токен при ошибках сети!
+    // Токен будет удален автоматически при реальной 401 ошибке в apiRequest
+    console.warn('⚠️ Ошибка проверки токена (возможно временная):', error.message);
+    
+    // Если токен есть, предполагаем что он валиден (оптимистичный подход)
+    // Реальная валидация произойдет при первом API запросе
+    return !!getAuthToken();
   }
 };
 

@@ -338,17 +338,22 @@ export default function CustomerEstimatePage() {
 
   const loadWorks = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/works`, {
+      const response = await fetch(`${API_BASE_URL}/works?limit=2000`, {
         headers: {
           'Content-Type': 'application/json',
           ...getAuthHeaders()
         }
       });
       if (response.ok) {
-        const data = await response.json();
-        if (Array.isArray(data)) {
-          setWorks(data);
+        const result = await response.json();
+        // API возвращает {data: Array, pagination: {...}}
+        if (result.data && Array.isArray(result.data)) {
+          setWorks(result.data);
+          console.log(`✅ Загружено ${result.data.length} работ для сметы заказчика`);
+        } else if (Array.isArray(result)) {
+          setWorks(result);
         } else {
+          console.warn('⚠️ /api/works вернул неожиданный формат');
           setWorks([]);
         }
       } else {
@@ -364,17 +369,22 @@ export default function CustomerEstimatePage() {
 
   const loadMaterials = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/materials`, {
+      const response = await fetch(`${API_BASE_URL}/materials?limit=2000`, {
         headers: {
           'Content-Type': 'application/json',
           ...getAuthHeaders()
         }
       });
       if (response.ok) {
-        const data = await response.json();
-        if (Array.isArray(data)) {
-          setMaterials(data);
+        const result = await response.json();
+        // API возвращает {data: Array, pagination: {...}}
+        if (result.data && Array.isArray(result.data)) {
+          setMaterials(result.data);
+          console.log(`✅ Загружено ${result.data.length} материалов для сметы заказчика`);
+        } else if (Array.isArray(result)) {
+          setMaterials(result);
         } else {
+          console.warn('⚠️ /api/materials вернул неожиданный формат');
           setMaterials([]);
         }
       } else {

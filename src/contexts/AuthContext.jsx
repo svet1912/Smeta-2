@@ -24,21 +24,34 @@ export const AuthProvider = ({ children }) => {
   const checkAuthStatus = async () => {
     setIsLoading(true);
     try {
-      const isValid = await validateToken();
-      if (isValid) {
+      // Проверяем есть ли токен в localStorage
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        clearAuth();
+        setIsLoading(false);
+        return;
+      }
+      
+      // Пытаемся загрузить данные пользователя
+      try {
         const response = await getCurrentUser();
         if (response.success && response.user) {
           setUser(response.user);
           setIsAuthenticated(true);
         } else {
-          clearAuth();
+          // Если не удалось загрузить - НЕ удаляем токен сразу
+          // Просто показываем что пользователь авторизован
+          console.warn('⚠️ Не удалось загрузить данные пользователя, но токен есть');
+          setIsAuthenticated(true);
         }
-      } else {
-        clearAuth();
+      } catch (error) {
+        // При ошибке сети - НЕ удаляем токен!
+        // Токен будет проверен при следующем API запросе
+        console.warn('⚠️ Ошибка загрузки пользователя (возможно временная):', error.message);
+        setIsAuthenticated(true);  // Оптимистично считаем что авторизован
       }
     } catch (error) {
-      console.error('Ошибка проверки аутентификации:', error);
-      clearAuth();
+      console.error('Критическая ошибка проверки auth:', error);
     } finally {
       setIsLoading(false);
     }

@@ -431,7 +431,7 @@ export default function ProjectStorage() {
               variant="contained"
               startIcon={<FilterOutlined />}
               fullWidth
-              href="/projects/create"
+              href="/app/projects/create-wizard"
             >
               Создать проект
             </Button>
@@ -485,7 +485,7 @@ export default function ProjectStorage() {
           <Typography variant="body2" color="text.secondary" paragraph>
             Измените параметры поиска или создайте новый проект
           </Typography>
-          <Button variant="contained" href="/projects/create">
+          <Button variant="contained" href="/app/projects/create-wizard">
             Создать проект
           </Button>
         </Paper>

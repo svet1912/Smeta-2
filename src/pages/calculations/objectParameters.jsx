@@ -282,13 +282,13 @@ const ObjectParameters = () => {
   // Состояние загрузки
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [projectId, setProjectId] = useState(1); // TODO: получать из роутера или контекста
+  const [projectId, setProjectId] = useState(null); // Загружаем первый доступный проект
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   
   // Проверка валидности токена
   const checkTokenValidity = async (token) => {
     try {
-      const response = await fetch('/api-proxy/auth/me', {
+      const response = await fetch('http://localhost:3001/api/auth/me', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -296,36 +296,50 @@ const ObjectParameters = () => {
       });
       return response.ok;
     } catch (error) {
-      return false;
+      console.log('⚠️ Не удалось проверить токен, продолжаем работу');
+      return true;  // Предполагаем что токен валиден
     }
   };
 
-  // Создание тестового проекта, если его нет
-  const createTestProject = async () => {
+  // Загрузка первого доступного проекта
+  const loadFirstProject = async () => {
     try {
       const token = getAuthToken();
-      const response = await fetch('/api-proxy/construction-projects', {
-        method: 'POST',
+      if (!token) {
+        console.log('⚠️ Токен не найден, используем локальные данные');
+        setLoading(false);
+        return null;
+      }
+      
+      const response = await fetch('http://localhost:3001/api/projects', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          name: 'Тестовый проект',
-          description: 'Автоматически созданный проект для тестирования',
-          status: 'draft'
-        })
+        }
       });
       
       if (response.ok) {
-        const project = await response.json();
-        setProjectId(project.data.id);
-        return project.data.id;
+        const projects = await response.json();
+        if (projects.length > 0) {
+          const firstProject = projects[0];
+          console.log(`✅ Используем проект ID: ${firstProject.id} - ${firstProject.customer_name}`);
+          setProjectId(firstProject.id);
+          return firstProject.id;
+        } else {
+          console.log('⚠️ В системе нет проектов');
+          notification.warning({
+            message: 'Нет проектов',
+            description: 'Создайте проект в разделе "Хранилище проектов"'
+          });
+          setLoading(false);
+          return null;
+        }
       }
     } catch (error) {
-      console.error('Ошибка создания проекта:', error);
+      console.error('Ошибка загрузки проектов:', error);
     }
-    return 1; // Используем ID по умолчанию
+    setLoading(false);
+    return null;
   };
 
   // Функции для работы с API
@@ -342,6 +356,16 @@ const ObjectParameters = () => {
         });
         setLoading(false);
         return;
+      }
+      
+      // Если нет projectId, загружаем первый проект
+      if (!currentProjectId) {
+        const loadedProjectId = await loadFirstProject();
+        if (!loadedProjectId) {
+          setLoading(false);
+          return;
+        }
+        currentProjectId = loadedProjectId;
       }
 
       // Проверяем валидность токена
@@ -361,7 +385,7 @@ const ObjectParameters = () => {
       setIsAuthenticated(true);
       
       // Загружаем параметры объекта
-      const objectParamsResponse = await fetch(`/api-proxy/projects/${currentProjectId}/object-parameters`, {
+      const objectParamsResponse = await fetch(`http://localhost:3001/api/projects/${currentProjectId}/object-parameters`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -392,9 +416,9 @@ const ObjectParameters = () => {
       const objectParams = await objectParamsResponse.json();
       
       // Загружаем помещения
-      const roomsResponse = await fetch(`/api-proxy/object-parameters/${objectParams.id}/rooms`, {
+      const roomsResponse = await fetch(`http://localhost:3001/api/object-parameters/${objectParams.id}/rooms`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
@@ -477,7 +501,7 @@ const ObjectParameters = () => {
       }
       
       // Сохраняем параметры объекта
-      const objectParamsResponse = await fetch(`/api-proxy/projects/${projectId}/object-parameters`, {
+      const objectParamsResponse = await fetch(`http://localhost:3001/api/projects/${projectId}/object-parameters`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -545,7 +569,7 @@ const ObjectParameters = () => {
         
         if (isNewRoom) {
           // Новое помещение - создаем через POST
-          const response = await fetch(`/api-proxy/object-parameters/${objectParamsId}/rooms`, {
+          const response = await fetch(`http://localhost:3001/api/object-parameters/${objectParamsId}/rooms`, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${token}`,
@@ -592,7 +616,16 @@ const ObjectParameters = () => {
 
   // Загрузка данных при монтировании компонента
   useEffect(() => {
-    loadObjectParameters();
+    // При монтировании загружаем первый доступный проект
+    if (projectId === null) {
+      loadFirstProject().then(id => {
+        if (id) {
+          loadObjectParameters(id);
+        }
+      });
+    } else {
+      loadObjectParameters();
+    }
   }, [projectId]);
 
   // Автосохранение при изменении данных (с задержкой)
@@ -778,17 +811,23 @@ const ObjectParameters = () => {
       width: 90,
       render: (value, record) => {
         // Формула откосов: для каждого окна (ширина + 2*высота) + простенки
-        const window1Slopes = (record.window1Width > 0 && record.window1Height > 0) 
-          ? record.window1Width + 2 * record.window1Height : 0;
-        const window2Slopes = (record.window2Width > 0 && record.window2Height > 0) 
-          ? record.window2Width + 2 * record.window2Height : 0;
-        const window3Slopes = (record.window3Width > 0 && record.window3Height > 0) 
-          ? record.window3Width + 2 * record.window3Height : 0;
+        const w1w = parseFloat(record.window1Width) || 0;
+        const w1h = parseFloat(record.window1Height) || 0;
+        const w2w = parseFloat(record.window2Width) || 0;
+        const w2h = parseFloat(record.window2Height) || 0;
+        const w3w = parseFloat(record.window3Width) || 0;
+        const w3h = parseFloat(record.window3Height) || 0;
+        const prostenki = parseFloat(record.prostenki) || 0;
         
-        const totalSlopes = window1Slopes + window2Slopes + window3Slopes + (record.prostenki || 0);
+        const window1Slopes = (w1w > 0 && w1h > 0) ? w1w + 2 * w1h : 0;
+        const window2Slopes = (w2w > 0 && w2h > 0) ? w2w + 2 * w2h : 0;
+        const window3Slopes = (w3w > 0 && w3h > 0) ? w3w + 2 * w3h : 0;
+        
+        const totalSlopes = window1Slopes + window2Slopes + window3Slopes + prostenki;
         
         // Проверяем разумность значений
-        const maxReasonableSlopes = record.perimeter * 2; // Максимум - двойной периметр
+        const perimeter = parseFloat(record.perimeter) || 0;
+        const maxReasonableSlopes = perimeter * 2; // Максимум - двойной периметр
         const hasWarning = totalSlopes > maxReasonableSlopes;
         
         return (
@@ -797,7 +836,7 @@ const ObjectParameters = () => {
             fontWeight: 'bold',
             fontSize: '11px'
           }}>
-            {totalSlopes.toFixed(1)}
+            {Number(totalSlopes).toFixed(1)}
             {hasWarning && ' ⚠️'}
           </span>
         );

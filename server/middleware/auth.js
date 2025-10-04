@@ -121,14 +121,14 @@ export async function authMiddleware(req, res, next) {
     }
 
     // Извлекаем данные пользователя
-    const userId = payload.id || payload.sub;
-    const tenantId = payload.tenantId || payload.tenant_id;
+    const userId = payload.id || payload.userId || payload.sub;
+    const tenantId = payload.tenantId || payload.tenant_id || 'default-tenant';  // Дефолтный tenant если не указан
     const role = payload.role || 'user';
     const email = payload.email;
 
-    if (!userId || !tenantId) {
+    if (!userId) {
       return res.status(401).json({
-        error: 'Токен не содержит необходимые данные пользователя',
+        error: 'Токен не содержит ID пользователя',
         code: 'INVALID_TOKEN_PAYLOAD'
       });
     }
@@ -136,6 +136,7 @@ export async function authMiddleware(req, res, next) {
     // Сохраняем данные пользователя в запросе
     req.user = {
       id: userId,
+      userId: userId,  // Добавляем для совместимости
       tenantId: tenantId,
       role: role,
       email: email
