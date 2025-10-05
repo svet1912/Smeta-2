@@ -25,7 +25,7 @@ const NotFound = () => {
           >
             404
           </Typography>
-          
+
           <Typography
             variant="h4"
             component="h1"
@@ -37,29 +37,24 @@ const NotFound = () => {
           >
             Страница не найдена
           </Typography>
-          
+
           <Typography
             variant="body1"
             color="text.secondary"
-            sx={{ 
+            sx={{
               maxWidth: '400px',
               lineHeight: 1.6
             }}
           >
-            К сожалению, запрашиваемая страница не существует. 
-            Проверьте правильность адреса или вернитесь на главную страницу.
+            К сожалению, запрашиваемая страница не существует. Проверьте правильность адреса или вернитесь на главную страницу.
           </Typography>
-          
-          <Stack 
-            direction={{ xs: 'column', sm: 'row' }} 
-            spacing={2} 
-            sx={{ pt: 2 }}
-          >
+
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ pt: 2 }}>
             <Button
               variant="contained"
               startIcon={<HomeIcon />}
-              onClick={() => window.location.href = '/'}
-              sx={{ 
+              onClick={() => (window.location.href = '/')}
+              sx={{
                 px: 3,
                 py: 1.5,
                 textTransform: 'none',
@@ -68,12 +63,12 @@ const NotFound = () => {
             >
               На главную
             </Button>
-            
+
             <Button
               variant="outlined"
               startIcon={<AppsIcon />}
-              onClick={() => window.location.href = '/app'}
-              sx={{ 
+              onClick={() => (window.location.href = '/app')}
+              sx={{
                 px: 3,
                 py: 1.5,
                 textTransform: 'none',

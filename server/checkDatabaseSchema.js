@@ -13,7 +13,7 @@ async function checkDatabaseSchema() {
     `);
 
     console.log('📋 Список таблиц в базе данных:');
-    tablesResult.rows.forEach(row => {
+    tablesResult.rows.forEach((row) => {
       console.log(`  - ${row.table_name}`);
     });
 
@@ -22,11 +22,12 @@ async function checkDatabaseSchema() {
     // Для каждой таблицы получаем структуру
     for (const table of tablesResult.rows) {
       const tableName = table.table_name;
-      
+
       console.log(`📊 Таблица: ${tableName}`);
-      
+
       // Получаем колонки
-      const columnsResult = await query(`
+      const columnsResult = await query(
+        `
         SELECT 
           column_name,
           data_type,
@@ -36,7 +37,9 @@ async function checkDatabaseSchema() {
         FROM information_schema.columns 
         WHERE table_name = $1 AND table_schema = 'public'
         ORDER BY ordinal_position;
-      `, [tableName]);
+      `,
+        [tableName]
+      );
 
       if (columnsResult.rows.length === 0) {
         console.log('  ❌ Таблица пуста или недоступна');
@@ -44,7 +47,7 @@ async function checkDatabaseSchema() {
       }
 
       console.log('  Колонки:');
-      columnsResult.rows.forEach(col => {
+      columnsResult.rows.forEach((col) => {
         let type = col.data_type;
         if (col.character_maximum_length) {
           type += `(${col.character_maximum_length})`;
@@ -59,7 +62,8 @@ async function checkDatabaseSchema() {
       console.log(`  Записей: ${countResult.rows[0].count}`);
 
       // Получаем первичные ключи
-      const pkResult = await query(`
+      const pkResult = await query(
+        `
         SELECT kcu.column_name
         FROM information_schema.table_constraints tc
         JOIN information_schema.key_column_usage kcu 
@@ -67,23 +71,28 @@ async function checkDatabaseSchema() {
         WHERE tc.table_name = $1 
           AND tc.constraint_type = 'PRIMARY KEY'
           AND tc.table_schema = 'public';
-      `, [tableName]);
+      `,
+        [tableName]
+      );
 
       if (pkResult.rows.length > 0) {
-        const pkColumns = pkResult.rows.map(row => row.column_name).join(', ');
+        const pkColumns = pkResult.rows.map((row) => row.column_name).join(', ');
         console.log(`  Первичный ключ: ${pkColumns}`);
       }
 
       // Получаем индексы
-      const indexesResult = await query(`
+      const indexesResult = await query(
+        `
         SELECT indexname, indexdef
         FROM pg_indexes 
         WHERE tablename = $1 AND schemaname = 'public';
-      `, [tableName]);
+      `,
+        [tableName]
+      );
 
       if (indexesResult.rows.length > 0) {
         console.log('  Индексы:');
-        indexesResult.rows.forEach(idx => {
+        indexesResult.rows.forEach((idx) => {
           console.log(`    - ${idx.indexname}`);
         });
       }
@@ -93,7 +102,6 @@ async function checkDatabaseSchema() {
 
     console.log('='.repeat(60));
     console.log('✅ Анализ структуры БД завершен');
-
   } catch (error) {
     console.error('❌ Ошибка при анализе структуры БД:', error);
   }

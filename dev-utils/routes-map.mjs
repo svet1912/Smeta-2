@@ -3,32 +3,32 @@ const routes = [
   // Главные маршруты
   { path: '/app', name: 'Главная страница приложения' },
   { path: '/app/dashboard/default', name: 'Панель управления' },
-  
+
   // Справочники
   { path: '/app/directories/works', name: 'Справочник работ' },
   { path: '/app/directories/materials', name: 'Справочник материалов' },
-  
+
   // Проекты
   { path: '/app/projects/create', name: 'Создание проекта' },
   { path: '/app/projects/storage', name: 'Хранилище проектов' },
-  
+
   // Расчёты
   { path: '/app/calculations/estimate', name: 'Расчёт сметы' },
   { path: '/app/calculations/object-parameters', name: 'Параметры объекта' },
   { path: '/app/calculations/customer-estimate', name: 'Клиентские сметы' },
-  
+
   // Профиль
   { path: '/app/profile', name: 'Обзор профиля' },
   { path: '/app/profile/edit', name: 'Редактирование профиля' },
   { path: '/app/profile/settings', name: 'Настройки профиля' },
-  
+
   // Утилиты и поддержка
   { path: '/app/database-test', name: 'Тест базы данных' },
-  
+
   // Авторизация (без /app)
   { path: '/login', name: 'Страница входа' },
   { path: '/register', name: 'Страница регистрации' },
-  
+
   // Лендинг
   { path: '/', name: 'Лендинг страница' }
 ];

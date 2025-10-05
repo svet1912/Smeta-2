@@ -22,7 +22,7 @@ function extractJwtToken(req) {
   if (authHeader.startsWith('Bearer ')) {
     return authHeader.slice(7);
   }
-  
+
   return authHeader;
 }
 
@@ -55,16 +55,10 @@ function verifyJwtToken(token) {
  */
 export function tenantContextMiddleware(req, res, next) {
   // Пропускаем авторизацию для публичных маршрутов
-  const publicRoutes = [
-    '/auth/login',
-    '/auth/register', 
-    '/auth/refresh',
-    '/health',
-    '/api-docs'
-  ];
-  
+  const publicRoutes = ['/auth/login', '/auth/register', '/auth/refresh', '/health', '/api-docs'];
+
   // Проверяем, является ли маршрут публичным
-  const isPublicRoute = publicRoutes.some(route => req.path === route || req.path.startsWith(route));
+  const isPublicRoute = publicRoutes.some((route) => req.path === route || req.path.startsWith(route));
   if (isPublicRoute) {
     return next();
   }
@@ -73,7 +67,7 @@ export function tenantContextMiddleware(req, res, next) {
     // 1. Извлекаем JWT токен из заголовков
     const token = extractJwtToken(req);
     if (!token) {
-      return res.status(401).json({ 
+      return res.status(401).json({
         error: 'Не предоставлен токен авторизации',
         code: 'NO_AUTH_TOKEN'
       });
@@ -123,17 +117,16 @@ export function tenantContextMiddleware(req, res, next) {
     setDatabaseContext(userId, tenantId)
       .then(() => {
         // Добавляем информацию о контексте в логи
-        console.log(`🔐 JWT Context: user=${userId.substring(0,8)}, tenant=${tenantId.substring(0,8)}, role=${role}, path=${req.path}`);
+        console.log(`🔐 JWT Context: user=${userId.substring(0, 8)}, tenant=${tenantId.substring(0, 8)}, role=${role}, path=${req.path}`);
         next();
       })
-      .catch(error => {
+      .catch((error) => {
         console.error('❌ Ошибка установки контекста БД:', error.message);
         res.status(500).json({
           error: 'Ошибка установки контекста базы данных',
           code: 'DATABASE_CONTEXT_ERROR'
         });
       });
-
   } catch (error) {
     console.error('❌ Ошибка в tenantContextMiddleware:', error);
     res.status(500).json({
@@ -150,11 +143,13 @@ export function tenantContextMiddleware(req, res, next) {
  */
 async function setDatabaseContext(userId, tenantId) {
   try {
-    // Используем SET (без LOCAL) для установки переменных сессии
-    // Это установит переменные для текущего соединения
-    await query(`SET app.user_id = $1`, [userId]);
-    await query(`SET app.tenant_id = $2`, [tenantId]);
-    
+    // PostgreSQL не поддерживает параметризованные запросы для SET
+    // Используем прямое значение, но с проверкой на SQL injection
+    const safeUserId = parseInt(userId);
+    const safeTenantId = tenantId.replace(/[^a-f0-9-]/gi, '');
+
+    await query(`SET app.user_id = ${safeUserId}`);
+    await query(`SET app.tenant_id = '${safeTenantId}'`);
   } catch (error) {
     console.error('❌ Ошибка установки контекста БД:', error.message);
     throw error;
@@ -177,7 +172,7 @@ export function getCurrentUser(req) {
  */
 export function requireRole(allowedRoles) {
   const roles = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
-  
+
   return (req, res, next) => {
     const user = getCurrentUser(req);
     if (!user) {

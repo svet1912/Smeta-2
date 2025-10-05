@@ -29,10 +29,10 @@ export const activeConnections = new client.Gauge({
 export function observeRequestDuration(req, res, next) {
   const end = httpRequestDuration.startTimer();
   res.on('finish', () => {
-    const labels = { 
-      method: req.method, 
-      route: req.route?.path || req.path, 
-      status_code: res.statusCode 
+    const labels = {
+      method: req.method,
+      route: req.route?.path || req.path,
+      status_code: res.statusCode
     };
     end(labels);
     httpRequestCounter.inc(labels);
@@ -43,18 +43,21 @@ export function observeRequestDuration(req, res, next) {
 export function observeDbQuery(queryText, duration) {
   const operation = queryText.trim().split(' ')[0].toLowerCase();
   let table = 'unknown';
-  
+
   // Простое извлечение таблицы из запроса
   const tableMatch = queryText.match(/(?:FROM|INTO|UPDATE|TABLE)\s+(\w+)/i);
   if (tableMatch) {
     table = tableMatch[1];
   }
-  
-  dbQueryDuration.observe({ 
-    query_type: operation, 
-    table: table, 
-    operation: operation 
-  }, duration / 1000); // конвертируем ms в секунды
+
+  dbQueryDuration.observe(
+    {
+      query_type: operation,
+      table: table,
+      operation: operation
+    },
+    duration / 1000
+  ); // конвертируем ms в секунды
 }
 
 export async function metricsEndpoint(req, res) {

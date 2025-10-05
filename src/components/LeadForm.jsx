@@ -58,7 +58,7 @@ const LeadForm = ({ content, variant = 'full' }) => {
           fieldErrors.name = 'Имя должно содержать минимум 2 символа';
         }
         break;
-      
+
       case 'email':
         if (!value.trim()) {
           fieldErrors.email = content.messages.validation.required;
@@ -66,13 +66,13 @@ const LeadForm = ({ content, variant = 'full' }) => {
           fieldErrors.email = content.messages.validation.email;
         }
         break;
-      
+
       case 'phone':
         if (value && !/^[\+\d\s\(\)\-]{7,20}$/.test(value)) {
           fieldErrors.phone = content.messages.validation.phone;
         }
         break;
-      
+
       case 'consent':
         if (!value) {
           fieldErrors.consent = content.messages.validation.consent;
@@ -86,15 +86,15 @@ const LeadForm = ({ content, variant = 'full' }) => {
   const handleInputChange = (e) => {
     const { name, value, checked, type } = e.target;
     const newValue = type === 'checkbox' ? checked : value;
-    
-    setFormData(prev => ({
+
+    setFormData((prev) => ({
       ...prev,
       [name]: newValue
     }));
 
     // Очищаем ошибки при изменении поля
     if (errors[name]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
         [name]: null
       }));
@@ -103,7 +103,7 @@ const LeadForm = ({ content, variant = 'full' }) => {
     // Валидация в реальном времени для обязательных полей
     const fieldErrors = validateField(name, newValue);
     if (Object.keys(fieldErrors).length > 0) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
         ...fieldErrors
       }));
@@ -112,7 +112,7 @@ const LeadForm = ({ content, variant = 'full' }) => {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     // Проверяем все обязательные поля
     Object.entries({
       name: formData.name,
@@ -140,7 +140,7 @@ const LeadForm = ({ content, variant = 'full' }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -150,11 +150,11 @@ const LeadForm = ({ content, variant = 'full' }) => {
 
     try {
       const utmParams = getUTMParams();
-      
+
       const response = await fetch('/api/lead', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           ...formData,
@@ -167,7 +167,7 @@ const LeadForm = ({ content, variant = 'full' }) => {
       if (response.ok) {
         setSubmitStatus('success');
         setSubmitMessage(result.message || content.messages.success);
-        
+
         // Очищаем форму при успехе
         setFormData({
           name: '',
@@ -180,7 +180,7 @@ const LeadForm = ({ content, variant = 'full' }) => {
           consent: false,
           website: ''
         });
-        
+
         // Прокручиваем к сообщению об успехе
         setTimeout(() => {
           const alertElement = document.querySelector('[data-success-alert]');
@@ -188,18 +188,17 @@ const LeadForm = ({ content, variant = 'full' }) => {
             alertElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
         }, 100);
-        
       } else {
         setSubmitStatus('error');
         setSubmitMessage(result.error || content.messages.error);
-        
+
         // Показываем детальные ошибки валидации
         if (result.details) {
           const serverErrors = {};
-          result.details.forEach(error => {
+          result.details.forEach((error) => {
             serverErrors.server = error;
           });
-          setErrors(prev => ({ ...prev, ...serverErrors }));
+          setErrors((prev) => ({ ...prev, ...serverErrors }));
         }
       }
     } catch (error) {
@@ -218,7 +217,7 @@ const LeadForm = ({ content, variant = 'full' }) => {
         <Typography variant="h6" gutterBottom>
           Быстрая заявка
         </Typography>
-        
+
         <form onSubmit={handleSubmit}>
           <Stack spacing={2}>
             <TextField
@@ -232,7 +231,7 @@ const LeadForm = ({ content, variant = 'full' }) => {
               size="small"
               required
             />
-            
+
             <TextField
               name="email"
               label={content.fields.email.label}
@@ -244,23 +243,16 @@ const LeadForm = ({ content, variant = 'full' }) => {
               size="small"
               required
             />
-            
+
             <FormControlLabel
-              control={
-                <Checkbox
-                  name="consent"
-                  checked={formData.consent}
-                  onChange={handleInputChange}
-                  size="small"
-                />
-              }
+              control={<Checkbox name="consent" checked={formData.consent} onChange={handleInputChange} size="small" />}
               label={
                 <Typography variant="body2">
                   Соглашаюсь с <Link href="#privacy">политикой конфиденциальности</Link>
                 </Typography>
               }
             />
-            
+
             <Button
               type="submit"
               variant="contained"
@@ -274,11 +266,7 @@ const LeadForm = ({ content, variant = 'full' }) => {
         </form>
 
         {submitStatus && (
-          <Alert 
-            severity={submitStatus} 
-            sx={{ mt: 2 }}
-            data-success-alert={submitStatus === 'success'}
-          >
+          <Alert severity={submitStatus} sx={{ mt: 2 }} data-success-alert={submitStatus === 'success'}>
             {submitMessage}
           </Alert>
         )}
@@ -300,11 +288,7 @@ const LeadForm = ({ content, variant = 'full' }) => {
         </Stack>
 
         {submitStatus && (
-          <Alert 
-            severity={submitStatus} 
-            onClose={() => setSubmitStatus(null)}
-            data-success-alert={submitStatus === 'success'}
-          >
+          <Alert severity={submitStatus} onClose={() => setSubmitStatus(null)} data-success-alert={submitStatus === 'success'}>
             {submitMessage}
           </Alert>
         )}
@@ -322,7 +306,7 @@ const LeadForm = ({ content, variant = 'full' }) => {
               required
               fullWidth
             />
-            
+
             <TextField
               name="email"
               type="email"
@@ -348,7 +332,7 @@ const LeadForm = ({ content, variant = 'full' }) => {
               helperText={errors.phone}
               fullWidth
             />
-            
+
             <TextField
               name="company"
               label={content.fields.company.label}
@@ -378,12 +362,7 @@ const LeadForm = ({ content, variant = 'full' }) => {
 
             <FormControl fullWidth>
               <InputLabel>{content.fields.budget.label}</InputLabel>
-              <Select
-                name="budget"
-                value={formData.budget}
-                onChange={handleInputChange}
-                label={content.fields.budget.label}
-              >
+              <Select name="budget" value={formData.budget} onChange={handleInputChange} label={content.fields.budget.label}>
                 {content.fields.budget.options.map((option) => (
                   <MenuItem key={option.value} value={option.value}>
                     {option.label}
@@ -415,27 +394,24 @@ const LeadForm = ({ content, variant = 'full' }) => {
           />
 
           <FormControlLabel
-            control={
-              <Checkbox
-                name="consent"
-                checked={formData.consent}
-                onChange={handleInputChange}
-                required
-              />
-            }
+            control={<Checkbox name="consent" checked={formData.consent} onChange={handleInputChange} required />}
             label={
               <Typography variant="body2">
-                Соглашаюсь с <Link href="#privacy" sx={{ textDecoration: 'none' }}>политикой конфиденциальности</Link> и на обработку персональных данных *
+                Соглашаюсь с{' '}
+                <Link href="#privacy" sx={{ textDecoration: 'none' }}>
+                  политикой конфиденциальности
+                </Link>{' '}
+                и на обработку персональных данных *
               </Typography>
             }
           />
-          
+
           {errors.consent && (
             <Typography color="error" variant="caption">
               {errors.consent}
             </Typography>
           )}
-          
+
           {errors.server && (
             <Typography color="error" variant="caption">
               {errors.server}

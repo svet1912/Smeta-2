@@ -10,8 +10,9 @@ import { query } from '../database.js';
 export async function getUserProjects(req, res) {
   try {
     const user = req.user;
-    
-    const result = await query(`
+
+    const result = await query(
+      `
       SELECT cp.*, 
              COUNT(ce.id) as estimates_count
       FROM construction_projects cp
@@ -19,8 +20,10 @@ export async function getUserProjects(req, res) {
       WHERE cp.user_id = $1
       GROUP BY cp.id
       ORDER BY cp.created_at DESC
-    `, [user.id]);
-    
+    `,
+      [user.id]
+    );
+
     res.json({
       data: result.rows,
       total: result.rows.length
@@ -39,22 +42,25 @@ export async function createProject(req, res) {
   try {
     const user = req.user;
     const { customer_name, object_address, contractor_name, contract_number, deadline } = req.body;
-    
+
     if (!customer_name || !object_address || !contractor_name || !contract_number || !deadline) {
       return res.status(400).json({
         error: 'Все поля обязательны для заполнения',
         code: 'MISSING_REQUIRED_FIELDS'
       });
     }
-    
-    const result = await query(`
+
+    const result = await query(
+      `
       INSERT INTO construction_projects (
         customer_name, object_address, contractor_name, 
         contract_number, deadline, user_id
       ) VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING *
-    `, [customer_name, object_address, contractor_name, contract_number, deadline, user.id]);
-    
+    `,
+      [customer_name, object_address, contractor_name, contract_number, deadline, user.id]
+    );
+
     res.status(201).json({
       success: true,
       data: result.rows[0]

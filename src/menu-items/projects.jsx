@@ -1,11 +1,9 @@
 // assets
-import { ProjectOutlined, PlusOutlined, FolderOutlined } from '@ant-design/icons';
+import { ProjectOutlined } from '@ant-design/icons';
 
 // icons
 const icons = {
-  ProjectOutlined,
-  PlusOutlined,
-  FolderOutlined
+  ProjectOutlined
 };
 
 // ==============================|| MENU ITEMS - PROJECTS ||============================== //
@@ -16,28 +14,12 @@ const projects = {
   type: 'group',
   children: [
     {
-      id: 'projects',
-      title: 'Управление проектами',
-      type: 'collapse',
+      id: 'projects-storage',
+      title: 'Проекты',
+      type: 'item',
+      url: '/app/projects/storage',
       icon: icons.ProjectOutlined,
-      children: [
-        {
-          id: 'create-project',
-          title: 'Создать проект',
-          type: 'item',
-          url: '/app/projects/create',
-          icon: icons.PlusOutlined,
-          breadcrumbs: false
-        },
-        {
-          id: 'projects-storage',
-          title: 'Хранилище проектов',
-          type: 'item',
-          url: '/app/projects/storage',
-          icon: icons.FolderOutlined,
-          breadcrumbs: false
-        }
-      ]
+      breadcrumbs: false
     }
   ]
 };

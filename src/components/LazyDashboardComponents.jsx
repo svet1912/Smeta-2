@@ -4,7 +4,7 @@ import { Typography, CircularProgress, Box } from 'utils/muiImports';
 
 // Ленивые импорты тяжелых компонентов
 const MonthlyBarChart = lazy(() => import('sections/dashboard/default/MonthlyBarChart'));
-const ReportAreaChart = lazy(() => import('sections/dashboard/default/ReportAreaChart')); 
+const ReportAreaChart = lazy(() => import('sections/dashboard/default/ReportAreaChart'));
 const UniqueVisitorCard = lazy(() => import('sections/dashboard/default/UniqueVisitorCard'));
 const SaleReportCard = lazy(() => import('sections/dashboard/default/SaleReportCard'));
 const OrdersTable = lazy(() => import('sections/dashboard/default/OrdersTable'));
@@ -46,18 +46,12 @@ const useIntersectionObserver = (options = {}) => {
 };
 
 // Компонент для ленивой загрузки графика при появлении в области видимости
-export const LazyChart = ({ children, minHeight = "200px" }) => {
+export const LazyChart = ({ children, minHeight = '200px' }) => {
   const [ref, isVisible] = useIntersectionObserver();
-  
+
   return (
     <div ref={ref} style={{ minHeight }}>
-      {isVisible ? (
-        <Suspense fallback={<ChartLoader />}>
-          {children}
-        </Suspense>
-      ) : (
-        <ChartLoader />
-      )}
+      {isVisible ? <Suspense fallback={<ChartLoader />}>{children}</Suspense> : <ChartLoader />}
     </div>
   );
 };

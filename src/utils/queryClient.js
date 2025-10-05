@@ -7,7 +7,7 @@ export const queryClient = new QueryClient({
     queries: {
       // Кэшируем данные на 5 минут
       staleTime: 1000 * 60 * 5,
-      // Данные считаются свежими 10 минут  
+      // Данные считаются свежими 10 минут
       cacheTime: 1000 * 60 * 10,
       // Не перезапрашиваем данные при фокусе окна
       refetchOnWindowFocus: false,

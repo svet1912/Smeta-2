@@ -1,14 +1,14 @@
-import { 
-  Box, 
-  Container, 
-  Typography, 
-  Grid, 
-  Card, 
-  CardContent, 
-  Button, 
-  List, 
-  ListItem, 
-  ListItemIcon, 
+import {
+  Box,
+  Container,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  Button,
+  List,
+  ListItem,
+  ListItemIcon,
   ListItemText,
   Stack,
   Chip
@@ -45,11 +45,7 @@ const Pricing = ({ content }) => {
             >
               {content.title}
             </Typography>
-            <Typography
-              variant="h6"
-              color="text.secondary"
-              sx={{ maxWidth: '600px' }}
-            >
+            <Typography variant="h6" color="text.secondary" sx={{ maxWidth: '600px' }}>
               {content.subtitle}
             </Typography>
           </Stack>
@@ -81,12 +77,7 @@ const Pricing = ({ content }) => {
                         zIndex: 1
                       }}
                     >
-                      <Chip
-                        icon={<StarIcon />}
-                        label="Популярный"
-                        color="primary"
-                        sx={{ fontWeight: 'bold' }}
-                      />
+                      <Chip icon={<StarIcon />} label="Популярный" color="primary" sx={{ fontWeight: 'bold' }} />
                     </Box>
                   )}
 
@@ -96,14 +87,14 @@ const Pricing = ({ content }) => {
                         <Typography
                           variant="h4"
                           component="h3"
-                          sx={{ 
+                          sx={{
                             fontWeight: 'bold',
                             color: plan.popular ? 'primary.main' : 'text.primary'
                           }}
                         >
                           {plan.name}
                         </Typography>
-                        
+
                         <Typography variant="body2" color="text.secondary">
                           {plan.description}
                         </Typography>
@@ -129,16 +120,16 @@ const Pricing = ({ content }) => {
                         {plan.features.map((feature, featureIndex) => (
                           <ListItem key={featureIndex} sx={{ px: 0, py: 0.5 }}>
                             <ListItemIcon sx={{ minWidth: 32 }}>
-                              <CheckIcon 
-                                sx={{ 
+                              <CheckIcon
+                                sx={{
                                   color: 'success.main',
                                   fontSize: '1.25rem'
-                                }} 
+                                }}
                               />
                             </ListItemIcon>
-                            <ListItemText 
+                            <ListItemText
                               primary={feature}
-                              sx={{ 
+                              sx={{
                                 '& .MuiListItemText-primary': {
                                   fontSize: '0.875rem'
                                 }

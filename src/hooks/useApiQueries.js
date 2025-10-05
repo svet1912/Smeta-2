@@ -1,5 +1,5 @@
 // Оптимизированные хуки для API с React Query кэшированием
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getStatistics, getOrders } from 'api/database';
 import { QUERY_KEYS } from 'utils/queryClient';
 
@@ -38,7 +38,7 @@ export const useOrders = () => {
 // Хук для инвалидации кэша при обновлении данных
 export const useInvalidateQueries = () => {
   const queryClient = useQueryClient();
-  
+
   return {
     invalidateStatistics: () => queryClient.invalidateQueries({ queryKey: QUERY_KEYS.STATISTICS }),
     invalidateOrders: () => queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDERS }),
@@ -49,7 +49,7 @@ export const useInvalidateQueries = () => {
 // Хук для предзагрузки данных
 export const usePrefetchQueries = () => {
   const queryClient = useQueryClient();
-  
+
   return {
     prefetchStatistics: () => {
       queryClient.prefetchQuery({
@@ -60,7 +60,7 @@ export const usePrefetchQueries = () => {
     },
     prefetchOrders: () => {
       queryClient.prefetchQuery({
-        queryKey: QUERY_KEYS.ORDERS, 
+        queryKey: QUERY_KEYS.ORDERS,
         queryFn: getOrders,
         staleTime: 1000 * 60 * 3
       });

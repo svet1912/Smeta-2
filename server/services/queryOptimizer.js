@@ -38,7 +38,7 @@ class QueryOptimizer {
     // Проверяем кэш если указан ключ и кэш не отключен
     if (cacheKey && !skipCache) {
       const cached = this.queryCache.get(cacheKey);
-      if (cached && (Date.now() - cached.timestamp) < cacheTTL) {
+      if (cached && Date.now() - cached.timestamp < cacheTTL) {
         this.cacheStats.hits++;
         console.log(`📦 Кэш-хит для ключа: ${cacheKey}`);
         return cached.result;
@@ -77,12 +77,7 @@ class QueryOptimizer {
    * Оптимизированная загрузка материалов с пагинацией
    */
   async getMaterialsOptimized(filters = {}, pagination = {}) {
-    const {
-      search = '',
-      category = '',
-      limit = 50,
-      offset = 0
-    } = { ...filters, ...pagination };
+    const { search = '', category = '', limit = 50, offset = 0 } = { ...filters, ...pagination };
 
     const cacheKey = `materials_${search}_${category}_${limit}_${offset}`;
 
@@ -123,11 +118,7 @@ class QueryOptimizer {
    * Оптимизированная загрузка работ с пагинацией
    */
   async getWorksOptimized(filters = {}, pagination = {}) {
-    const {
-      search = '',
-      limit = 50,
-      offset = 0
-    } = { ...filters, ...pagination };
+    const { search = '', limit = 50, offset = 0 } = { ...filters, ...pagination };
 
     const cacheKey = `works_${search}_${limit}_${offset}`;
 
@@ -174,11 +165,7 @@ class QueryOptimizer {
    * Оптимизированная загрузка смет с предварительной загрузкой элементов
    */
   async getCustomerEstimatesOptimized(userId, tenantId, pagination = {}) {
-    const {
-      limit = 20,
-      offset = 0,
-      includeItems = true
-    } = pagination;
+    const { limit = 20, offset = 0, includeItems = true } = pagination;
 
     const cacheKey = `estimates_${userId}_${tenantId}_${limit}_${offset}_${includeItems}`;
 
@@ -202,7 +189,7 @@ class QueryOptimizer {
 
     // Если нужно загрузить элементы смет
     if (includeItems && result.rows.length > 0) {
-      const estimateIds = result.rows.map(row => row.id);
+      const estimateIds = result.rows.map((row) => row.id);
       const itemsSql = `
         SELECT 
           cei.*,
@@ -233,7 +220,7 @@ class QueryOptimizer {
       }, {});
 
       // Добавляем элементы к сметам
-      result.rows.forEach(estimate => {
+      result.rows.forEach((estimate) => {
         estimate.items = itemsByEstimate[estimate.id] || [];
       });
     }
@@ -246,7 +233,7 @@ class QueryOptimizer {
    */
   async getLeadsStatsOptimized() {
     const cacheKey = 'leads_stats';
-    
+
     const sql = `
       SELECT
         COUNT(*) as total,
@@ -286,7 +273,7 @@ class QueryOptimizer {
     return {
       ...this.cacheStats,
       size: this.queryCache.size,
-      hitRate: this.cacheStats.hits / (this.cacheStats.hits + this.cacheStats.misses) * 100
+      hitRate: (this.cacheStats.hits / (this.cacheStats.hits + this.cacheStats.misses)) * 100
     };
   }
 

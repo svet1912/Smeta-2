@@ -12,12 +12,7 @@ import { getCurrentUser } from '../middleware/auth.js';
 export async function getMaterials(req, res) {
   try {
     const user = getCurrentUser(req);
-    const { 
-      search = '', 
-      limit = 50, 
-      offset = 0,
-      showOnlyOverrides = false 
-    } = req.query;
+    const { search = '', limit = 50, offset = 0, showOnlyOverrides = false } = req.query;
 
     // Строим WHERE условие для поиска
     let whereCondition = '';
@@ -36,7 +31,8 @@ export async function getMaterials(req, res) {
     }
 
     // Выполняем запрос к VIEW materials_effective (автоматически учитывает tenant_id из app.tenant_id)
-    const result = await query(`
+    const result = await query(
+      `
       SELECT 
         id, 
         name, 
@@ -53,16 +49,21 @@ export async function getMaterials(req, res) {
       ${whereCondition}
       ORDER BY name
       LIMIT $${paramIndex} OFFSET $${paramIndex + 1};
-    `, [...params, parseInt(limit), parseInt(offset)]);
+    `,
+      [...params, parseInt(limit), parseInt(offset)]
+    );
 
     // Подсчитываем общее количество
-    const countResult = await query(`
+    const countResult = await query(
+      `
       SELECT COUNT(*) as total
       FROM materials_effective 
       ${whereCondition};
-    `, params);
+    `,
+      params
+    );
 
-    const materials = result.rows.map(row => ({
+    const materials = result.rows.map((row) => ({
       id: row.id,
       name: row.name,
       imageUrl: row.image_url,
@@ -76,7 +77,7 @@ export async function getMaterials(req, res) {
       updatedAt: row.updated_at
     }));
 
-    console.log(`📚 Получено материалов: ${materials.length}, tenant=${user.tenantId.substring(0,8)}`);
+    console.log(`📚 Получено материалов: ${materials.length}, tenant=${user.tenantId.substring(0, 8)}`);
 
     res.json({
       success: true,
@@ -85,10 +86,9 @@ export async function getMaterials(req, res) {
         total: parseInt(countResult.rows[0].total),
         limit: parseInt(limit),
         offset: parseInt(offset),
-        hasMore: (parseInt(offset) + materials.length) < parseInt(countResult.rows[0].total)
+        hasMore: parseInt(offset) + materials.length < parseInt(countResult.rows[0].total)
       }
     });
-
   } catch (error) {
     console.error('❌ Ошибка получения материалов:', error);
     res.status(500).json({
@@ -105,16 +105,7 @@ export async function getMaterials(req, res) {
 export async function overrideMaterial(req, res) {
   try {
     const user = getCurrentUser(req);
-    const { 
-      baseId, 
-      name, 
-      unit, 
-      unitPrice, 
-      expenditure, 
-      weight,
-      imageUrl,
-      itemUrl 
-    } = req.body;
+    const { baseId, name, unit, unitPrice, expenditure, weight, imageUrl, itemUrl } = req.body;
 
     if (!baseId || !name) {
       return res.status(400).json({
@@ -127,7 +118,8 @@ export async function overrideMaterial(req, res) {
     const overrideId = `${baseId}_tenant_${user.tenantId.substring(0, 8)}`;
 
     // Создаем или обновляем переопределение
-    const result = await query(`
+    const result = await query(
+      `
       INSERT INTO materials (
         id, tenant_id, name, unit, unit_price, expenditure, weight, image_url, item_url
       )
@@ -142,21 +134,23 @@ export async function overrideMaterial(req, res) {
         item_url = EXCLUDED.item_url,
         updated_at = CURRENT_TIMESTAMP
       RETURNING id, name, unit, unit_price, expenditure, weight;
-    `, [
-      overrideId,
-      user.tenantId,
-      name,
-      unit,
-      parseFloat(unitPrice) || 0,
-      parseFloat(expenditure) || 0,
-      parseFloat(weight) || 0,
-      imageUrl || null,
-      itemUrl || null
-    ]);
+    `,
+      [
+        overrideId,
+        user.tenantId,
+        name,
+        unit,
+        parseFloat(unitPrice) || 0,
+        parseFloat(expenditure) || 0,
+        parseFloat(weight) || 0,
+        imageUrl || null,
+        itemUrl || null
+      ]
+    );
 
     const material = result.rows[0];
 
-    console.log(`🏢 Создано переопределение материала: ${material.name}, tenant=${user.tenantId.substring(0,8)}`);
+    console.log(`🏢 Создано переопределение материала: ${material.name}, tenant=${user.tenantId.substring(0, 8)}`);
 
     res.json({
       success: true,
@@ -170,7 +164,6 @@ export async function overrideMaterial(req, res) {
         isTenantOverride: true
       }
     });
-
   } catch (error) {
     console.error('❌ Ошибка создания переопределения материала:', error);
     res.status(500).json({
@@ -190,10 +183,13 @@ export async function resetMaterialOverride(req, res) {
     const { id } = req.params;
 
     // Удаляем только тенантские переопределения
-    const result = await query(`
+    const result = await query(
+      `
       DELETE FROM materials
       WHERE id = $1 AND tenant_id = $2;
-    `, [id, user.tenantId]);
+    `,
+      [id, user.tenantId]
+    );
 
     if (result.rowCount === 0) {
       return res.status(404).json({
@@ -202,13 +198,12 @@ export async function resetMaterialOverride(req, res) {
       });
     }
 
-    console.log(`🌍 Сброшено переопределение материала: ${id}, tenant=${user.tenantId.substring(0,8)}`);
+    console.log(`🌍 Сброшено переопределение материала: ${id}, tenant=${user.tenantId.substring(0, 8)}`);
 
     res.json({
       success: true,
       message: 'Переопределение удалено, материал сброшен к глобальному'
     });
-
   } catch (error) {
     console.error('❌ Ошибка сброса переопределения материала:', error);
     res.status(500).json({
@@ -224,12 +219,7 @@ export async function resetMaterialOverride(req, res) {
  */
 export async function getWorks(req, res) {
   try {
-    const { 
-      search = '', 
-      limit = 50, 
-      offset = 0,
-      showOnlyOverrides = false 
-    } = req.query;
+    const { search = '', limit = 50, offset = 0, showOnlyOverrides = false } = req.query;
 
     // Строим WHERE условие для поиска
     let whereCondition = '';
@@ -248,7 +238,8 @@ export async function getWorks(req, res) {
     }
 
     // Выполняем запрос к таблице works_ref
-    const result = await query(`
+    const result = await query(
+      `
       SELECT 
         id, 
         name, 
@@ -261,16 +252,21 @@ export async function getWorks(req, res) {
       ${whereCondition}
       ORDER BY name
       LIMIT $${paramIndex} OFFSET $${paramIndex + 1};
-    `, [...params, parseInt(limit), parseInt(offset)]);
+    `,
+      [...params, parseInt(limit), parseInt(offset)]
+    );
 
     // Подсчитываем общее количество
-    const countResult = await query(`
+    const countResult = await query(
+      `
       SELECT COUNT(*) as total
       FROM works_ref 
       ${whereCondition};
-    `, params);
+    `,
+      params
+    );
 
-    const works = result.rows.map(row => ({
+    const works = result.rows.map((row) => ({
       id: row.id,
       name: row.name,
       unit: row.unit,
@@ -289,10 +285,9 @@ export async function getWorks(req, res) {
         total: parseInt(countResult.rows[0].total),
         limit: parseInt(limit),
         offset: parseInt(offset),
-        hasMore: (parseInt(offset) + works.length) < parseInt(countResult.rows[0].total)
+        hasMore: parseInt(offset) + works.length < parseInt(countResult.rows[0].total)
       }
     });
-
   } catch (error) {
     console.error('❌ Ошибка получения работ:', error);
     res.status(500).json({
@@ -312,11 +307,14 @@ export async function getWorkMaterials(req, res) {
     const { id } = req.params;
 
     // Используем функцию get_effective_work_materials для получения состава
-    const result = await query(`
+    const result = await query(
+      `
       SELECT * FROM get_effective_work_materials($1);
-    `, [id]);
+    `,
+      [id]
+    );
 
-    const materials = result.rows.map(row => ({
+    const materials = result.rows.map((row) => ({
       materialId: row.material_id,
       materialName: row.material_name || 'Неизвестный материал',
       consumptionPerWorkUnit: parseFloat(row.consumption_per_work_unit),
@@ -324,7 +322,7 @@ export async function getWorkMaterials(req, res) {
       isTenantOverride: row.is_tenant_override
     }));
 
-    console.log(`🔗 Получен состав работы ${id}: ${materials.length} материалов, tenant=${user.tenantId.substring(0,8)}`);
+    console.log(`🔗 Получен состав работы ${id}: ${materials.length} материалов, tenant=${user.tenantId.substring(0, 8)}`);
 
     res.json({
       success: true,
@@ -333,7 +331,6 @@ export async function getWorkMaterials(req, res) {
         materials
       }
     });
-
   } catch (error) {
     console.error('❌ Ошибка получения состава работы:', error);
     res.status(500).json({
@@ -356,13 +353,16 @@ export async function getMaterialPrice(req, res) {
     const targetDate = date || new Date().toISOString().split('T')[0];
 
     // Используем функцию effective_material_price для получения цены на дату
-    const result = await query(`
+    const result = await query(
+      `
       SELECT effective_material_price($1, $2) as effective_price;
-    `, [id, targetDate]);
+    `,
+      [id, targetDate]
+    );
 
     const effectivePrice = result.rows[0].effective_price;
 
-    console.log(`💰 Цена материала ${id} на ${targetDate}: ${effectivePrice}, tenant=${user.tenantId.substring(0,8)}`);
+    console.log(`💰 Цена материала ${id} на ${targetDate}: ${effectivePrice}, tenant=${user.tenantId.substring(0, 8)}`);
 
     res.json({
       success: true,
@@ -373,7 +373,6 @@ export async function getMaterialPrice(req, res) {
         hasDatePrice: effectivePrice !== null
       }
     });
-
   } catch (error) {
     console.error('❌ Ошибка получения цены материала:', error);
     res.status(500).json({
@@ -391,14 +390,13 @@ export async function health(req, res) {
   try {
     // Простая проверка подключения к БД
     const result = await query('SELECT 1 as status;');
-    
+
     res.json({
       success: true,
       status: 'healthy',
       database: result.rows.length > 0 ? 'connected' : 'disconnected',
       timestamp: new Date().toISOString()
     });
-
   } catch (error) {
     console.error('❌ Health check failed:', error);
     res.status(500).json({
@@ -426,17 +424,28 @@ export async function createMaterial(req, res) {
       });
     }
 
-    const result = await query(`
+    const result = await query(
+      `
       INSERT INTO materials (name, unit, unit_price, expenditure, weight, image_url, item_url, tenant_id)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING *
-    `, [name, unit, parseFloat(unit_price) || 0, parseFloat(expenditure) || 0, parseFloat(weight) || 0, image_url, item_url, user?.tenantId || null]);
+    `,
+      [
+        name,
+        unit,
+        parseFloat(unit_price) || 0,
+        parseFloat(expenditure) || 0,
+        parseFloat(weight) || 0,
+        image_url,
+        item_url,
+        user?.tenantId || null
+      ]
+    );
 
     res.status(201).json({
       success: true,
       data: result.rows[0]
     });
-
   } catch (error) {
     console.error('❌ Ошибка создания материала:', error);
     res.status(500).json({
@@ -452,11 +461,13 @@ export async function createMaterial(req, res) {
  */
 export async function updateMaterial(req, res) {
   try {
+    // eslint-disable-next-line no-unused-vars
     const user = getCurrentUser(req);
     const { id } = req.params;
     const { name, unit, unit_price, expenditure, weight, image_url, item_url } = req.body;
 
-    const result = await query(`
+    const result = await query(
+      `
       UPDATE materials 
       SET name = COALESCE($2, name),
           unit = COALESCE($3, unit),
@@ -468,7 +479,9 @@ export async function updateMaterial(req, res) {
           updated_at = CURRENT_TIMESTAMP
       WHERE id = $1
       RETURNING *
-    `, [id, name, unit, unit_price, expenditure, weight, image_url, item_url]);
+    `,
+      [id, name, unit, unit_price, expenditure, weight, image_url, item_url]
+    );
 
     if (result.rows.length === 0) {
       return res.status(404).json({
@@ -481,7 +494,6 @@ export async function updateMaterial(req, res) {
       success: true,
       data: result.rows[0]
     });
-
   } catch (error) {
     console.error('❌ Ошибка обновления материала:', error);
     res.status(500).json({
@@ -499,9 +511,12 @@ export async function deleteMaterial(req, res) {
   try {
     const { id } = req.params;
 
-    const result = await query(`
+    const result = await query(
+      `
       DELETE FROM materials WHERE id = $1
-    `, [id]);
+    `,
+      [id]
+    );
 
     if (result.rowCount === 0) {
       return res.status(404).json({
@@ -514,7 +529,6 @@ export async function deleteMaterial(req, res) {
       success: true,
       message: 'Материал удален'
     });
-
   } catch (error) {
     console.error('❌ Ошибка удаления материала:', error);
     res.status(500).json({
@@ -540,17 +554,19 @@ export async function createWork(req, res) {
       });
     }
 
-    const result = await query(`
+    const result = await query(
+      `
       INSERT INTO works_ref (name, unit, unit_price, phase_id, stage_id, tenant_id)
       VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING *
-    `, [name, unit, parseFloat(unit_price) || 0, phase_id, stage_id, user?.tenantId || null]);
+    `,
+      [name, unit, parseFloat(unit_price) || 0, phase_id, stage_id, user?.tenantId || null]
+    );
 
     res.status(201).json({
       success: true,
       data: result.rows[0]
     });
-
   } catch (error) {
     console.error('❌ Ошибка создания работы:', error);
     res.status(500).json({
@@ -568,12 +584,15 @@ export async function getPhases(req, res) {
   try {
     const { limit = 50, offset = 0 } = req.query;
 
-    const result = await query(`
+    const result = await query(
+      `
       SELECT id, name, description, sort_order
       FROM phases
       ORDER BY sort_order, name
       LIMIT $1 OFFSET $2
-    `, [parseInt(limit), parseInt(offset)]);
+    `,
+      [parseInt(limit), parseInt(offset)]
+    );
 
     const countResult = await query(`SELECT COUNT(*) as total FROM phases`);
 
@@ -586,7 +605,6 @@ export async function getPhases(req, res) {
         offset: parseInt(offset)
       }
     });
-
   } catch (error) {
     console.error('❌ Ошибка получения этапов:', error);
     res.status(500).json({
@@ -612,17 +630,19 @@ export async function addWorkMaterial(req, res) {
       });
     }
 
-    const result = await query(`
+    const result = await query(
+      `
       INSERT INTO work_materials (work_id, material_id, consumption_per_work_unit, waste_coeff)
       VALUES ($1, $2, $3, $4)
       RETURNING *
-    `, [workId, material_id, parseFloat(consumption_per_work_unit), parseFloat(waste_coeff) || 1.0]);
+    `,
+      [workId, material_id, parseFloat(consumption_per_work_unit), parseFloat(waste_coeff) || 1.0]
+    );
 
     res.status(201).json({
       success: true,
       data: result.rows[0]
     });
-
   } catch (error) {
     console.error('❌ Ошибка добавления материала к работе:', error);
     res.status(500).json({
@@ -641,13 +661,16 @@ export async function updateWorkMaterial(req, res) {
     const { workId, materialId } = req.params;
     const { consumption_per_work_unit, waste_coeff } = req.body;
 
-    const result = await query(`
+    const result = await query(
+      `
       UPDATE work_materials 
       SET consumption_per_work_unit = COALESCE($3, consumption_per_work_unit),
           waste_coeff = COALESCE($4, waste_coeff)
       WHERE work_id = $1 AND material_id = $2
       RETURNING *
-    `, [workId, materialId, consumption_per_work_unit, waste_coeff]);
+    `,
+      [workId, materialId, consumption_per_work_unit, waste_coeff]
+    );
 
     if (result.rows.length === 0) {
       return res.status(404).json({
@@ -660,7 +683,6 @@ export async function updateWorkMaterial(req, res) {
       success: true,
       data: result.rows[0]
     });
-
   } catch (error) {
     console.error('❌ Ошибка обновления связи работы и материала:', error);
     res.status(500).json({
@@ -678,9 +700,12 @@ export async function deleteWorkMaterial(req, res) {
   try {
     const { workId, materialId } = req.params;
 
-    const result = await query(`
+    const result = await query(
+      `
       DELETE FROM work_materials WHERE work_id = $1 AND material_id = $2
-    `, [workId, materialId]);
+    `,
+      [workId, materialId]
+    );
 
     if (result.rowCount === 0) {
       return res.status(404).json({
@@ -693,7 +718,6 @@ export async function deleteWorkMaterial(req, res) {
       success: true,
       message: 'Связь работы и материала удалена'
     });
-
   } catch (error) {
     console.error('❌ Ошибка удаления связи работы и материала:', error);
     res.status(500).json({

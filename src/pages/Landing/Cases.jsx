@@ -18,11 +18,7 @@ const Cases = ({ content }) => {
             >
               {content.title}
             </Typography>
-            <Typography
-              variant="h6"
-              color="text.secondary"
-              sx={{ maxWidth: '700px' }}
-            >
+            <Typography variant="h6" color="text.secondary" sx={{ maxWidth: '700px' }}>
               {content.subtitle}
             </Typography>
           </Stack>
@@ -49,7 +45,7 @@ const Cases = ({ content }) => {
                         <Chip
                           label="Кейс"
                           size="small"
-                          sx={{ 
+                          sx={{
                             backgroundColor: 'success.light',
                             color: 'success.contrastText'
                           }}
@@ -59,7 +55,7 @@ const Cases = ({ content }) => {
                       <Typography
                         variant="h6"
                         component="h3"
-                        sx={{ 
+                        sx={{
                           fontWeight: 600,
                           color: 'primary.main',
                           lineHeight: 1.3
@@ -91,7 +87,7 @@ const Cases = ({ content }) => {
                       <Typography
                         variant="body1"
                         color="text.secondary"
-                        sx={{ 
+                        sx={{
                           lineHeight: 1.6,
                           flexGrow: 1,
                           display: 'flex',

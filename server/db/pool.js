@@ -3,10 +3,10 @@ import { Pool } from 'pg';
 // Настройка оптимизированного пула соединений для производительности
 export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  max: 20,                     // максимум одновременных соединений
-  idleTimeoutMillis: 30000,    // 30 секунд простаивающее соединение держим
+  max: 20, // максимум одновременных соединений
+  idleTimeoutMillis: 30000, // 30 секунд простаивающее соединение держим
   connectionTimeoutMillis: 2000, // если нет соединения за 2с → ошибка
-  keepAlive: true,             // поддерживаем соединения активными
+  keepAlive: true, // поддерживаем соединения активными
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
@@ -31,17 +31,17 @@ pool.on('release', (client) => {
 export async function executeQuery(text, params = []) {
   const start = Date.now();
   const client = await pool.connect();
-  
+
   try {
     const result = await client.query(text, params);
     const duration = Date.now() - start;
-    
+
     console.log('✅ Выполнен запрос через пул:', {
       text: text.substring(0, 50) + (text.length > 50 ? '...' : ''),
       duration: `${duration}ms`,
       rows: result.rowCount
     });
-    
+
     return result;
   } catch (error) {
     const duration = Date.now() - start;

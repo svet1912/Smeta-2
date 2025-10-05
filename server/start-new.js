@@ -12,7 +12,7 @@ async function startServer() {
     // Проверяем подключение к базе данных
     const result = await query('SELECT NOW() as current_time');
     console.log('✅ Подключение к базе данных проверено:', result.rows[0].current_time);
-    
+
     // Инициализируем таблицы
     if (app.initializeTables) {
       await app.initializeTables();
@@ -51,7 +51,7 @@ async function startServer() {
 
 // Запускаем сервер только если этот файл выполняется напрямую
 if (import.meta.url === `file://${process.argv[1]}`) {
-  startServer().catch(error => {
+  startServer().catch((error) => {
     console.error('❌ Ошибка запуска сервера:', error);
     process.exit(1);
   });

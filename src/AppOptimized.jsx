@@ -72,18 +72,22 @@ export default function AppOptimized() {
         <ThemeCustomization>
           <AuthProvider>
             <ScrollTop>
-              <Suspense fallback={
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  height: '100vh',
-                  fontSize: '18px',
-                  color: '#666'
-                }}>
-                  Загрузка приложения...
-                </div>
-              }>
+              <Suspense
+                fallback={
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      height: '100vh',
+                      fontSize: '18px',
+                      color: '#666'
+                    }}
+                  >
+                    Загрузка приложения...
+                  </div>
+                }
+              >
                 <RouterProvider router={router} />
               </Suspense>
             </ScrollTop>

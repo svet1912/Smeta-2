@@ -2,7 +2,7 @@
 // Экспортируем только используемые иконки для tree-shaking
 
 export { default as GiftOutlined } from '@ant-design/icons/GiftOutlined';
-export { default as MessageOutlined } from '@ant-design/icons/MessageOutlined';  
+export { default as MessageOutlined } from '@ant-design/icons/MessageOutlined';
 export { default as SettingOutlined } from '@ant-design/icons/SettingOutlined';
 export { default as EyeInvisibleOutlined } from '@ant-design/icons/EyeInvisibleOutlined';
 export { default as EyeOutlined } from '@ant-design/icons/EyeOutlined';

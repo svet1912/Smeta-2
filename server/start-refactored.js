@@ -20,7 +20,7 @@ async function startRefactoredServer() {
 }
 
 // Запуск сервера
-startRefactoredServer().catch(error => {
+startRefactoredServer().catch((error) => {
   console.error('❌ Критическая ошибка запуска сервера:', error);
   process.exit(1);
 });

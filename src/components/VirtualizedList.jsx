@@ -5,25 +5,14 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { Box, List, ListItem } from '@mui/material';
 
-const VirtualizedList = ({
-  items = [],
-  itemHeight = 60,
-  containerHeight = 400,
-  overscan = 5,
-  renderItem,
-  onScroll,
-  ...props
-}) => {
+const VirtualizedList = ({ items = [], itemHeight = 60, containerHeight = 400, overscan = 5, renderItem, onScroll, ...props }) => {
   const [scrollTop, setScrollTop] = useState(0);
   const containerRef = useRef(null);
 
   // Вычисляем видимые элементы
   const visibleItems = useMemo(() => {
     const startIndex = Math.floor(scrollTop / itemHeight);
-    const endIndex = Math.min(
-      startIndex + Math.ceil(containerHeight / itemHeight) + overscan,
-      items.length
-    );
+    const endIndex = Math.min(startIndex + Math.ceil(containerHeight / itemHeight) + overscan, items.length);
 
     return items.slice(Math.max(0, startIndex - overscan), endIndex).map((item, index) => ({
       ...item,
@@ -33,14 +22,14 @@ const VirtualizedList = ({
 
   // Общая высота списка
   const totalHeight = items.length * itemHeight;
-  
+
   // Смещение для виртуализации
   const offsetY = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan) * itemHeight;
 
   const handleScroll = (event) => {
     const newScrollTop = event.target.scrollTop;
     setScrollTop(newScrollTop);
-    
+
     if (onScroll) {
       onScroll(newScrollTop);
     }

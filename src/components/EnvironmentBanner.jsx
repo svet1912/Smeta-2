@@ -1,10 +1,11 @@
 import { Box, Chip, Typography } from '@mui/material';
 
 const EnvironmentBanner = () => {
-  const isPreview = import.meta.env.VITE_VERCEL_ENV === 'preview' || 
-                   window.location.hostname.includes('-git-') ||
-                   window.location.hostname.includes('.vercel.app');
-  
+  const isPreview =
+    import.meta.env.VITE_VERCEL_ENV === 'preview' ||
+    window.location.hostname.includes('-git-') ||
+    window.location.hostname.includes('.vercel.app');
+
   const isProduction = import.meta.env.PROD && !isPreview;
 
   if (isProduction) {

@@ -82,13 +82,13 @@ const LandingPage = () => {
         <title>{content.meta.title}</title>
         <meta name="description" content={content.meta.description} />
         <meta name="keywords" content={content.meta.keywords} />
-        
+
         {/* Open Graph */}
         <meta property="og:title" content={content.meta.og.title} />
         <meta property="og:description" content={content.meta.og.description} />
         <meta property="og:image" content={content.meta.og.image} />
         <meta property="og:type" content="website" />
-        
+
         {/* Canonical URL */}
         <link rel="canonical" href={import.meta.env.VITE_SITE_URL || window.location.origin} />
       </Helmet>

@@ -59,7 +59,7 @@ export default function DashboardLayout() {
 
   const handleSubTabChange = (key) => {
     setActiveSubTab(key);
-    
+
     // Логика навигации по подвкладкам
     switch (key) {
       case 'object-parameters':
@@ -87,20 +87,17 @@ export default function DashboardLayout() {
       <Drawer />
 
       <Box component="main" sx={{ width: 'calc(100% - 260px)', flexGrow: 1, p: { xs: 2, sm: 3 } }}>
-        <Toolbar sx={{ 
-          mt: 'inherit',
-          // Добавляем отступ только если хедер видим
-          display: isHeaderVisible ? 'block' : 'none'
-        }} />
-        
+        <Toolbar
+          sx={{
+            mt: 'inherit',
+            // Добавляем отступ только если хедер видим
+            display: isHeaderVisible ? 'block' : 'none'
+          }}
+        />
+
         {/* Подвкладки для страниц расчетов и проектов */}
-        {showSubNavTabs && (
-          <SubNavTabs 
-            activeKey={activeSubTab} 
-            onChange={handleSubTabChange} 
-          />
-        )}
-        
+        {showSubNavTabs && <SubNavTabs activeKey={activeSubTab} onChange={handleSubTabChange} />}
+
         <Box
           sx={{
             ...{ px: { xs: 0, sm: 2 } },
@@ -108,7 +105,7 @@ export default function DashboardLayout() {
             minHeight: 'calc(100vh - 110px)',
             display: 'flex',
             flexDirection: 'column',
-            paddingTop: showSubNavTabs ? '16px' : (isHeaderVisible ? '0px' : '24px') // Компенсируем скрытый хедер
+            paddingTop: showSubNavTabs ? '16px' : isHeaderVisible ? '0px' : '24px' // Компенсируем скрытый хедер
           }}
         >
           <Outlet />

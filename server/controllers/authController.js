@@ -13,7 +13,7 @@ import tokenService from '../services/tokenService.js';
 export async function login(req, res) {
   try {
     const { email, password } = req.body;
-    
+
     if (!email || !password) {
       return res.status(400).json({
         error: 'Требуются email и пароль',
@@ -22,11 +22,14 @@ export async function login(req, res) {
     }
 
     // 1. Находим пользователя по email
-    const userResult = await query(`
+    const userResult = await query(
+      `
       SELECT id, email, password_hash, firstname, lastname, is_active
       FROM auth_users
       WHERE email = $1;
-    `, [email.toLowerCase()]);
+    `,
+      [email.toLowerCase()]
+    );
 
     if (userResult.rows.length === 0) {
       return res.status(401).json({
@@ -55,13 +58,16 @@ export async function login(req, res) {
     }
 
     // 4. Получаем текущий тенант пользователя
-    const tenantResult = await query(`
+    const tenantResult = await query(
+      `
       SELECT ut.tenant_id, t.name as tenant_name
       FROM user_tenants ut
       JOIN tenants t ON t.id = ut.tenant_id
       WHERE ut.user_id = $1 AND ut.is_current = true
       LIMIT 1;
-    `, [user.id]);
+    `,
+      [user.id]
+    );
 
     if (tenantResult.rows.length === 0) {
       return res.status(401).json({
@@ -80,15 +86,18 @@ export async function login(req, res) {
     // 6. Сохраняем refresh токен
     const userAgent = req.headers['user-agent'] || 'Unknown';
     const ipAddress = req.ip || req.connection.remoteAddress || 'Unknown';
-    
+
     await tokenService.saveRefreshToken(user.id, refreshToken, userAgent, ipAddress);
 
     // 7. Обновляем время последнего входа
-    await query(`
+    await query(
+      `
       UPDATE auth_users 
       SET last_login = CURRENT_TIMESTAMP 
       WHERE id = $1;
-    `, [user.id]);
+    `,
+      [user.id]
+    );
 
     console.log(`🔐 Логин пользователя: ${email}, tenant: ${tenantInfo.tenant_name}`);
 
@@ -104,7 +113,6 @@ export async function login(req, res) {
         tenantName: tenantInfo.tenant_name
       }
     });
-
   } catch (error) {
     console.error('❌ Ошибка при логине:', error);
     res.status(500).json({
@@ -121,7 +129,7 @@ export async function login(req, res) {
 export async function refreshToken(req, res) {
   try {
     const { refreshToken } = req.body;
-    
+
     if (!refreshToken) {
       return res.status(400).json({
         error: 'Refresh токен обязателен',
@@ -132,9 +140,9 @@ export async function refreshToken(req, res) {
     // Ротируем токен
     const userAgent = req.headers['user-agent'] || 'Unknown';
     const ipAddress = req.ip || req.connection.remoteAddress || 'Unknown';
-    
+
     const tokens = await tokenService.rotateRefreshToken(refreshToken, userAgent, ipAddress);
-    
+
     if (!tokens) {
       return res.status(401).json({
         error: 'Недействительный refresh токен',
@@ -142,7 +150,7 @@ export async function refreshToken(req, res) {
       });
     }
 
-    console.log(`🔄 Refresh токен: user=${tokens.user.id.substring(0,8)}`);
+    console.log(`🔄 Refresh токен: user=${tokens.user.id.substring(0, 8)}`);
 
     res.json({
       success: true,
@@ -150,7 +158,6 @@ export async function refreshToken(req, res) {
       refreshToken: tokens.refreshToken,
       user: tokens.user
     });
-
   } catch (error) {
     console.error('❌ Ошибка при обновлении токена:', error);
     res.status(500).json({
@@ -167,7 +174,7 @@ export async function refreshToken(req, res) {
 export async function logout(req, res) {
   try {
     const { refreshToken } = req.body;
-    
+
     if (refreshToken) {
       await tokenService.revokeRefreshToken(refreshToken);
     }
@@ -178,7 +185,6 @@ export async function logout(req, res) {
       success: true,
       message: 'Успешный выход'
     });
-
   } catch (error) {
     console.error('❌ Ошибка при логауте:', error);
     res.status(500).json({
@@ -195,8 +201,9 @@ export async function logout(req, res) {
 export async function getUserTenants(req, res) {
   try {
     const user = req.user; // Из JWT middleware
-    
-    const result = await query(`
+
+    const result = await query(
+      `
       SELECT 
         ut.tenant_id,
         ut.is_current,
@@ -208,9 +215,11 @@ export async function getUserTenants(req, res) {
       JOIN tenants t ON t.id = ut.tenant_id
       WHERE ut.user_id = $1 AND ut.is_active = true
       ORDER BY ut.is_current DESC, t.name ASC;
-    `, [user.id]);
+    `,
+      [user.id]
+    );
 
-    const tenants = result.rows.map(row => ({
+    const tenants = result.rows.map((row) => ({
       id: row.tenant_id,
       name: row.name,
       displayName: row.display_name,
@@ -223,7 +232,6 @@ export async function getUserTenants(req, res) {
       success: true,
       tenants
     });
-
   } catch (error) {
     console.error('❌ Ошибка получения списка тенантов:', error);
     res.status(500).json({
@@ -241,7 +249,7 @@ export async function switchTenant(req, res) {
   try {
     const user = req.user; // Из JWT middleware
     const { tenantId } = req.body;
-    
+
     if (!tenantId) {
       return res.status(400).json({
         error: 'ID тенанта обязателен',
@@ -250,12 +258,15 @@ export async function switchTenant(req, res) {
     }
 
     // 1. Проверяем доступ к тенанту
-    const tenantResult = await query(`
+    const tenantResult = await query(
+      `
       SELECT ut.tenant_id, t.name, t.display_name, ut.role
       FROM user_tenants ut
       JOIN tenants t ON t.id = ut.tenant_id
       WHERE ut.user_id = $1 AND ut.tenant_id = $2 AND ut.is_active = true;
-    `, [user.id, tenantId]);
+    `,
+      [user.id, tenantId]
+    );
 
     if (tenantResult.rows.length === 0) {
       return res.status(403).json({
@@ -268,21 +279,27 @@ export async function switchTenant(req, res) {
 
     // 2. Обновляем текущий тенант
     await query('BEGIN');
-    
+
     try {
       // Сбрасываем is_current для всех тенантов пользователя
-      await query(`
+      await query(
+        `
         UPDATE user_tenants 
         SET is_current = false 
         WHERE user_id = $1;
-      `, [user.id]);
+      `,
+        [user.id]
+      );
 
       // Устанавливаем новый текущий тенант
-      await query(`
+      await query(
+        `
         UPDATE user_tenants 
         SET is_current = true 
         WHERE user_id = $1 AND tenant_id = $2;
-      `, [user.id, tenantId]);
+      `,
+        [user.id, tenantId]
+      );
 
       await query('COMMIT');
     } catch (error) {
@@ -291,11 +308,14 @@ export async function switchTenant(req, res) {
     }
 
     // 3. Получаем данные пользователя
-    const userResult = await query(`
+    const userResult = await query(
+      `
       SELECT id, email, firstname, lastname
       FROM auth_users
       WHERE id = $1;
-    `, [user.id]);
+    `,
+      [user.id]
+    );
 
     const userData = userResult.rows[0];
 
@@ -303,7 +323,7 @@ export async function switchTenant(req, res) {
     const userDataWithRole = { ...userData, role: 'estimator' }; // Временная роль
     const accessToken = tokenService.createAccessToken(userDataWithRole, tenantId);
 
-    console.log(`🔄 Переключение тенанта: user=${user.id.substring(0,8)}, tenant=${tenantInfo.name}`);
+    console.log(`🔄 Переключение тенанта: user=${user.id.substring(0, 8)}, tenant=${tenantInfo.name}`);
 
     res.json({
       success: true,
@@ -318,7 +338,6 @@ export async function switchTenant(req, res) {
         tenantRole: tenantInfo.role
       }
     });
-
   } catch (error) {
     console.error('❌ Ошибка переключения тенанта:', error);
     res.status(500).json({
@@ -345,7 +364,6 @@ export async function getCurrentUserInfo(req, res) {
         tenantName: 'Test Company RLS'
       }
     });
-
   } catch (error) {
     console.error('❌ Ошибка получения информации о пользователе:', error);
     res.status(500).json({

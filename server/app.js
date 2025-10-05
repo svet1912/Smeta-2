@@ -1,17 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import pino from 'pino-http';
 import { query } from './database.js';
-import { config } from './config.js';
-import { tenantContextMiddleware, requireRole, getCurrentUser } from './middleware/tenantContext.js';
 import { observeRequestDuration, metricsEndpoint, activeConnections as activeConnectionsGauge } from './metrics.js';
-import { cacheGetOrSet, cacheInvalidateByPrefix, getCacheStats } from './cache/cache.js';
-import { getRedis, isRedisAvailable, getRedisStats } from './cache/redisClient.js';
 
 dotenv.config();
 
@@ -29,34 +23,36 @@ app.use((req, res, next) => {
     console.log(`⚠️ Отклоняем запрос - превышен лимит (${activeConnections.size}/${MAX_CONNECTIONS})`);
     return res.status(503).json({ error: 'Сервер перегружен, попробуйте позже' });
   }
-  
+
   const connectionId = Math.random().toString(36).substr(2, 9);
   activeConnections.add(connectionId);
-  
+
   req.connectionId = connectionId;
   console.log(`📨 ${req.method} ${req.path} [${connectionId}] (${activeConnections.size}/${MAX_CONNECTIONS})`);
-  
+
   // Обновляем метрику активных соединений
   activeConnectionsGauge.set(activeConnections.size);
-  
+
   res.on('finish', () => {
     activeConnections.delete(connectionId);
     activeConnectionsGauge.set(activeConnections.size);
   });
-  
+
   res.on('close', () => {
     activeConnections.delete(connectionId);
     activeConnectionsGauge.set(activeConnections.size);
   });
-  
+
   next();
 });
 
 // Быстрый неблокирующий логгер
-app.use(pino({
-  level: process.env.LOG_LEVEL || 'info',
-  genReqId: (req, res) => `${Date.now()}-${Math.random().toString(16).slice(2)}`
-}));
+app.use(
+  pino({
+    level: process.env.LOG_LEVEL || 'info',
+    genReqId: (req, res) => `${Date.now()}-${Math.random().toString(16).slice(2)}`
+  })
+);
 
 // Сжатие ответов (gzip/br)
 app.use(compression());
@@ -92,13 +88,15 @@ app.use((req, res, next) => {
 });
 
 // CORS
-app.use(cors({
-  origin: true,
-  credentials: true,
-  optionsSuccessStatus: 200,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+    optionsSuccessStatus: 200,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+  })
+);
 
 // JSON parsing
 app.use(express.json({ limit: '1mb' }));
@@ -166,12 +164,12 @@ app.get('/api/orders', async (req, res) => {
 });
 
 // Инициализация таблиц при старте
-app.initializeTables = async function() {
+app.initializeTables = async function () {
   console.log('🔄 Инициализация таблиц...');
-  
+
   // Инициализируем таблицу для заявок
   await initializeLeadsTable();
-  
+
   // Здесь будет код инициализации из оригинального файла
 };
 

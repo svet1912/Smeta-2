@@ -21,13 +21,13 @@ const Preloader = ({ onComplete }) => {
       for (let i = 0; i < steps.length; i++) {
         setLoadingText(steps[i].text);
         setProgress((i + 1) * 25);
-        await new Promise(resolve => setTimeout(resolve, steps[i].duration));
+        await new Promise((resolve) => setTimeout(resolve, steps[i].duration));
       }
 
       // Дополнительная задержка для плавности
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise((resolve) => setTimeout(resolve, 200));
       setProgress(100);
-      
+
       // Вызываем callback завершения
       if (onComplete) {
         onComplete();
@@ -83,10 +83,7 @@ const Preloader = ({ onComplete }) => {
       </Box>
 
       <Box sx={{ textAlign: 'center' }}>
-        <CircularProgress 
-          size={24} 
-          sx={{ color: 'white', mb: 2 }} 
-        />
+        <CircularProgress size={24} sx={{ color: 'white', mb: 2 }} />
         <Typography variant="body2" sx={{ opacity: 0.8 }}>
           {loadingText}
         </Typography>

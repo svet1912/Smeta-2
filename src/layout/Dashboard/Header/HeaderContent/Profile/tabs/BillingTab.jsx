@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 // material-ui
 import {
   Box,
@@ -15,12 +13,10 @@ import {
   TableRow,
   Chip,
   Button,
-  Paper,
   List,
   ListItem,
   ListItemText,
-  LinearProgress,
-  Divider
+  LinearProgress
 } from '@mui/material';
 import { Stack } from '@mui/material';
 
@@ -37,12 +33,12 @@ import ExclamationCircleOutlined from '@ant-design/icons/ExclamationCircleOutlin
 export default function BillingTab() {
   const billingStats = {
     currentBalance: 2456.78,
-    monthlySpend: 324.50,
-    yearlySpend: 3894.00,
+    monthlySpend: 324.5,
+    yearlySpend: 3894.0,
     creditLimit: 5000,
     availableCredit: 2543.22,
     nextPayment: '15 октября 2024',
-    nextPaymentAmount: 324.50
+    nextPaymentAmount: 324.5
   };
 
   const transactions = [
@@ -57,7 +53,7 @@ export default function BillingTab() {
     {
       id: 'TXN-002',
       description: 'Пополнение баланса',
-      amount: +500.00,
+      amount: +500.0,
       date: '2024-09-22',
       status: 'completed',
       category: 'Пополнение'
@@ -65,7 +61,7 @@ export default function BillingTab() {
     {
       id: 'TXN-003',
       description: 'Figma Professional - годовая подписка',
-      amount: -144.00,
+      amount: -144.0,
       date: '2024-09-20',
       status: 'completed',
       category: 'Софтвер'
@@ -73,7 +69,7 @@ export default function BillingTab() {
     {
       id: 'TXN-004',
       description: 'Возврат за неиспользованные услуги',
-      amount: +23.50,
+      amount: +23.5,
       date: '2024-09-18',
       status: 'pending',
       category: 'Возврат'
@@ -92,7 +88,7 @@ export default function BillingTab() {
     { service: 'Office 365 Subscription', amount: 12.99, dueDate: '2024-10-01', auto: true },
     { service: 'Slack Premium', amount: 6.67, dueDate: '2024-10-05', auto: true },
     { service: 'Dropbox Professional', amount: 19.99, dueDate: '2024-10-10', auto: false },
-    { service: 'GitHub Pro', amount: 4.00, dueDate: '2024-10-15', auto: true }
+    { service: 'GitHub Pro', amount: 4.0, dueDate: '2024-10-15', auto: true }
   ];
 
   const paymentMethods = [
@@ -138,9 +134,7 @@ export default function BillingTab() {
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                 <DollarOutlined style={{ color: '#1976d2' }} />
-                <Typography variant="subtitle2">
-                  Текущий баланс
-                </Typography>
+                <Typography variant="subtitle2">Текущий баланс</Typography>
               </Box>
               <Typography variant="h4" color="primary">
                 ${billingStats.currentBalance.toFixed(2)}
@@ -153,9 +147,7 @@ export default function BillingTab() {
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                 <CalendarOutlined style={{ color: '#2e7d32' }} />
-                <Typography variant="subtitle2">
-                  Расходы за месяц
-                </Typography>
+                <Typography variant="subtitle2">Расходы за месяц</Typography>
               </Box>
               <Typography variant="h4" color="success.main">
                 ${billingStats.monthlySpend.toFixed(2)}
@@ -168,9 +160,7 @@ export default function BillingTab() {
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                 <CreditCardOutlined style={{ color: '#ed6c02' }} />
-                <Typography variant="subtitle2">
-                  Доступный кредит
-                </Typography>
+                <Typography variant="subtitle2">Доступный кредит</Typography>
               </Box>
               <Typography variant="h4" color="warning.main">
                 ${billingStats.availableCredit.toFixed(2)}
@@ -183,9 +173,7 @@ export default function BillingTab() {
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                 <CalendarOutlined style={{ color: '#d32f2f' }} />
-                <Typography variant="subtitle2">
-                  Следующий платеж
-                </Typography>
+                <Typography variant="subtitle2">Следующий платеж</Typography>
               </Box>
               <Typography variant="h6" color="error.main">
                 ${billingStats.nextPaymentAmount.toFixed(2)}
@@ -206,12 +194,8 @@ export default function BillingTab() {
           </Typography>
           <Box sx={{ mb: 2 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-              <Typography variant="body2">
-                Использовано: ${(billingStats.creditLimit - billingStats.availableCredit).toFixed(2)}
-              </Typography>
-              <Typography variant="body2">
-                Лимит: ${billingStats.creditLimit.toFixed(2)}
-              </Typography>
+              <Typography variant="body2">Использовано: ${(billingStats.creditLimit - billingStats.availableCredit).toFixed(2)}</Typography>
+              <Typography variant="body2">Лимит: ${billingStats.creditLimit.toFixed(2)}</Typography>
             </Box>
             <LinearProgress
               variant="determinate"
@@ -254,9 +238,7 @@ export default function BillingTab() {
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2">
-                            {new Date(transaction.date).toLocaleDateString('ru-RU')}
-                          </Typography>
+                          <Typography variant="body2">{new Date(transaction.date).toLocaleDateString('ru-RU')}</Typography>
                         </TableCell>
                         <TableCell align="right">
                           <Typography
@@ -271,8 +253,7 @@ export default function BillingTab() {
                           <Chip
                             icon={getStatusIcon(transaction.status)}
                             label={
-                              transaction.status === 'completed' ? 'Завершена' :
-                              transaction.status === 'pending' ? 'Ожидает' : 'Ошибка'
+                              transaction.status === 'completed' ? 'Завершена' : transaction.status === 'pending' ? 'Ожидает' : 'Ошибка'
                             }
                             color={getStatusColor(transaction.status)}
                             size="small"
@@ -298,10 +279,7 @@ export default function BillingTab() {
               <List dense>
                 {upcomingBills.map((bill, index) => (
                   <ListItem key={index} sx={{ px: 0 }}>
-                    <ListItemText
-                      primary={bill.service}
-                      secondary={`Срок: ${new Date(bill.dueDate).toLocaleDateString('ru-RU')}`}
-                    />
+                    <ListItemText primary={bill.service} secondary={`Срок: ${new Date(bill.dueDate).toLocaleDateString('ru-RU')}`} />
                     <Box sx={{ textAlign: 'right' }}>
                       <Typography variant="body2" fontWeight="bold">
                         ${bill.amount.toFixed(2)}
@@ -343,9 +321,7 @@ export default function BillingTab() {
                       <Typography variant="body2" fontWeight="medium">
                         {method.type} {method.last4 ? `****${method.last4}` : ''}
                       </Typography>
-                      {method.isDefault && (
-                        <Chip label="По умолчанию" size="small" color="primary" />
-                      )}
+                      {method.isDefault && <Chip label="По умолчанию" size="small" color="primary" />}
                     </Box>
                     <Typography variant="caption" color="text.secondary">
                       {method.expiry ? `Действительна до ${method.expiry}` : method.email}

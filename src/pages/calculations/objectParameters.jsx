@@ -1,20 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Card,
-  Row,
-  Col,
-  InputNumber,
-  Select,
-  Switch,
-  Table,
-  Button,
-  Statistic,
-  Space,
-  Input,
-  Typography,
-  Divider,
-  notification
-} from 'antd';
+import { Card, Row, Col, InputNumber, Select, Switch, Table, Button, Statistic, Space, Input, notification } from 'antd';
 import { getAuthToken, removeAuthToken } from '../../api/auth';
 import {
   BuildOutlined,
@@ -31,7 +16,26 @@ import {
 } from '@ant-design/icons';
 
 const { Option } = Select;
-const { Title } = Typography;
+// const { Title } = Typography; // Неиспользуемый импорт
+
+// Функция для получения правильного API URL
+const getApiBaseUrl = () => {
+  // Проверяем переменную окружения
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+
+  // Автоматическое определение для GitHub Codespaces
+  const currentHost = window.location.hostname;
+  if (currentHost.includes('.app.github.dev')) {
+    // Заменяем порт 3000 на 3001 в GitHub Codespaces URL
+    return '/api-proxy';
+    // Используем прокси через Vite dev server
+  }
+
+  // Fallback для локальной разработки
+  return 'http://localhost:3001/api';
+};
 
 // Единые стили для всех полей ввода
 const inputStyles = {
@@ -54,14 +58,14 @@ const evaluateFormula = (expression) => {
   if (typeof expression === 'number') {
     return expression;
   }
-  
+
   if (typeof expression !== 'string') {
     return 0;
   }
 
   // Убираем пробелы и заменяем запятые на точки
   const cleanExpression = expression.replace(/\s/g, '').replace(/,/g, '.');
-  
+
   // Если это просто число без операторов
   if (!/[+\-*/()]/.test(cleanExpression)) {
     return parseFloat(cleanExpression) || 0;
@@ -90,7 +94,7 @@ const evaluateFormula = (expression) => {
     // Безопасное вычисление с помощью Function constructor
     const result = new Function('return ' + cleanExpression)();
     return isNaN(result) || !isFinite(result) ? 0 : Number(result.toFixed(2));
-  } catch (error) {
+  } catch {
     // Если не удалось вычислить как формулу, пробуем извлечь число
     const numbers = cleanExpression.match(/\d+\.?\d*/g);
     return numbers ? parseFloat(numbers[0]) || 0 : 0;
@@ -103,7 +107,7 @@ const FormulaInput = ({ value, onChange, style, ...props }) => {
   const [originalValue, setOriginalValue] = useState(value?.toString() || '');
   const [isFormula, setIsFormula] = useState(false);
   const [showResult, setShowResult] = useState(false);
-  
+
   React.useEffect(() => {
     const newValue = value?.toString() || '';
     setInputValue(newValue);
@@ -112,7 +116,7 @@ const FormulaInput = ({ value, onChange, style, ...props }) => {
 
   const handleInputChange = (newValue) => {
     setInputValue(newValue);
-    
+
     // Проверяем, содержит ли ввод математические операторы
     const hasOperators = /[+\-*/]/.test(newValue);
     setIsFormula(hasOperators);
@@ -165,7 +169,7 @@ const FormulaInput = ({ value, onChange, style, ...props }) => {
         onBlur={handleCalculate}
         onKeyDown={handleKeyPress}
         placeholder="Введите число или формулу (2+3*4)"
-        style={{ 
+        style={{
           paddingRight: isFormula ? '30px' : '8px',
           color: showResult && isFormula ? '#52c41a' : 'inherit',
           ...compactInputStyles,
@@ -192,7 +196,7 @@ const FormulaInput = ({ value, onChange, style, ...props }) => {
   );
 };
 
-const ObjectParameters = () => {
+const ObjectParameters = ({ projectId: propProjectId }) => {
   const [buildingParams, setBuildingParams] = useState({
     floors: 1,
     purpose: 'residential',
@@ -282,22 +286,22 @@ const ObjectParameters = () => {
   // Состояние загрузки
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [projectId, setProjectId] = useState(null); // Загружаем первый доступный проект
+  const [projectId, setProjectId] = useState(propProjectId || null); // Используем переданный projectId или загружаем первый доступный
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  
+
   // Проверка валидности токена
   const checkTokenValidity = async (token) => {
     try {
-      const response = await fetch('http://localhost:3001/api/auth/me', {
+      const response = await fetch(`${getApiBaseUrl()}/auth/me`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
       return response.ok;
-    } catch (error) {
+    } catch {
       console.log('⚠️ Не удалось проверить токен, продолжаем работу');
-      return true;  // Предполагаем что токен валиден
+      return true; // Предполагаем что токен валиден
     }
   };
 
@@ -310,14 +314,14 @@ const ObjectParameters = () => {
         setLoading(false);
         return null;
       }
-      
-      const response = await fetch('http://localhost:3001/api/projects', {
+
+      const response = await fetch(`${getApiBaseUrl()}/projects`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
-      
+
       if (response.ok) {
         const projects = await response.json();
         if (projects.length > 0) {
@@ -346,7 +350,7 @@ const ObjectParameters = () => {
   const loadObjectParameters = async (currentProjectId = projectId) => {
     try {
       setLoading(true);
-      
+
       const token = getAuthToken();
       if (!token) {
         console.log('Токен не найден, работаем в режиме просмотра');
@@ -357,7 +361,7 @@ const ObjectParameters = () => {
         setLoading(false);
         return;
       }
-      
+
       // Если нет projectId, загружаем первый проект
       if (!currentProjectId) {
         const loadedProjectId = await loadFirstProject();
@@ -383,19 +387,25 @@ const ObjectParameters = () => {
       }
 
       setIsAuthenticated(true);
-      
+
       // Загружаем параметры объекта
-      const objectParamsResponse = await fetch(`http://localhost:3001/api/projects/${currentProjectId}/object-parameters`, {
+      const objectParamsResponse = await fetch(`${getApiBaseUrl()}/projects/${currentProjectId}/object-parameters`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
 
       if (objectParamsResponse.status === 404) {
-        // Параметры не найдены - используем значения по умолчанию
-        console.log('Параметры объекта не найдены, используем значения по умолчанию');
+        // Параметры не найдены - создаем их с значениями по умолчанию
+        console.log('Параметры объекта не найдены, создаем с значениями по умолчанию');
         setLoading(false);
+
+        // Автоматически сохраняем параметры по умолчанию через 1 секунду
+        setTimeout(() => {
+          console.log('Создаем параметры объекта по умолчанию...');
+          saveObjectParameters();
+        }, 1000);
         return;
       }
 
@@ -414,11 +424,11 @@ const ObjectParameters = () => {
       }
 
       const objectParams = await objectParamsResponse.json();
-      
+
       // Загружаем помещения
-      const roomsResponse = await fetch(`http://localhost:3001/api/object-parameters/${objectParams.id}/rooms`, {
+      const roomsResponse = await fetch(`${getApiBaseUrl()}/object-parameters/${objectParams.id}/rooms`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
@@ -427,7 +437,7 @@ const ObjectParameters = () => {
         const roomsData = await roomsResponse.json();
         if (roomsData.length > 0) {
           // Преобразуем данные из БД в формат компонента
-          const formattedRooms = roomsData.map(room => ({
+          const formattedRooms = roomsData.map((room) => ({
             id: room.id,
             name: room.room_name || room.name,
             perimeter: room.perimeter || 0,
@@ -452,7 +462,7 @@ const ObjectParameters = () => {
 
       // Обновляем параметры здания если они есть в objectParams
       if (objectParams.building_floors) {
-        setBuildingParams(prev => ({
+        setBuildingParams((prev) => ({
           ...prev,
           floors: objectParams.building_floors,
           purpose: objectParams.building_purpose || prev.purpose,
@@ -462,7 +472,6 @@ const ObjectParameters = () => {
           heatingType: objectParams.heating_type || prev.heatingType
         }));
       }
-
     } catch (error) {
       console.error('Ошибка загрузки данных:', error);
       notification.error({
@@ -477,7 +486,7 @@ const ObjectParameters = () => {
   const saveObjectParameters = async () => {
     try {
       setSaving(true);
-      
+
       const token = getAuthToken();
       if (!token) {
         notification.warning({
@@ -499,21 +508,31 @@ const ObjectParameters = () => {
         setSaving(false);
         return;
       }
-      
+
       // Сохраняем параметры объекта
-      const objectParamsResponse = await fetch(`http://localhost:3001/api/projects/${projectId}/object-parameters`, {
-        method: 'POST',
+      const objectParamsResponse = await fetch(`${getApiBaseUrl()}/projects/${projectId}/object-parameters`, {
+        method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          buildingFloors: buildingParams.floors,
-          buildingPurpose: buildingParams.purpose,
-          energyClass: buildingParams.energyClass,
-          hasBasement: buildingParams.hasBasement,
-          hasAttic: buildingParams.hasAttic,
-          heatingType: buildingParams.heatingType
+          building_type: buildingParams.purpose || 'residential',
+          construction_category: 2,
+          floors_above_ground: buildingParams.floors || 1,
+          floors_below_ground: buildingParams.hasBasement ? 1 : 0,
+          height_above_ground: (buildingParams.floors || 1) * 2.7,
+          height_below_ground: buildingParams.hasBasement ? 2.5 : 0,
+          total_area: 100.0,
+          building_area: 80.0,
+          estimated_cost: 2000000,
+          construction_complexity: 'средняя',
+          seismic_zone: 6,
+          wind_load: 2,
+          snow_load: 3,
+          soil_conditions: 'суглинок',
+          groundwater_level: 3.0,
+          climate_zone: 'умеренная'
         })
       });
 
@@ -532,13 +551,15 @@ const ObjectParameters = () => {
 
       const savedObjectParams = await objectParamsResponse.json();
       console.log('Saved object params:', savedObjectParams); // Для отладки
-      
+
       // ID находится в data поле
       const objectParamsId = savedObjectParams.data?.id;
+      console.log('🔍 savedObjectParams:', savedObjectParams);
+      console.log('🔍 objectParamsId:', objectParamsId);
       if (!objectParamsId) {
         throw new Error('Не удалось получить ID параметров объекта');
       }
-      
+
       // Сохраняем каждое помещение
       for (const room of rooms) {
         const roomData = {
@@ -566,31 +587,29 @@ const ObjectParameters = () => {
 
         // Проверяем, является ли помещение новым (ID сгенерирован локально или это дефолтные помещения)
         const isNewRoom = room.id > 1000000 || room.id <= 3; // ID 1,2,3 - это дефолтные помещения
-        
+
         if (isNewRoom) {
           // Новое помещение - создаем через POST
-          const response = await fetch(`http://localhost:3001/api/object-parameters/${objectParamsId}/rooms`, {
+          const response = await fetch(`${getApiBaseUrl()}/object-parameters/${objectParamsId}/rooms`, {
             method: 'POST',
             headers: {
-              'Authorization': `Bearer ${token}`,
+              Authorization: `Bearer ${token}`,
               'Content-Type': 'application/json'
             },
             body: JSON.stringify(roomData)
           });
-          
+
           if (response.ok) {
             const newRoomData = await response.json();
             // Обновляем ID в локальном состоянии
-            setRooms(prev => prev.map(r => 
-              r.id === room.id ? { ...r, id: newRoomData.data.id } : r
-            ));
+            setRooms((prev) => prev.map((r) => (r.id === room.id ? { ...r, id: newRoomData.data.id } : r)));
           }
         } else {
           // Существующее помещение пользователя - обновляем через PUT
           await fetch(`/api-proxy/rooms/${room.id}`, {
             method: 'PUT',
             headers: {
-              'Authorization': `Bearer ${token}`,
+              Authorization: `Bearer ${token}`,
               'Content-Type': 'application/json'
             },
             body: JSON.stringify(roomData)
@@ -602,7 +621,6 @@ const ObjectParameters = () => {
         message: 'Сохранено',
         description: 'Параметры объекта успешно сохранены'
       });
-
     } catch (error) {
       console.error('Ошибка сохранения:', error);
       notification.error({
@@ -616,9 +634,13 @@ const ObjectParameters = () => {
 
   // Загрузка данных при монтировании компонента
   useEffect(() => {
-    // При монтировании загружаем первый доступный проект
-    if (projectId === null) {
-      loadFirstProject().then(id => {
+    // Если projectId передан как prop, используем его
+    if (propProjectId) {
+      setProjectId(propProjectId);
+      loadObjectParameters(propProjectId);
+    } else if (projectId === null) {
+      // При монтировании загружаем первый доступный проект (только если projectId не передан)
+      loadFirstProject().then((id) => {
         if (id) {
           loadObjectParameters(id);
         }
@@ -626,12 +648,12 @@ const ObjectParameters = () => {
     } else {
       loadObjectParameters();
     }
-  }, [projectId]);
+  }, [projectId, propProjectId]);
 
   // Автосохранение при изменении данных (с задержкой)
   useEffect(() => {
     if (loading || saving || !isAuthenticated) return; // Не сохраняем для неавторизованных пользователей
-    
+
     const timeoutId = setTimeout(() => {
       console.log('Автосохранение данных...');
       saveObjectParameters();
@@ -642,13 +664,13 @@ const ObjectParameters = () => {
 
   // Функции для обновления данных
   const updateBuildingParam = (key, value) => {
-    setBuildingParams(prev => ({ ...prev, [key]: value }));
+    setBuildingParams((prev) => ({ ...prev, [key]: value }));
   };
 
   // Функция валидации значений
   const validateRoomValue = (field, value) => {
     const numValue = parseFloat(value) || 0;
-    
+
     switch (field) {
       case 'perimeter':
       case 'height':
@@ -676,11 +698,7 @@ const ObjectParameters = () => {
 
   const updateRoom = (roomId, field, value) => {
     const validatedValue = validateRoomValue(field, value);
-    setRooms(prev => 
-      prev.map(room => 
-        room.id === roomId ? { ...room, [field]: validatedValue } : room
-      )
-    );
+    setRooms((prev) => prev.map((room) => (room.id === roomId ? { ...room, [field]: validatedValue } : room)));
   };
 
   const addRoom = () => {
@@ -708,15 +726,15 @@ const ObjectParameters = () => {
   };
 
   const removeRoom = (roomId) => {
-    setRooms(rooms.filter(room => room.id !== roomId));
+    setRooms(rooms.filter((room) => room.id !== roomId));
   };
 
   const updateConstructiveParam = (key, value) => {
-    setConstructiveParams(prev => ({ ...prev, [key]: value }));
+    setConstructiveParams((prev) => ({ ...prev, [key]: value }));
   };
 
   const updateEngineeringParam = (key, value) => {
-    setEngineeringParams(prev => ({ ...prev, [key]: value }));
+    setEngineeringParams((prev) => ({ ...prev, [key]: value }));
   };
 
   // Колонки для таблицы помещений
@@ -727,12 +745,16 @@ const ObjectParameters = () => {
       key: 'name',
       width: 110,
       render: (text) => (
-        <span style={{ 
-          fontWeight: '500',
-          fontSize: '12px',
-          color: '#2c3e50'
-        }}>{text}</span>
-      ),
+        <span
+          style={{
+            fontWeight: '500',
+            fontSize: '12px',
+            color: '#2c3e50'
+          }}
+        >
+          {text}
+        </span>
+      )
     },
     {
       title: 'Периметр (м.пог.)',
@@ -745,7 +767,7 @@ const ObjectParameters = () => {
           onChange={(val) => updateRoom(record.id, 'perimeter', val || 0)}
           style={{ width: '100%', ...compactInputStyles }}
         />
-      ),
+      )
     },
     {
       title: 'Высота (м)',
@@ -758,7 +780,7 @@ const ObjectParameters = () => {
           onChange={(val) => updateRoom(record.id, 'height', val || 0)}
           style={{ width: '100%', ...compactInputStyles }}
         />
-      ),
+      )
     },
     {
       title: 'Площадь пола (м²)',
@@ -779,30 +801,32 @@ const ObjectParameters = () => {
       key: 'wallsArea',
       width: 90,
       render: (_, record) => {
-        const totalOpeningsArea = 
-          (record.window1Width * record.window1Height) + 
-          (record.window2Width * record.window2Height) + 
-          (record.window3Width * record.window3Height) + 
-          (record.portal1Width * record.portal1Height) + 
-          (record.portal2Width * record.portal2Height);
-        
+        const totalOpeningsArea =
+          record.window1Width * record.window1Height +
+          record.window2Width * record.window2Height +
+          record.window3Width * record.window3Height +
+          record.portal1Width * record.portal1Height +
+          record.portal2Width * record.portal2Height;
+
         const grossWallArea = record.perimeter * record.height;
         const wallArea = grossWallArea - totalOpeningsArea;
-        
+
         // Проверка на логические ошибки
         const hasError = wallArea < 0 || totalOpeningsArea > grossWallArea * 0.8; // Предупреждение если проемы > 80% стены
-        
+
         return (
-          <span style={{ 
-            color: hasError ? '#ff4d4f' : '#52c41a', 
-            fontWeight: 'bold',
-            fontSize: '11px'
-          }}>
+          <span
+            style={{
+              color: hasError ? '#ff4d4f' : '#52c41a',
+              fontWeight: 'bold',
+              fontSize: '11px'
+            }}
+          >
             {wallArea.toFixed(1)}
             {hasError && ' ⚠️'}
           </span>
         );
-      },
+      }
     },
     {
       title: 'Откосы (м.пог.)',
@@ -818,24 +842,26 @@ const ObjectParameters = () => {
         const w3w = parseFloat(record.window3Width) || 0;
         const w3h = parseFloat(record.window3Height) || 0;
         const prostenki = parseFloat(record.prostenki) || 0;
-        
-        const window1Slopes = (w1w > 0 && w1h > 0) ? w1w + 2 * w1h : 0;
-        const window2Slopes = (w2w > 0 && w2h > 0) ? w2w + 2 * w2h : 0;
-        const window3Slopes = (w3w > 0 && w3h > 0) ? w3w + 2 * w3h : 0;
-        
+
+        const window1Slopes = w1w > 0 && w1h > 0 ? w1w + 2 * w1h : 0;
+        const window2Slopes = w2w > 0 && w2h > 0 ? w2w + 2 * w2h : 0;
+        const window3Slopes = w3w > 0 && w3h > 0 ? w3w + 2 * w3h : 0;
+
         const totalSlopes = window1Slopes + window2Slopes + window3Slopes + prostenki;
-        
+
         // Проверяем разумность значений
         const perimeter = parseFloat(record.perimeter) || 0;
         const maxReasonableSlopes = perimeter * 2; // Максимум - двойной периметр
         const hasWarning = totalSlopes > maxReasonableSlopes;
-        
+
         return (
-          <span style={{ 
-            color: hasWarning ? '#fa8c16' : '#52c41a', 
-            fontWeight: 'bold',
-            fontSize: '11px'
-          }}>
+          <span
+            style={{
+              color: hasWarning ? '#fa8c16' : '#52c41a',
+              fontWeight: 'bold',
+              fontSize: '11px'
+            }}
+          >
             {Number(totalSlopes).toFixed(1)}
             {hasWarning && ' ⚠️'}
           </span>
@@ -870,7 +896,7 @@ const ObjectParameters = () => {
           style={{ width: '100%', ...compactInputStyles }}
           controls={false}
         />
-      ),
+      )
     },
     {
       title: 'Окно 1 Ш×В (м)',
@@ -881,7 +907,7 @@ const ObjectParameters = () => {
           <FormulaInput
             value={record.window1Width}
             onChange={(val) => updateRoom(record.id, 'window1Width', val || 0)}
-            style={{ 
+            style={{
               width: '50%',
               fontSize: '12px'
             }}
@@ -890,14 +916,14 @@ const ObjectParameters = () => {
           <FormulaInput
             value={record.window1Height}
             onChange={(val) => updateRoom(record.id, 'window1Height', val || 0)}
-            style={{ 
+            style={{
               width: '50%',
               fontSize: '12px'
             }}
             placeholder="Высота"
           />
         </Space.Compact>
-      ),
+      )
     },
     {
       title: 'Окно 2 Ш×В (м)',
@@ -908,7 +934,7 @@ const ObjectParameters = () => {
           <FormulaInput
             value={record.window2Width}
             onChange={(val) => updateRoom(record.id, 'window2Width', val || 0)}
-            style={{ 
+            style={{
               width: '50%',
               fontSize: '12px'
             }}
@@ -917,14 +943,14 @@ const ObjectParameters = () => {
           <FormulaInput
             value={record.window2Height}
             onChange={(val) => updateRoom(record.id, 'window2Height', val || 0)}
-            style={{ 
+            style={{
               width: '50%',
               fontSize: '12px'
             }}
             placeholder="Высота"
           />
         </Space.Compact>
-      ),
+      )
     },
     {
       title: 'Окно 3 Ш×В (м)',
@@ -935,7 +961,7 @@ const ObjectParameters = () => {
           <FormulaInput
             value={record.window3Width}
             onChange={(val) => updateRoom(record.id, 'window3Width', val || 0)}
-            style={{ 
+            style={{
               width: '50%',
               fontSize: '12px'
             }}
@@ -944,14 +970,14 @@ const ObjectParameters = () => {
           <FormulaInput
             value={record.window3Height}
             onChange={(val) => updateRoom(record.id, 'window3Height', val || 0)}
-            style={{ 
+            style={{
               width: '50%',
               fontSize: '12px'
             }}
             placeholder="Высота"
           />
         </Space.Compact>
-      ),
+      )
     },
     {
       title: 'Портал 1 Ш×В (м)',
@@ -962,7 +988,7 @@ const ObjectParameters = () => {
           <FormulaInput
             value={record.portal1Width}
             onChange={(val) => updateRoom(record.id, 'portal1Width', val || 0)}
-            style={{ 
+            style={{
               width: '50%',
               fontSize: '12px'
             }}
@@ -971,14 +997,14 @@ const ObjectParameters = () => {
           <FormulaInput
             value={record.portal1Height}
             onChange={(val) => updateRoom(record.id, 'portal1Height', val || 0)}
-            style={{ 
+            style={{
               width: '50%',
               fontSize: '12px'
             }}
             placeholder="Высота"
           />
         </Space.Compact>
-      ),
+      )
     },
     {
       title: 'Портал 2 Ш×В (м)',
@@ -989,7 +1015,7 @@ const ObjectParameters = () => {
           <FormulaInput
             value={record.portal2Width}
             onChange={(val) => updateRoom(record.id, 'portal2Width', val || 0)}
-            style={{ 
+            style={{
               width: '50%',
               fontSize: '12px'
             }}
@@ -998,42 +1024,36 @@ const ObjectParameters = () => {
           <FormulaInput
             value={record.portal2Height}
             onChange={(val) => updateRoom(record.id, 'portal2Height', val || 0)}
-            style={{ 
+            style={{
               width: '50%',
               fontSize: '12px'
             }}
             placeholder="Высота"
           />
         </Space.Compact>
-      ),
+      )
     },
     {
       title: 'Действия',
       key: 'actions',
       width: 60,
-      render: (_, record) => (
-        <Button
-          type="text"
-          danger
-          icon={<DeleteOutlined />}
-          onClick={() => removeRoom(record.id)}
-          size="small"
-        />
-      ),
-    },
+      render: (_, record) => <Button type="text" danger icon={<DeleteOutlined />} onClick={() => removeRoom(record.id)} size="small" />
+    }
   ];
 
   // Показываем индикатор загрузки
   if (loading) {
     return (
-      <div style={{ 
-        padding: '24px', 
-        backgroundColor: '#f0f2f5', 
-        minHeight: '100vh',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center'
-      }}>
+      <div
+        style={{
+          padding: '24px',
+          backgroundColor: '#f0f2f5',
+          minHeight: '100vh',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}
+      >
         <Card>
           <div style={{ textAlign: 'center', padding: '20px' }}>
             <LoadingOutlined style={{ fontSize: '24px', marginBottom: '16px' }} />
@@ -1047,7 +1067,7 @@ const ObjectParameters = () => {
   return (
     <div style={{ padding: '24px', backgroundColor: '#f0f2f5', minHeight: '100vh' }}>
       {/* Общие параметры здания */}
-      <Card 
+      <Card
         title={
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <BuildOutlined style={{ color: '#1890ff' }} />
@@ -1122,57 +1142,47 @@ const ObjectParameters = () => {
           <Col span={8}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <label>Наличие подвала</label>
-              <Switch
-                checked={buildingParams.hasBasement}
-                onChange={(val) => updateBuildingParam('hasBasement', val)}
-              />
+              <Switch checked={buildingParams.hasBasement} onChange={(val) => updateBuildingParam('hasBasement', val)} />
             </div>
           </Col>
           <Col span={8}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <label>Наличие чердака</label>
-              <Switch
-                checked={buildingParams.hasAttic}
-                onChange={(val) => updateBuildingParam('hasAttic', val)}
-              />
+              <Switch checked={buildingParams.hasAttic} onChange={(val) => updateBuildingParam('hasAttic', val)} />
             </div>
           </Col>
         </Row>
       </Card>
 
       {/* Габариты помещений */}
-      <Card 
+      <Card
         title={
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <HomeOutlined style={{ color: '#52c41a' }} />
             Габариты помещений
             <Space style={{ marginLeft: 'auto' }}>
               {!isAuthenticated && !loading && (
-                <span style={{ 
-                  fontSize: '12px', 
-                  color: '#999', 
-                  marginRight: '8px' 
-                }}>
+                <span
+                  style={{
+                    fontSize: '12px',
+                    color: '#999',
+                    marginRight: '8px'
+                  }}
+                >
                   🔒 Режим просмотра
                 </span>
               )}
-              <Button 
-                icon={saving ? <LoadingOutlined /> : <SaveOutlined />} 
+              <Button
+                icon={saving ? <LoadingOutlined /> : <SaveOutlined />}
                 onClick={saveObjectParameters}
                 size="small"
                 loading={saving}
                 disabled={loading || !isAuthenticated}
-                type={isAuthenticated ? "default" : "dashed"}
+                type={isAuthenticated ? 'default' : 'dashed'}
               >
                 {saving ? 'Сохранение...' : isAuthenticated ? 'Сохранить' : 'Войдите для сохранения'}
               </Button>
-              <Button 
-                type="primary" 
-                icon={<PlusOutlined />} 
-                onClick={addRoom}
-                size="small"
-                disabled={loading}
-              >
+              <Button type="primary" icon={<PlusOutlined />} onClick={addRoom} size="small" disabled={loading}>
                 Добавить помещение
               </Button>
             </Space>
@@ -1193,29 +1203,32 @@ const ObjectParameters = () => {
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
           }}
         />
-        
+
         {/* Справочная информация */}
-        <div style={{ 
-          marginTop: '12px', 
-          padding: '8px 12px', 
-          backgroundColor: '#e6f7ff', 
-          border: '1px solid #91d5ff',
-          borderRadius: '4px',
-          fontSize: '11px',
-          color: '#1890ff'
-        }}>
-          💡 <strong>Формулы расчета:</strong> Площадь стен = Периметр × Высота - Площади всех проемов | 
-          Откосы = (Ширина окна + 2 × Высота окна) + Простенки | 
-          ⚠️ - предупреждение о возможных ошибках в данных
+        <div
+          style={{
+            marginTop: '12px',
+            padding: '8px 12px',
+            backgroundColor: '#e6f7ff',
+            border: '1px solid #91d5ff',
+            borderRadius: '4px',
+            fontSize: '11px',
+            color: '#1890ff'
+          }}
+        >
+          💡 <strong>Формулы расчета:</strong> Площадь стен = Периметр × Высота - Площади всех проемов | Откосы = (Ширина окна + 2 × Высота
+          окна) + Простенки | ⚠️ - предупреждение о возможных ошибках в данных
         </div>
 
-        <div style={{ 
-          marginTop: '16px', 
-          padding: '12px', 
-          backgroundColor: '#f6ffed', 
-          border: '1px solid #b7eb8f',
-          borderRadius: '6px'
-        }}>
+        <div
+          style={{
+            marginTop: '16px',
+            padding: '12px',
+            backgroundColor: '#f6ffed',
+            border: '1px solid #b7eb8f',
+            borderRadius: '6px'
+          }}
+        >
           <Row gutter={[16, 8]}>
             <Col span={6}>
               <Statistic
@@ -1230,12 +1243,13 @@ const ObjectParameters = () => {
               <Statistic
                 title="Общая площадь стен"
                 value={rooms.reduce((sum, room) => {
-                  const wallArea = room.perimeter * room.height - 
-                    (room.window1Width * room.window1Height) - 
-                    (room.window2Width * room.window2Height) - 
-                    (room.window3Width * room.window3Height) - 
-                    (room.portal1Width * room.portal1Height) - 
-                    (room.portal2Width * room.portal2Height);
+                  const wallArea =
+                    room.perimeter * room.height -
+                    room.window1Width * room.window1Height -
+                    room.window2Width * room.window2Height -
+                    room.window3Width * room.window3Height -
+                    room.portal1Width * room.portal1Height -
+                    room.portal2Width * room.portal2Height;
                   return sum + wallArea;
                 }, 0)}
                 precision={1}
@@ -1247,13 +1261,19 @@ const ObjectParameters = () => {
               <Statistic
                 title="Всего откосов"
                 value={rooms.reduce((sum, room) => {
-                  const window1Slopes = (room.window1Width || 0) > 0 && (room.window1Height || 0) > 0 
-                    ? (room.window1Width || 0) + 2 * (room.window1Height || 0) : 0;
-                  const window2Slopes = (room.window2Width || 0) > 0 && (room.window2Height || 0) > 0 
-                    ? (room.window2Width || 0) + 2 * (room.window2Height || 0) : 0;
-                  const window3Slopes = (room.window3Width || 0) > 0 && (room.window3Height || 0) > 0 
-                    ? (room.window3Width || 0) + 2 * (room.window3Height || 0) : 0;
-                  
+                  const window1Slopes =
+                    (room.window1Width || 0) > 0 && (room.window1Height || 0) > 0
+                      ? (room.window1Width || 0) + 2 * (room.window1Height || 0)
+                      : 0;
+                  const window2Slopes =
+                    (room.window2Width || 0) > 0 && (room.window2Height || 0) > 0
+                      ? (room.window2Width || 0) + 2 * (room.window2Height || 0)
+                      : 0;
+                  const window3Slopes =
+                    (room.window3Width || 0) > 0 && (room.window3Height || 0) > 0
+                      ? (room.window3Width || 0) + 2 * (room.window3Height || 0)
+                      : 0;
+
                   return sum + window1Slopes + window2Slopes + window3Slopes + (room.prostenki || 0);
                 }, 0)}
                 precision={1}
@@ -1273,12 +1293,7 @@ const ObjectParameters = () => {
           </Row>
           <Row gutter={[16, 8]} style={{ marginTop: '8px' }}>
             <Col span={8}>
-              <Statistic
-                title="Всего помещений"
-                value={rooms.length}
-                suffix="шт"
-                valueStyle={{ color: '#722ed1' }}
-              />
+              <Statistic title="Всего помещений" value={rooms.length} suffix="шт" valueStyle={{ color: '#722ed1' }} />
             </Col>
             <Col span={8}>
               <Statistic
@@ -1293,7 +1308,7 @@ const ObjectParameters = () => {
       </Card>
 
       {/* Конструктивные элементы */}
-      <Card 
+      <Card
         title={
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <SettingOutlined style={{ color: '#fa8c16' }} />
@@ -1381,7 +1396,7 @@ const ObjectParameters = () => {
       </Card>
 
       {/* Инженерные системы */}
-      <Card 
+      <Card
         title={
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <ThunderboltOutlined style={{ color: '#722ed1' }} />
@@ -1394,60 +1409,42 @@ const ObjectParameters = () => {
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
               <FireOutlined style={{ fontSize: '24px', color: '#ff4d4f' }} />
               <label>Отопление</label>
-              <Switch
-                checked={engineeringParams.heating}
-                onChange={(val) => updateEngineeringParam('heating', val)}
-              />
+              <Switch checked={engineeringParams.heating} onChange={(val) => updateEngineeringParam('heating', val)} />
             </div>
           </Col>
           <Col span={4}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
               <ThunderboltOutlined style={{ fontSize: '24px', color: '#fadb14' }} />
               <label>Электричество</label>
-              <Switch
-                checked={engineeringParams.electricity}
-                onChange={(val) => updateEngineeringParam('electricity', val)}
-              />
+              <Switch checked={engineeringParams.electricity} onChange={(val) => updateEngineeringParam('electricity', val)} />
             </div>
           </Col>
           <Col span={4}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
               <DropboxOutlined style={{ fontSize: '24px', color: '#1890ff' }} />
               <label>Водоснабжение</label>
-              <Switch
-                checked={engineeringParams.water}
-                onChange={(val) => updateEngineeringParam('water', val)}
-              />
+              <Switch checked={engineeringParams.water} onChange={(val) => updateEngineeringParam('water', val)} />
             </div>
           </Col>
           <Col span={4}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
               <DropboxOutlined style={{ fontSize: '24px', color: '#52c41a' }} />
               <label>Канализация</label>
-              <Switch
-                checked={engineeringParams.sewage}
-                onChange={(val) => updateEngineeringParam('sewage', val)}
-              />
+              <Switch checked={engineeringParams.sewage} onChange={(val) => updateEngineeringParam('sewage', val)} />
             </div>
           </Col>
           <Col span={4}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
               <SettingOutlined style={{ fontSize: '24px', color: '#13c2c2' }} />
               <label>Вентиляция</label>
-              <Switch
-                checked={engineeringParams.ventilation}
-                onChange={(val) => updateEngineeringParam('ventilation', val)}
-              />
+              <Switch checked={engineeringParams.ventilation} onChange={(val) => updateEngineeringParam('ventilation', val)} />
             </div>
           </Col>
           <Col span={4}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
               <SettingOutlined style={{ fontSize: '24px', color: '#722ed1' }} />
               <label>Кондиционирование</label>
-              <Switch
-                checked={engineeringParams.airConditioning}
-                onChange={(val) => updateEngineeringParam('airConditioning', val)}
-              />
+              <Switch checked={engineeringParams.airConditioning} onChange={(val) => updateEngineeringParam('airConditioning', val)} />
             </div>
           </Col>
         </Row>

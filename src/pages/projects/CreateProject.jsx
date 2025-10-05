@@ -2,19 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // material-ui
-import {
-  Box,
-  Button,
-  TextField,
-  Typography,
-  Grid,
-  Card,
-  CardContent,
-  Paper,
-  Alert,
-  CircularProgress,
-  Chip
-} from '@mui/material';
+import { Box, Button, TextField, Typography, Grid, Card, CardContent, Paper, Alert, CircularProgress, Chip } from '@mui/material';
 
 // api
 import { getCurrentUser } from '../../api/auth';
@@ -28,15 +16,15 @@ const getApiBaseUrl = () => {
   if (import.meta.env.VITE_API_BASE_URL) {
     return import.meta.env.VITE_API_BASE_URL;
   }
-  
+
   // Автоматическое определение для GitHub Codespaces
   const currentHost = window.location.hostname;
   if (currentHost.includes('.app.github.dev')) {
     // Заменяем порт 3000 на 3001 в GitHub Codespaces URL
-    return "/api-proxy";
+    return '/api-proxy';
     // Используем прокси через Vite dev server
   }
-  
+
   // Fallback для локальной разработки
   return 'http://localhost:3001/api';
 };
@@ -88,7 +76,7 @@ export default function CreateProject() {
   };
 
   const handleChange = (field) => (event) => {
-    setProject(prev => ({ ...prev, [field]: event.target.value }));
+    setProject((prev) => ({ ...prev, [field]: event.target.value }));
   };
 
   const handleCreateProject = async () => {
@@ -100,10 +88,10 @@ export default function CreateProject() {
       });
       return;
     }
-    
+
     setLoading(true);
     setMessage(null);
-    
+
     try {
       const token = localStorage.getItem('authToken');
       if (!token) {
@@ -115,9 +103,9 @@ export default function CreateProject() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify(project),
+        body: JSON.stringify(project)
       });
 
       const data = await response.json();
@@ -127,7 +115,7 @@ export default function CreateProject() {
           type: 'success',
           text: `Проект успешно создан! ID: ${data.project.id}`
         });
-        
+
         // Сброс формы после создания
         setProject({
           customerName: '',
@@ -141,7 +129,7 @@ export default function CreateProject() {
           navigate('/login');
           return;
         }
-        
+
         setMessage({
           type: 'error',
           text: data.error || 'Ошибка при создании проекта'
@@ -176,27 +164,15 @@ export default function CreateProject() {
             <ProjectOutlined style={{ fontSize: 24, color: '#1976d2' }} />
             <Typography variant="h4">Создание нового проекта</Typography>
           </Box>
-          
+
           {/* Информация о пользователе */}
           {currentUser && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Typography variant="body2" color="text.secondary">
                 Создается как:
               </Typography>
-              <Chip 
-                label={`${currentUser.email} (${currentUser.role})`} 
-                color="primary" 
-                variant="outlined" 
-                size="small" 
-              />
-              {currentUser.tenantName && (
-                <Chip 
-                  label={currentUser.tenantName} 
-                  color="secondary" 
-                  variant="outlined" 
-                  size="small" 
-                />
-              )}
+              <Chip label={`${currentUser.email} (${currentUser.role})`} color="primary" variant="outlined" size="small" />
+              {currentUser.tenantName && <Chip label={currentUser.tenantName} color="secondary" variant="outlined" size="small" />}
             </Box>
           )}
         </Box>

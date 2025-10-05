@@ -1,12 +1,5 @@
 // assets
-import {
-  BarcodeOutlined
-} from '@ant-design/icons';
-
-// icons
-const icons = {
-  BarcodeOutlined
-};
+// import { BarcodeOutlined } from '@ant-design/icons';
 
 // ==============================|| MENU ITEMS - UTILITIES ||============================== //
 

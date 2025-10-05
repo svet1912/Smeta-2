@@ -8,10 +8,7 @@ describe('Auth', () => {
     await waitForServer();
   });
   it('POST /api/auth/login returns token', async () => {
-    const res = await api
-      .post('/api/auth/login')
-      .send({ email: 'admin@smeta360.ru', password: 'password123' })
-      .expect(200);
+    const res = await api.post('/api/auth/login').send({ email: 'admin@smeta360.ru', password: 'password123' }).expect(200);
 
     expect(res.body).toBeTypeOf('object');
     expect(res.body.success).toBe(true);
@@ -19,10 +16,7 @@ describe('Auth', () => {
   });
 
   it('POST /api/auth/login with wrong credentials returns 401', async () => {
-    await api
-      .post('/api/auth/login')
-      .send({ email: 'wrong@email.com', password: 'wrongpass' })
-      .expect(401);
+    await api.post('/api/auth/login').send({ email: 'wrong@email.com', password: 'wrongpass' }).expect(401);
   });
 
   it('Protected route requires auth (401/403)', async () => {

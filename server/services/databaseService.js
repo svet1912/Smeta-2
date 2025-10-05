@@ -11,17 +11,17 @@ class DatabaseService {
   async initializeTables() {
     try {
       console.log('🚀 Инициализация таблиц базы данных...');
-      
+
       // Основные таблицы
       await this.createAuthTables();
       await this.createCatalogTables();
       await this.createProjectTables();
       await this.createEstimateTables();
       await this.createSystemTables();
-      
+
       // Индексы для производительности
       await this.createIndexes();
-      
+
       console.log('✅ Таблицы инициализированы успешно');
     } catch (error) {
       console.error('❌ Ошибка инициализации таблиц:', error);
@@ -51,7 +51,7 @@ class DatabaseService {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )`,
-      
+
       `CREATE TABLE IF NOT EXISTS user_sessions (
         id SERIAL PRIMARY KEY,
         user_id INTEGER REFERENCES auth_users(id) ON DELETE CASCADE,
@@ -61,7 +61,7 @@ class DatabaseService {
         ip_address INET,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )`,
-      
+
       `CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
@@ -93,7 +93,7 @@ class DatabaseService {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )`,
-      
+
       `CREATE TABLE IF NOT EXISTS works_ref (
         id VARCHAR(50) PRIMARY KEY,
         name TEXT NOT NULL,
@@ -107,7 +107,7 @@ class DatabaseService {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )`,
-      
+
       `CREATE TABLE IF NOT EXISTS work_materials (
         work_id VARCHAR(50) NOT NULL,
         material_id VARCHAR(50) NOT NULL,
@@ -189,7 +189,7 @@ class DatabaseService {
         metric_unit VARCHAR(50),
         recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )`,
-      
+
       `CREATE TABLE IF NOT EXISTS orders (
         id SERIAL PRIMARY KEY,
         customer_name VARCHAR(255) NOT NULL,

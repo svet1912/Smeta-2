@@ -1,9 +1,5 @@
 import { Box, Container, Typography, Grid, Stack, Avatar } from '@mui/material';
-import { 
-  Login as LoginIcon,
-  Search as SearchIcon,
-  Description as DescriptionIcon
-} from '@mui/icons-material';
+import { Login as LoginIcon, Search as SearchIcon, Description as DescriptionIcon } from '@mui/icons-material';
 
 const iconMap = {
   0: LoginIcon,
@@ -28,11 +24,7 @@ const HowItWorks = ({ content }) => {
             >
               {content.title}
             </Typography>
-            <Typography
-              variant="h6"
-              color="text.secondary"
-              sx={{ maxWidth: '600px' }}
-            >
+            <Typography variant="h6" color="text.secondary" sx={{ maxWidth: '600px' }}>
               {content.subtitle}
             </Typography>
           </Stack>
@@ -40,7 +32,7 @@ const HowItWorks = ({ content }) => {
           <Grid container spacing={6} alignItems="center">
             {content.steps.map((step, index) => {
               const IconComponent = iconMap[index] || LoginIcon;
-              
+
               return (
                 <Grid item xs={12} md={4} key={index}>
                   <Stack spacing={3} alignItems="center" textAlign="center">
@@ -76,19 +68,11 @@ const HowItWorks = ({ content }) => {
                       </Box>
                     </Box>
 
-                    <Typography
-                      variant="h5"
-                      component="h3"
-                      sx={{ fontWeight: 600, color: 'primary.main' }}
-                    >
+                    <Typography variant="h5" component="h3" sx={{ fontWeight: 600, color: 'primary.main' }}>
                       {step.title}
                     </Typography>
 
-                    <Typography
-                      variant="body1"
-                      color="text.secondary"
-                      sx={{ lineHeight: 1.6, maxWidth: '300px' }}
-                    >
+                    <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.6, maxWidth: '300px' }}>
                       {step.description}
                     </Typography>
 

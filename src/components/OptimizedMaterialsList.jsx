@@ -3,17 +3,7 @@
  * Оптимизированный компонент списка материалов с виртуализацией и lazy loading
  */
 import { useState, useMemo, useCallback } from 'react';
-import {
-  Card,
-  CardContent,
-  CardMedia,
-  Typography,
-  Box,
-  Chip,
-  Skeleton,
-  TextField,
-  InputAdornment
-} from '@mui/material';
+import { Card, CardContent, Typography, Box, Chip, Skeleton, TextField, InputAdornment } from '@mui/material';
 import { Search as SearchIcon } from '@mui/icons-material';
 import VirtualizedList from './VirtualizedList';
 import OptimizedImage from './OptimizedImage';
@@ -23,12 +13,7 @@ const MaterialCard = ({ material, index }) => {
   return (
     <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Box sx={{ position: 'relative' }}>
-        <OptimizedImage
-          src={material.image_url}
-          alt={material.name}
-          height={200}
-          placeholder={true}
-        />
+        <OptimizedImage src={material.image_url} alt={material.name} height={200} placeholder={true} />
         {material.is_tenant_override && (
           <Chip
             label="Переопределено"
@@ -42,7 +27,7 @@ const MaterialCard = ({ material, index }) => {
           />
         )}
       </Box>
-      
+
       <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
         <Typography
           variant="h6"
@@ -61,7 +46,7 @@ const MaterialCard = ({ material, index }) => {
         >
           {material.name}
         </Typography>
-        
+
         <Box sx={{ mt: 'auto' }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
             <Typography variant="body2" color="text.secondary">
@@ -71,13 +56,13 @@ const MaterialCard = ({ material, index }) => {
               {parseFloat(material.unit_price).toLocaleString('ru-RU')} ₽
             </Typography>
           </Box>
-          
+
           {material.expenditure && (
             <Typography variant="body2" color="text.secondary">
               Расход: {material.expenditure} {material.unit}
             </Typography>
           )}
-          
+
           {material.weight && (
             <Typography variant="body2" color="text.secondary">
               Вес: {material.weight} кг
@@ -89,14 +74,9 @@ const MaterialCard = ({ material, index }) => {
   );
 };
 
-const OptimizedMaterialsList = ({ 
-  materials = [], 
-  loading = false, 
-  onSearch,
-  containerHeight = 600 
-}) => {
+const OptimizedMaterialsList = ({ materials = [], loading = false, onSearch, containerHeight = 600 }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  
+
   // Debounced search для оптимизации
   const debouncedSearch = useDebounce((term) => {
     if (onSearch) {
@@ -104,11 +84,14 @@ const OptimizedMaterialsList = ({
     }
   }, 300);
 
-  const handleSearchChange = useCallback((event) => {
-    const value = event.target.value;
-    setSearchTerm(value);
-    debouncedSearch(value);
-  }, [debouncedSearch]);
+  const handleSearchChange = useCallback(
+    (event) => {
+      const value = event.target.value;
+      setSearchTerm(value);
+      debouncedSearch(value);
+    },
+    [debouncedSearch]
+  );
 
   // Мемоизированный список материалов
   const memoizedMaterials = useMemo(() => {
@@ -135,7 +118,7 @@ const OptimizedMaterialsList = ({
         </Card>
       );
     }
-    
+
     return <MaterialCard material={item} index={index} />;
   }, []);
 

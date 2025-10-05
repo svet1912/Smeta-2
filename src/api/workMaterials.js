@@ -6,14 +6,14 @@ const getApiBaseUrl = () => {
   if (import.meta.env.VITE_API_BASE_URL) {
     return import.meta.env.VITE_API_BASE_URL;
   }
-  
+
   // В GitHub Codespaces используем прокси через Vite
   const currentHost = window.location.hostname;
   if (currentHost.includes('.app.github.dev')) {
     // Используем прокси через Vite dev server
     return '/api-proxy';
   }
-  
+
   // Fallback для локальной разработки
   return 'http://localhost:3001/api';
 };
@@ -23,14 +23,14 @@ const API_BASE_URL = getApiBaseUrl();
 // Получить JWT токен из localStorage
 const getAuthHeaders = () => {
   const token = localStorage.getItem('authToken'); // Используем правильный ключ
-  return token ? { 'Authorization': `Bearer ${token}` } : {};
+  return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
 export const workMaterialsApi = {
   // Добавить материал к работе
   addMaterialToWork: async (workId, materialData) => {
     try {
-  const response = await fetch(`${API_BASE_URL}/works/${workId}/materials`, {
+      const response = await fetch(`${API_BASE_URL}/works/${workId}/materials`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -59,7 +59,7 @@ export const workMaterialsApi = {
   // Обновить связь работа-материал
   updateWorkMaterial: async (workId, materialId, materialData) => {
     try {
-  const response = await fetch(`${API_BASE_URL}/works/${workId}/materials/${materialId}`, {
+      const response = await fetch(`${API_BASE_URL}/works/${workId}/materials/${materialId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -87,7 +87,7 @@ export const workMaterialsApi = {
   // Удалить материал из работы
   removeMaterialFromWork: async (workId, materialId) => {
     try {
-  const response = await fetch(`${API_BASE_URL}/works/${workId}/materials/${materialId}`, {
+      const response = await fetch(`${API_BASE_URL}/works/${workId}/materials/${materialId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -110,7 +110,7 @@ export const workMaterialsApi = {
   // Получить все материалы для работы
   getWorkMaterials: async (workId) => {
     try {
-  const response = await fetch(`${API_BASE_URL}/works/${workId}/materials`, {
+      const response = await fetch(`${API_BASE_URL}/works/${workId}/materials`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

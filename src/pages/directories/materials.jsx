@@ -1,21 +1,5 @@
 import MainCard from 'components/MainCard';
-import {
-  Typography,
-  Button,
-  Table,
-  Space,
-  Popconfirm,
-  message,
-  Input,
-  Modal,
-  Form,
-  InputNumber,
-  Select,
-  Card,
-  Image,
-  Tag,
-  Tooltip
-} from 'antd';
+import { Typography, Button, Table, Space, Popconfirm, message, Input, Modal, Form, InputNumber, Select, Image, Tag } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, LinkOutlined, EyeOutlined } from '@ant-design/icons';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getMaterials, createMaterial, updateMaterial, deleteMaterial } from '../../api/database';
@@ -44,15 +28,15 @@ const naturalSort = (arr) => {
   return arr.sort((a, b) => {
     const aId = a.id || '';
     const bId = b.id || '';
-    
+
     // Разбиваем строку на части (текст и числа)
     const aParts = aId.split(/(\d+)/);
     const bParts = bId.split(/(\d+)/);
-    
+
     for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
       const aPart = aParts[i] || '';
       const bPart = bParts[i] || '';
-      
+
       // Если обе части - числа, сравниваем как числа
       if (!isNaN(aPart) && !isNaN(bPart)) {
         const diff = parseInt(aPart) - parseInt(bPart);
@@ -63,7 +47,7 @@ const naturalSort = (arr) => {
         if (diff !== 0) return diff;
       }
     }
-    
+
     return 0;
   });
 };
@@ -94,7 +78,7 @@ export default function MaterialsPage() {
         console.warn('⚠️ getMaterials вернул не-массив, устанавливаю []');
         materialsData = [];
       }
-      
+
       // Применяем естественную сортировку к загруженным данным
       const sortedMaterials = naturalSort([...materialsData]);
       setMaterials(sortedMaterials);
@@ -124,7 +108,7 @@ export default function MaterialsPage() {
           material.unit?.toLowerCase().includes(debouncedSearchText.toLowerCase()) ||
           material.id.toString().includes(debouncedSearchText))
     );
-    
+
     // Применяем естественную сортировку к отфильтрованным результатам
     return naturalSort(filtered);
   }, [materials, debouncedSearchText]);

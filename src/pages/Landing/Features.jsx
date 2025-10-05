@@ -1,5 +1,5 @@
 import { Box, Container, Typography, Grid, Card, CardContent, Stack } from '@mui/material';
-import { 
+import {
   Storage as StorageIcon,
   Api as ApiIcon,
   Group as GroupIcon,
@@ -32,11 +32,7 @@ const Features = ({ content }) => {
             >
               Ключевые возможности
             </Typography>
-            <Typography
-              variant="h6"
-              color="text.secondary"
-              sx={{ maxWidth: '600px' }}
-            >
+            <Typography variant="h6" color="text.secondary" sx={{ maxWidth: '600px' }}>
               Профессиональные инструменты для управления строительными сметами
             </Typography>
           </Stack>
@@ -44,7 +40,7 @@ const Features = ({ content }) => {
           <Grid container spacing={4}>
             {content.map((feature, index) => {
               const IconComponent = iconMap[index] || StorageIcon;
-              
+
               return (
                 <Grid item xs={12} sm={6} md={4} key={index}>
                   <Card
@@ -72,20 +68,12 @@ const Features = ({ content }) => {
                         >
                           <IconComponent sx={{ fontSize: '2rem' }} />
                         </Box>
-                        
-                        <Typography
-                          variant="h5"
-                          component="h3"
-                          sx={{ fontWeight: 600, color: 'primary.main' }}
-                        >
+
+                        <Typography variant="h5" component="h3" sx={{ fontWeight: 600, color: 'primary.main' }}>
                           {feature.title}
                         </Typography>
-                        
-                        <Typography
-                          variant="body1"
-                          color="text.secondary"
-                          sx={{ lineHeight: 1.6, flexGrow: 1 }}
-                        >
+
+                        <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.6, flexGrow: 1 }}>
                           {feature.description}
                         </Typography>
                       </Stack>

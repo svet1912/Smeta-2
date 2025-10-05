@@ -3,7 +3,7 @@
  * Маршруты для работы с проектами и объектными параметрами
  */
 import express from 'express';
-import { authMiddleware, requireRole } from '../middleware/auth.js';
+import { authMiddleware } from '../middleware/auth.js';
 import profileController from '../controllers/profileController.js';
 
 const router = express.Router();

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 // material-ui
 import {
@@ -18,9 +19,6 @@ import {
   Avatar,
   AvatarGroup,
   LinearProgress,
-  IconButton,
-  Menu,
-  Divider,
   Paper,
   InputAdornment,
   Tabs,
@@ -37,14 +35,10 @@ import { useAuth } from 'contexts/AuthContext';
 
 // assets
 import SearchOutlined from '@ant-design/icons/SearchOutlined';
-import FilterOutlined from '@ant-design/icons/FilterOutlined';
-import MoreOutlined from '@ant-design/icons/MoreOutlined';
-import EditOutlined from '@ant-design/icons/EditOutlined';
-import DeleteOutlined from '@ant-design/icons/DeleteOutlined';
 import EyeOutlined from '@ant-design/icons/EyeOutlined';
-import CalendarOutlined from '@ant-design/icons/CalendarOutlined';
+import DeleteOutlined from '@ant-design/icons/DeleteOutlined';
+import EditOutlined from '@ant-design/icons/EditOutlined';
 import TeamOutlined from '@ant-design/icons/TeamOutlined';
-import DollarOutlined from '@ant-design/icons/DollarOutlined';
 import ProjectOutlined from '@ant-design/icons/ProjectOutlined';
 import ClockCircleOutlined from '@ant-design/icons/ClockCircleOutlined';
 import CheckCircleOutlined from '@ant-design/icons/CheckCircleOutlined';
@@ -76,8 +70,10 @@ const getPriorityColor = (priority) => {
 };
 
 export default function ProjectStorage() {
+  // eslint-disable-next-line no-unused-vars
   const { user } = useAuth();
-  
+  const navigate = useNavigate();
+
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -85,15 +81,14 @@ export default function ProjectStorage() {
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterCategory, setFilterCategory] = useState('all');
   const [sortBy, setSortBy] = useState('recent');
+  // eslint-disable-next-line no-unused-vars
   const [viewMode, setViewMode] = useState('cards');
   const [tabValue, setTabValue] = useState(0);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [selectedProject, setSelectedProject] = useState(null);
 
   // Загрузка проектов при монтировании компонента
   useEffect(() => {
     loadProjects();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadProjects = async () => {
     setLoading(true);
@@ -101,7 +96,7 @@ export default function ProjectStorage() {
       const response = await getProjects();
       if (response.success) {
         // Преобразуем данные из БД в формат для интерфейса
-        const transformedProjects = response.data.map(project => ({
+        const transformedProjects = (response.data.items || []).map((project) => ({
           id: project.id,
           name: `${project.customer_name} - ${project.object_address}`,
           description: `Подрядчик: ${project.contractor_name}. Договор: ${project.contract_number}`,
@@ -140,24 +135,49 @@ export default function ProjectStorage() {
     const now = new Date();
     const diffTime = Math.abs(now - date);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays === 1) return 'Вчера';
     if (diffDays < 7) return `${diffDays} дней назад`;
     if (diffDays < 30) return `${Math.ceil(diffDays / 7)} недель назад`;
     return `${Math.ceil(diffDays / 30)} месяцев назад`;
   };
 
+  // Открытие проекта
+  const handleOpenProject = (project) => {
+    // Переходим к странице проекта
+    console.log('Открытие проекта:', project.id);
+    navigate(`/app/projects/${project.id}`);
+  };
+
+  // Удаление проекта
+  const handleDeleteProject = async (project) => {
+    if (window.confirm(`Вы уверены, что хотите удалить проект "${project.name}"?`)) {
+      try {
+        const response = await deleteProject(project.id);
+        if (response.success) {
+          setProjects(projects.filter((p) => p.id !== project.id));
+          console.log('Проект удален:', project.id);
+        } else {
+          console.error('Ошибка удаления проекта:', response.message);
+        }
+      } catch (error) {
+        console.error('Ошибка удаления проекта:', error);
+      }
+    }
+  };
+
   // Фильтрация и поиск проектов
-  const filteredProjects = projects.filter(project => {
-    const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         project.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (project.originalData?.contract_number || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         project.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-    
+  const filteredProjects = projects.filter((project) => {
+    const matchesSearch =
+      project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      project.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (project.originalData?.contract_number || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      project.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+
     const matchesStatus = filterStatus === 'all' || project.status === filterStatus;
     const matchesCategory = filterCategory === 'all' || project.category === filterCategory;
-    
+
     return matchesSearch && matchesStatus && matchesCategory;
   });
 
@@ -180,61 +200,18 @@ export default function ProjectStorage() {
   // Группировка по статусам для вкладок
   const projectsByStatus = {
     all: filteredProjects.length,
-    draft: projects.filter(p => p.status === 'draft').length,
-    planning: projects.filter(p => p.status === 'planning').length,
-    in_progress: projects.filter(p => p.status === 'in_progress').length,
-    completed: projects.filter(p => p.status === 'completed').length,
-    on_hold: projects.filter(p => p.status === 'on_hold').length,
-    cancelled: projects.filter(p => p.status === 'cancelled').length
-  };
-
-  const handleMenuClick = (event, project) => {
-    setAnchorEl(event.currentTarget);
-    setSelectedProject(project);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-    setSelectedProject(null);
+    draft: projects.filter((p) => p.status === 'draft').length,
+    planning: projects.filter((p) => p.status === 'planning').length,
+    in_progress: projects.filter((p) => p.status === 'in_progress').length,
+    completed: projects.filter((p) => p.status === 'completed').length,
+    on_hold: projects.filter((p) => p.status === 'on_hold').length,
+    cancelled: projects.filter((p) => p.status === 'cancelled').length
   };
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
     const statusMap = ['all', 'draft', 'planning', 'in_progress', 'completed', 'on_hold'];
     setFilterStatus(statusMap[newValue] || 'all');
-  };
-
-  const handleProjectAction = async (action) => {
-    switch (action) {
-      case 'view':
-        // Перенаправляем на страницу просмотра проекта
-        window.location.href = `/projects/${selectedProject?.id}`;
-        break;
-      case 'edit':
-        // Перенаправляем на страницу редактирования проекта
-        window.location.href = `/projects/${selectedProject?.id}/edit`;
-        break;
-      case 'delete':
-        if (window.confirm(`Удалить проект "${selectedProject?.name}"?`)) {
-          try {
-            const response = await deleteProject(selectedProject.id);
-            if (response.success) {
-              // Обновляем локальный список
-              setProjects(prev => prev.filter(p => p.id !== selectedProject?.id));
-              alert('Проект успешно удален!');
-            } else {
-              alert(`Ошибка при удалении проекта: ${response.message}`);
-            }
-          } catch (error) {
-            alert('Произошла ошибка при удалении проекта');
-            console.error('Ошибка удаления проекта:', error);
-          }
-        }
-        break;
-      default:
-        break;
-    }
-    handleMenuClose();
   };
 
   // Компонент карточки проекта
@@ -244,16 +221,10 @@ export default function ProjectStorage() {
     return (
       <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
         <CardContent sx={{ flexGrow: 1 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+          <Box sx={{ mb: 2 }}>
             <Typography variant="h6" component="h3" sx={{ fontWeight: 600, lineHeight: 1.2 }}>
               {project.name}
             </Typography>
-            <IconButton
-              size="small"
-              onClick={(e) => handleMenuClick(e, project)}
-            >
-              <MoreOutlined />
-            </IconButton>
           </Box>
 
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2, minHeight: 40 }}>
@@ -261,18 +232,8 @@ export default function ProjectStorage() {
           </Typography>
 
           <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-            <Chip
-              {...statusInfo}
-              label={statusInfo.label}
-              color={statusInfo.color}
-              size="small"
-            />
-            <Chip
-              label={project.priority}
-              color={getPriorityColor(project.priority)}
-              size="small"
-              variant="outlined"
-            />
+            <Chip {...statusInfo} label={statusInfo.label} color={statusInfo.color} size="small" />
+            <Chip label={project.priority} color={getPriorityColor(project.priority)} size="small" variant="outlined" />
           </Box>
 
           <Box sx={{ mb: 2 }}>
@@ -289,20 +250,18 @@ export default function ProjectStorage() {
           </Box>
 
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 2 }}>
-            {project.tags.slice(0, 3).map((tag) => (
-              <Chip key={tag} label={tag} size="small" variant="outlined" />
+            {project.tags.slice(0, 3).map((tag, index) => (
+              <Chip key={`${tag}-${index}`} label={tag} size="small" variant="outlined" />
             ))}
-            {project.tags.length > 3 && (
-              <Chip label={`+${project.tags.length - 3}`} size="small" variant="outlined" />
-            )}
+            {project.tags.length > 3 && <Chip label={`+${project.tags.length - 3}`} size="small" variant="outlined" />}
           </Stack>
 
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <TeamOutlined style={{ fontSize: 16, color: '#666' }} />
               <AvatarGroup max={3} sx={{ '& .MuiAvatar-root': { width: 24, height: 24, fontSize: '0.75rem' } }}>
-                {project.team.map((member) => (
-                  <Avatar key={member.id} alt={member.name} src={member.avatar}>
+                {project.team.map((member, index) => (
+                  <Avatar key={member.id || `member-${index}`} alt={member.name} src={member.avatar}>
                     {member.name.charAt(0)}
                   </Avatar>
                 ))}
@@ -314,17 +273,20 @@ export default function ProjectStorage() {
           </Box>
         </CardContent>
 
-        <CardActions sx={{ p: 2, pt: 0 }}>
-          <Button size="small" onClick={() => handleMenuClick({ currentTarget: null }, project)}>
-            Подробнее
+        <CardActions sx={{ p: 2, pt: 0, display: 'flex', gap: 1 }}>
+          <Button size="small" variant="contained" startIcon={<EyeOutlined />} onClick={() => handleOpenProject(project)} sx={{ flex: 1 }}>
+            Открыть
           </Button>
-          <Box sx={{ flexGrow: 1 }} />
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <CalendarOutlined style={{ fontSize: 14, color: '#666' }} />
-            <Typography variant="caption" color="text.secondary">
-              {new Date(project.endDate).toLocaleDateString()}
-            </Typography>
-          </Box>
+          <Button
+            size="small"
+            variant="outlined"
+            color="error"
+            startIcon={<DeleteOutlined />}
+            onClick={() => handleDeleteProject(project)}
+            sx={{ flex: 1 }}
+          >
+            Удалить
+          </Button>
         </CardActions>
       </Card>
     );
@@ -381,7 +343,7 @@ export default function ProjectStorage() {
                   <InputAdornment position="start">
                     <SearchOutlined />
                   </InputAdornment>
-                ),
+                )
               }}
             />
           </Grid>
@@ -425,53 +387,54 @@ export default function ProjectStorage() {
               </Select>
             </FormControl>
           </Grid>
-
-          <Grid item xs={12} md={2}>
-            <Button
-              variant="contained"
-              startIcon={<FilterOutlined />}
-              fullWidth
-              href="/app/projects/create-wizard"
-            >
-              Создать проект
-            </Button>
-          </Grid>
         </Grid>
       </Paper>
 
       {/* Вкладки по статусам */}
       <Paper sx={{ mb: 3 }}>
         <Tabs value={tabValue} onChange={handleTabChange} variant="scrollable" scrollButtons="auto">
-          <Tab label={
-            <Badge badgeContent={projectsByStatus.all} color="primary" showZero>
-              Все проекты
-            </Badge>
-          } />
-          <Tab label={
-            <Badge badgeContent={projectsByStatus.draft} color="default">
-              Черновики
-            </Badge>
-          } />
-          <Tab label={
-            <Badge badgeContent={projectsByStatus.planning} color="info">
-              Планирование
-            </Badge>
-          } />
-          <Tab label={
-            <Badge badgeContent={projectsByStatus.in_progress} color="primary">
-              В работе
-            </Badge>
-          } />
-          <Tab label={
-            <Badge badgeContent={projectsByStatus.completed} color="success">
-              Завершенные
-            </Badge>
-          } />
-          <Tab label={
-            <Badge badgeContent={projectsByStatus.on_hold} color="warning">
-              Приостановленные
-            </Badge>
-          } />
+          <Tab
+            label={
+              <Badge badgeContent={projectsByStatus.all} color="primary" showZero>
+                Все проекты
+              </Badge>
+            }
+          />
+          <Tab
+            label={
+              <Badge badgeContent={projectsByStatus.draft} color="default">
+                Черновики
+              </Badge>
+            }
+          />
+          <Tab
+            label={
+              <Badge badgeContent={projectsByStatus.planning} color="info">
+                Планирование
+              </Badge>
+            }
+          />
+          <Tab
+            label={
+              <Badge badgeContent={projectsByStatus.in_progress} color="primary">
+                В работе
+              </Badge>
+            }
+          />
+          <Tab
+            label={
+              <Badge badgeContent={projectsByStatus.completed} color="success">
+                Завершенные
+              </Badge>
+            }
+          />
+          <Tab
+            label={
+              <Badge badgeContent={projectsByStatus.on_hold} color="warning">
+                Приостановленные
+              </Badge>
+            }
+          />
         </Tabs>
       </Paper>
 
@@ -483,11 +446,8 @@ export default function ProjectStorage() {
             Проекты не найдены
           </Typography>
           <Typography variant="body2" color="text.secondary" paragraph>
-            Измените параметры поиска или создайте новый проект
+            Измените параметры поиска или фильтры
           </Typography>
-          <Button variant="contained" href="/app/projects/create-wizard">
-            Создать проект
-          </Button>
         </Paper>
       ) : (
         <Grid container spacing={3}>
@@ -498,30 +458,6 @@ export default function ProjectStorage() {
           ))}
         </Grid>
       )}
-
-      {/* Меню действий */}
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-      >
-        <MenuItem onClick={() => handleProjectAction('view')}>
-          <EyeOutlined style={{ marginRight: 8 }} />
-          Просмотр
-        </MenuItem>
-        <Divider />
-        <MenuItem onClick={() => handleProjectAction('edit')}>
-          <EditOutlined style={{ marginRight: 8 }} />
-          Редактировать
-        </MenuItem>
-        <Divider />
-        <MenuItem onClick={() => handleProjectAction('delete')} sx={{ color: 'error.main' }}>
-          <DeleteOutlined style={{ marginRight: 8 }} />
-          Удалить
-        </MenuItem>
-      </Menu>
     </Box>
   );
 }

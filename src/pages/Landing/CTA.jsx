@@ -8,8 +8,8 @@ const CTA = ({ content }) => {
   };
 
   return (
-    <Box 
-      sx={{ 
+    <Box
+      sx={{
         py: 12,
         background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
         color: 'white',
@@ -25,11 +25,12 @@ const CTA = ({ content }) => {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundImage: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.1"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
+          backgroundImage:
+            'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.1"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
           opacity: 0.3
         }}
       />
-      
+
       <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
         <Grid container spacing={8} alignItems="center">
           <Grid item xs={12} md={6}>
@@ -44,7 +45,7 @@ const CTA = ({ content }) => {
               >
                 {content.title}
               </Typography>
-              
+
               <Typography
                 variant="h6"
                 sx={{
@@ -55,7 +56,7 @@ const CTA = ({ content }) => {
               >
                 {content.subtitle}
               </Typography>
-              
+
               <Button
                 variant="contained"
                 size="large"
@@ -82,7 +83,7 @@ const CTA = ({ content }) => {
               >
                 {content.button.text}
               </Button>
-              
+
               <Typography
                 variant="body2"
                 sx={{
@@ -95,21 +96,18 @@ const CTA = ({ content }) => {
               </Typography>
             </Stack>
           </Grid>
-          
+
           <Grid item xs={12} md={6}>
-            <Paper 
-              sx={{ 
-                p: 4, 
+            <Paper
+              sx={{
+                p: 4,
                 backgroundColor: 'rgba(255, 255, 255, 0.95)',
                 backdropFilter: 'blur(10px)',
                 borderRadius: 3,
                 boxShadow: '0 20px 60px rgba(0,0,0,0.1)'
               }}
             >
-              <LeadForm 
-                content={content.leadForm} 
-                variant="full"
-              />
+              <LeadForm content={content.leadForm} variant="full" />
             </Paper>
           </Grid>
         </Grid>

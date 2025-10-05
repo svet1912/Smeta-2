@@ -1,13 +1,5 @@
 import { useState } from 'react';
-import { 
-  Box, 
-  Container, 
-  Typography, 
-  Accordion, 
-  AccordionSummary, 
-  AccordionDetails,
-  Stack 
-} from '@mui/material';
+import { Box, Container, Typography, Accordion, AccordionSummary, AccordionDetails, Stack } from '@mui/material';
 import { ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
 
 const FAQ = ({ content }) => {
@@ -33,11 +25,7 @@ const FAQ = ({ content }) => {
             >
               Часто задаваемые вопросы
             </Typography>
-            <Typography
-              variant="h6"
-              color="text.secondary"
-              sx={{ maxWidth: '600px' }}
-            >
+            <Typography variant="h6" color="text.secondary" sx={{ maxWidth: '600px' }}>
               Ответы на основные вопросы о системе SMETA360
             </Typography>
           </Stack>
@@ -85,11 +73,7 @@ const FAQ = ({ content }) => {
                     borderColor: 'divider'
                   }}
                 >
-                  <Typography
-                    variant="body1"
-                    color="text.secondary"
-                    sx={{ lineHeight: 1.6 }}
-                  >
+                  <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.6 }}>
                     {faq.answer}
                   </Typography>
                 </AccordionDetails>

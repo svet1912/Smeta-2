@@ -1,7 +1,7 @@
 import { getRedis } from './redisClient.js';
 
 const ns = 'smeta360'; // неймспейс ключей
-const v = 'v1';        // версия схемы ключей для инвалидации
+const v = 'v1'; // версия схемы ключей для инвалидации
 
 // Метрики кэша
 let cacheStats = {
@@ -57,12 +57,12 @@ export async function cacheGetOrSet(key, ttlSec, producer, { skip = false } = {}
 
     // Берём простую блокировку, чтобы толпа не пошла в БД
     const gotLock = await redis.set(lockKey, '1', 'PX', lockTtlMs, 'NX');
-    
+
     if (!gotLock) {
       // Подождём немного и попробуем ещё раз достать из кэша
       console.log(`⏳ Ожидание разблокировки для ключа: ${key}`);
-      await new Promise(r => setTimeout(r, 150));
-      
+      await new Promise((r) => setTimeout(r, 150));
+
       const retry = await redis.get(fullKey);
       if (retry) {
         cacheStats.hits++;
@@ -75,22 +75,21 @@ export async function cacheGetOrSet(key, ttlSec, producer, { skip = false } = {}
       // Получаем данные из источника
       console.log(`🔄 Загрузка данных для ключа: ${key}`);
       const data = await producer();
-      
+
       // Сохраняем в кэш
       await redis.set(fullKey, JSON.stringify(data), 'EX', ttlSec);
       cacheStats.sets++;
       console.log(`💾 Cache SET для ключа: ${key}, TTL: ${ttlSec}s`);
-      
+
       return data;
     } finally {
       // Освободим блокировку
       await redis.del(lockKey).catch(() => {});
     }
-
   } catch (error) {
     cacheStats.errors++;
     console.warn(`⚠️ Cache ERROR для ключа ${key}:`, error.message);
-    
+
     // При ошибке кэша - fallback к прямому вызову
     return await producer();
   }
@@ -112,9 +111,9 @@ export async function cacheInvalidateByPrefix(prefix) {
     console.log(`🗑️ Cache invalidation для паттерна: ${pattern}`);
 
     // Используем SCAN для безопасного поиска ключей
-    const stream = redis.scanStream({ 
-      match: pattern, 
-      count: 200 
+    const stream = redis.scanStream({
+      match: pattern,
+      count: 200
     });
 
     const pipeline = redis.pipeline();
@@ -123,13 +122,13 @@ export async function cacheInvalidateByPrefix(prefix) {
     await new Promise((resolve, reject) => {
       stream.on('data', (keys) => {
         if (keys.length > 0) {
-          keys.forEach(k => {
+          keys.forEach((k) => {
             pipeline.del(k);
             deletedCount++;
           });
         }
       });
-      
+
       stream.on('end', resolve);
       stream.on('error', reject);
     });
@@ -140,7 +139,6 @@ export async function cacheInvalidateByPrefix(prefix) {
     } else {
       console.log(`ℹ️ Cache invalidation: ключей не найдено для паттерна ${pattern}`);
     }
-
   } catch (error) {
     console.warn(`⚠️ Cache invalidation ERROR для префикса ${prefix}:`, error.message);
   }
@@ -165,10 +163,10 @@ export async function getCacheKeys(prefix = '') {
   try {
     const pattern = `${ns}:${v}:${prefix}*`;
     const keys = [];
-    
-    const stream = redis.scanStream({ 
-      match: pattern, 
-      count: 100 
+
+    const stream = redis.scanStream({
+      match: pattern,
+      count: 100
     });
 
     await new Promise((resolve) => {

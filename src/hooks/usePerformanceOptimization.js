@@ -10,15 +10,18 @@ import { useEffect, useCallback, useMemo, useRef } from 'react';
 export const useDebounce = (callback, delay) => {
   const timeoutRef = useRef(null);
 
-  const debouncedCallback = useCallback((...args) => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    
-    timeoutRef.current = setTimeout(() => {
-      callback(...args);
-    }, delay);
-  }, [callback, delay]);
+  const debouncedCallback = useCallback(
+    (...args) => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+
+      timeoutRef.current = setTimeout(() => {
+        callback(...args);
+      }, delay);
+    },
+    [callback, delay]
+  );
 
   useEffect(() => {
     return () => {
@@ -37,12 +40,15 @@ export const useDebounce = (callback, delay) => {
 export const useThrottle = (callback, delay) => {
   const lastRun = useRef(Date.now());
 
-  const throttledCallback = useCallback((...args) => {
-    if (Date.now() - lastRun.current >= delay) {
-      callback(...args);
-      lastRun.current = Date.now();
-    }
-  }, [callback, delay]);
+  const throttledCallback = useCallback(
+    (...args) => {
+      if (Date.now() - lastRun.current >= delay) {
+        callback(...args);
+        lastRun.current = Date.now();
+      }
+    },
+    [callback, delay]
+  );
 
   return throttledCallback;
 };
@@ -55,10 +61,7 @@ export const useVirtualization = (items, itemHeight, containerHeight) => {
 
   const visibleItems = useMemo(() => {
     const startIndex = Math.floor(scrollTop / itemHeight);
-    const endIndex = Math.min(
-      startIndex + Math.ceil(containerHeight / itemHeight) + 1,
-      items.length
-    );
+    const endIndex = Math.min(startIndex + Math.ceil(containerHeight / itemHeight) + 1, items.length);
 
     return items.slice(startIndex, endIndex).map((item, index) => ({
       ...item,
@@ -85,7 +88,7 @@ export const usePreloadResources = (resources) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const preloadPromises = resources.map(resource => {
+    const preloadPromises = resources.map((resource) => {
       return new Promise((resolve, reject) => {
         if (typeof resource === 'string') {
           // Предзагрузка изображений
@@ -100,7 +103,7 @@ export const usePreloadResources = (resources) => {
       });
     });
 
-    Promise.allSettled(preloadPromises).then(results => {
+    Promise.allSettled(preloadPromises).then((results) => {
       const loaded = new Set();
       results.forEach((result, index) => {
         if (result.status === 'fulfilled') {
@@ -120,7 +123,7 @@ export const usePreloadResources = (resources) => {
  */
 export const useOptimizedCallback = (callback, deps) => {
   const callbackRef = useRef(callback);
-  
+
   useEffect(() => {
     callbackRef.current = callback;
   });
@@ -194,11 +197,11 @@ export const useMemoizedValue = (computeFn, deps) => {
     const startTime = Date.now();
     const result = computeFn();
     const computeTime = Date.now() - startTime;
-    
+
     if (process.env.NODE_ENV === 'development' && computeTime > 16) {
       console.warn(`[Performance] Expensive computation took ${computeTime}ms`);
     }
-    
+
     return result;
   }, deps);
 };

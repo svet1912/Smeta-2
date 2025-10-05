@@ -18,10 +18,9 @@ const MaterialsPage = Loadable(lazy(() => import('pages/directories/materials'))
 const CreateProject = Loadable(lazy(() => import('pages/projects/CreateProject')));
 const CreateProjectWizard = Loadable(lazy(() => import('pages/projects/CreateProjectWizard')));
 const ProjectStorage = Loadable(lazy(() => import('pages/projects/ProjectStorage')));
+const ProjectDashboard = Loadable(lazy(() => import('pages/projects/ProjectDashboard')));
 
 // render - calculations
-const EstimateCalculationPage = Loadable(lazy(() => import('pages/calculations/estimate')));
-const ObjectParametersPage = Loadable(lazy(() => import('pages/calculations/objectParameters')));
 const CustomerEstimatePage = Loadable(lazy(() => import('pages/calculations/customerEstimate')));
 
 // render - admin pages
@@ -80,20 +79,16 @@ const MainRoutes = {
         {
           path: 'storage',
           element: <ProjectStorage />
+        },
+        {
+          path: ':projectId',
+          element: <ProjectDashboard />
         }
       ]
     },
     {
       path: 'calculations',
       children: [
-        {
-          path: 'estimate',
-          element: <EstimateCalculationPage />
-        },
-        {
-          path: 'object-parameters',
-          element: <ObjectParametersPage />
-        },
         {
           path: 'customer-estimate',
           element: <CustomerEstimatePage />

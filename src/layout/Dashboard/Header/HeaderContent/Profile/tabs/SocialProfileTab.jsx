@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 // material-ui
 import {
   Box,
@@ -183,7 +181,7 @@ export default function SocialProfileTab() {
                         </Typography>
                       </Box>
                     </Box>
-                    
+
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, ml: 7 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                         <IconButton size="small" color="error">
@@ -233,10 +231,7 @@ export default function SocialProfileTab() {
                     <ListItemAvatar>
                       <Avatar src={connection.avatar} sx={{ width: 32, height: 32 }} />
                     </ListItemAvatar>
-                    <ListItemText
-                      primary={connection.name}
-                      secondary={connection.position}
-                    />
+                    <ListItemText primary={connection.name} secondary={connection.position} />
                     <Typography variant="caption" color="text.secondary">
                       {connection.mutual} общих
                     </Typography>
@@ -258,14 +253,7 @@ export default function SocialProfileTab() {
               </Typography>
               <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
                 {skills.map((skill, index) => (
-                  <Chip
-                    key={index}
-                    label={skill}
-                    size="small"
-                    variant="outlined"
-                    color="primary"
-                    sx={{ mb: 1 }}
-                  />
+                  <Chip key={index} label={skill} size="small" variant="outlined" color="primary" sx={{ mb: 1 }} />
                 ))}
               </Stack>
             </CardContent>

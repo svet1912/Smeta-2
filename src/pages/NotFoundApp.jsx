@@ -28,7 +28,7 @@ const NotFoundApp = () => {
           >
             404
           </Typography>
-          
+
           <Typography
             variant="h4"
             component="h1"
@@ -40,29 +40,24 @@ const NotFoundApp = () => {
           >
             Страница не найдена
           </Typography>
-          
+
           <Typography
             variant="body1"
             color="text.secondary"
-            sx={{ 
+            sx={{
               maxWidth: '400px',
               lineHeight: 1.6
             }}
           >
-            К сожалению, запрашиваемый раздел приложения не существует. 
-            Проверьте правильность адреса или вернитесь на главную панель.
+            К сожалению, запрашиваемый раздел приложения не существует. Проверьте правильность адреса или вернитесь на главную панель.
           </Typography>
-          
-          <Stack 
-            direction={{ xs: 'column', sm: 'row' }} 
-            spacing={2} 
-            sx={{ pt: 2 }}
-          >
+
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ pt: 2 }}>
             <Button
               variant="contained"
               startIcon={<DashboardIcon />}
               onClick={() => navigate('/app/dashboard/default')}
-              sx={{ 
+              sx={{
                 px: 3,
                 py: 1.5,
                 textTransform: 'none',
@@ -71,12 +66,12 @@ const NotFoundApp = () => {
             >
               На главную панель
             </Button>
-            
+
             <Button
               variant="outlined"
               startIcon={<ArrowBackIcon />}
               onClick={() => navigate(-1)}
-              sx={{ 
+              sx={{
                 px: 3,
                 py: 1.5,
                 textTransform: 'none',

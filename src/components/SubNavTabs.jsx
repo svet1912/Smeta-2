@@ -1,7 +1,5 @@
-import React from 'react';
 import { Tabs } from 'antd';
-import { 
-  EditOutlined,
+import {
   BarChartOutlined,
   FileTextOutlined,
   CreditCardOutlined,
@@ -22,7 +20,7 @@ const SubNavTabs = ({ activeKey, onChange }) => {
           <BuildOutlined />
           Параметры объекта
         </span>
-      ),
+      )
     },
     {
       key: 'estimate-calculation',
@@ -31,7 +29,7 @@ const SubNavTabs = ({ activeKey, onChange }) => {
           <CalculatorOutlined />
           Расчет сметы
         </span>
-      ),
+      )
     },
     {
       key: 'chart',
@@ -40,7 +38,7 @@ const SubNavTabs = ({ activeKey, onChange }) => {
           <BarChartOutlined />
           График
         </span>
-      ),
+      )
     },
     {
       key: 'customer-estimate',
@@ -49,7 +47,7 @@ const SubNavTabs = ({ activeKey, onChange }) => {
           <FileTextOutlined />
           Смета заказчика
         </span>
-      ),
+      )
     },
     {
       key: 'customer-payments',
@@ -58,7 +56,7 @@ const SubNavTabs = ({ activeKey, onChange }) => {
           <CreditCardOutlined />
           Платежи заказчика
         </span>
-      ),
+      )
     },
     {
       key: 'purchases',
@@ -67,7 +65,7 @@ const SubNavTabs = ({ activeKey, onChange }) => {
           <ShoppingOutlined />
           Закупки
         </span>
-      ),
+      )
     },
     {
       key: 'works',
@@ -76,7 +74,7 @@ const SubNavTabs = ({ activeKey, onChange }) => {
           <ToolOutlined />
           Работы
         </span>
-      ),
+      )
     },
     {
       key: 'documents',
@@ -85,20 +83,14 @@ const SubNavTabs = ({ activeKey, onChange }) => {
           <FolderOutlined />
           Документы
         </span>
-      ),
-    },
+      )
+    }
   ];
 
   return (
     <div className="sub-nav-tabs">
       <div style={{ padding: '0 24px' }}>
-        <Tabs
-          activeKey={activeKey}
-          onChange={onChange}
-          type="line"
-          size="middle"
-          items={items}
-        />
+        <Tabs activeKey={activeKey} onChange={onChange} type="line" size="middle" items={items} />
       </div>
     </div>
   );

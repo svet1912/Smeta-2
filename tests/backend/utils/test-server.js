@@ -28,42 +28,36 @@ export async function loginAndGetToken({ email, password } = TEST_USER) {
   }
 
   console.log('🔐 Авторизуемся для API тестов...');
-  
+
   try {
     // Сначала попробуем зарегистрироваться (на случай если пользователя нет)
     try {
-      await api
-        .post('/api/auth/register')
-        .send({
-          email: email,
-          password: password,
-          firstname: TEST_USER.firstname,
-          lastname: TEST_USER.lastname
-        });
+      await api.post('/api/auth/register').send({
+        email: email,
+        password: password,
+        firstname: TEST_USER.firstname,
+        lastname: TEST_USER.lastname
+      });
       console.log('👤 Тестовый пользователь создан');
-    } catch (error) {
+    } catch {
       // Игнорируем ошибку - возможно пользователь уже существует
     }
 
     // Логинимся
-    const response = await api
-      .post('/api/auth/login')
-      .send({ email, password })
-      .expect(200);
+    const response = await api.post('/api/auth/login').send({ email, password }).expect(200);
 
     const token = response.body?.data?.token || response.body?.token || response.body?.accessToken;
-    
+
     if (!token) {
       throw new Error('Токен не получен при авторизации');
     }
 
     // Кэшируем токен на 50 минут
     cachedToken = token;
-    tokenExpiry = Date.now() + (50 * 60 * 1000);
-    
+    tokenExpiry = Date.now() + 50 * 60 * 1000;
+
     console.log('✅ Авторизация успешна');
     return token;
-    
   } catch (error) {
     console.error('❌ Ошибка авторизации:', error);
     throw new Error('Не удалось получить токен авторизации для тестов');
@@ -83,7 +77,7 @@ export async function authenticatedRequest(method, path) {
  */
 export async function waitForServer(url = `${API_BASE_URL}/api/health`, timeout = 30000) {
   const startTime = Date.now();
-  
+
   while (Date.now() - startTime < timeout) {
     try {
       const response = await supertest(API_BASE_URL).get('/api/health');
@@ -91,14 +85,14 @@ export async function waitForServer(url = `${API_BASE_URL}/api/health`, timeout 
         console.log('✅ Сервер готов');
         return;
       }
-    } catch (error) {
+    } catch {
       // Игнорируем ошибки и продолжаем ждать
     }
-    
+
     // Ждем 1 секунду перед следующей попыткой
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   }
-  
+
   throw new Error(`Сервер не ответил в течение ${timeout}ms`);
 }
 

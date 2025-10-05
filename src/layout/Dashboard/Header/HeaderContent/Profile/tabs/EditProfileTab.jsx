@@ -28,7 +28,7 @@ import avatar1 from 'assets/images/users/avatar-1.png';
 
 export default function EditProfileTab() {
   const { user, updateUser } = useAuth();
-  
+
   const [profile, setProfile] = useState({
     firstName: '',
     lastName: '',
@@ -61,9 +61,17 @@ export default function EditProfileTab() {
 
   // Вычисление процента заполненности профиля
   const calculateCompletion = () => {
-    const fields = [profile.firstName, profile.lastName, profile.email, profile.phone, 
-                   profile.position, profile.company, profile.bio, profile.location];
-    const filled = fields.filter(field => field && field.trim()).length;
+    const fields = [
+      profile.firstName,
+      profile.lastName,
+      profile.email,
+      profile.phone,
+      profile.position,
+      profile.company,
+      profile.bio,
+      profile.location
+    ];
+    const filled = fields.filter((field) => field && field.trim()).length;
     return Math.round((filled / fields.length) * 100);
   };
 
@@ -74,7 +82,7 @@ export default function EditProfileTab() {
   }, [profile]);
 
   const handleChange = (field) => (event) => {
-    setProfile(prev => ({
+    setProfile((prev) => ({
       ...prev,
       [field]: event.target.value
     }));
@@ -145,11 +153,7 @@ export default function EditProfileTab() {
             Завершенность профиля
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <LinearProgress 
-              variant="determinate" 
-              value={profileCompletion} 
-              sx={{ flexGrow: 1, height: 8, borderRadius: 4 }}
-            />
+            <LinearProgress variant="determinate" value={profileCompletion} sx={{ flexGrow: 1, height: 8, borderRadius: 4 }} />
             <Typography variant="body2" color="text.secondary">
               {profileCompletion}%
             </Typography>
@@ -179,22 +183,10 @@ export default function EditProfileTab() {
       {/* Form Fields */}
       <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
-          <TextField
-            fullWidth
-            label="Имя"
-            value={profile.firstName}
-            onChange={handleChange('firstName')}
-            variant="outlined"
-          />
+          <TextField fullWidth label="Имя" value={profile.firstName} onChange={handleChange('firstName')} variant="outlined" />
         </Grid>
         <Grid item xs={12} md={6}>
-          <TextField
-            fullWidth
-            label="Фамилия"
-            value={profile.lastName}
-            onChange={handleChange('lastName')}
-            variant="outlined"
-          />
+          <TextField fullWidth label="Фамилия" value={profile.lastName} onChange={handleChange('lastName')} variant="outlined" />
         </Grid>
         <Grid item xs={12} md={6}>
           <TextField
@@ -209,51 +201,19 @@ export default function EditProfileTab() {
           />
         </Grid>
         <Grid item xs={12} md={6}>
-          <TextField
-            fullWidth
-            label="Телефон"
-            value={profile.phone}
-            onChange={handleChange('phone')}
-            variant="outlined"
-          />
+          <TextField fullWidth label="Телефон" value={profile.phone} onChange={handleChange('phone')} variant="outlined" />
         </Grid>
         <Grid item xs={12} md={6}>
-          <TextField
-            fullWidth
-            label="Должность"
-            value={profile.position}
-            onChange={handleChange('position')}
-            variant="outlined"
-          />
+          <TextField fullWidth label="Должность" value={profile.position} onChange={handleChange('position')} variant="outlined" />
         </Grid>
         <Grid item xs={12} md={6}>
-          <TextField
-            fullWidth
-            label="Компания"
-            value={profile.company}
-            onChange={handleChange('company')}
-            variant="outlined"
-          />
+          <TextField fullWidth label="Компания" value={profile.company} onChange={handleChange('company')} variant="outlined" />
         </Grid>
         <Grid item xs={12}>
-          <TextField
-            fullWidth
-            label="Местоположение"
-            value={profile.location}
-            onChange={handleChange('location')}
-            variant="outlined"
-          />
+          <TextField fullWidth label="Местоположение" value={profile.location} onChange={handleChange('location')} variant="outlined" />
         </Grid>
         <Grid item xs={12}>
-          <TextField
-            fullWidth
-            label="О себе"
-            value={profile.bio}
-            onChange={handleChange('bio')}
-            variant="outlined"
-            multiline
-            rows={4}
-          />
+          <TextField fullWidth label="О себе" value={profile.bio} onChange={handleChange('bio')} variant="outlined" multiline rows={4} />
         </Grid>
 
         {/* Skills Section */}
@@ -263,14 +223,7 @@ export default function EditProfileTab() {
           </Typography>
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
             {skills.map((skill, index) => (
-              <Chip
-                key={index}
-                label={skill}
-                variant="outlined"
-                color="primary"
-                onDelete={() => {}}
-                sx={{ mb: 1 }}
-              />
+              <Chip key={index} label={skill} variant="outlined" color="primary" onDelete={() => {}} sx={{ mb: 1 }} />
             ))}
             <Button variant="text" size="small" sx={{ ml: 1 }}>
               + Добавить навык
@@ -281,20 +234,16 @@ export default function EditProfileTab() {
         {/* Action Buttons */}
         <Grid item xs={12}>
           <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-            <Button 
-              variant="contained" 
-              color="primary" 
+            <Button
+              variant="contained"
+              color="primary"
               onClick={handleSave}
               disabled={loading || !profile.firstName || !profile.lastName}
               startIcon={loading && <CircularProgress size={20} />}
             >
               {loading ? 'Сохранение...' : 'Сохранить изменения'}
             </Button>
-            <Button 
-              variant="outlined" 
-              onClick={handleCancel}
-              disabled={loading}
-            >
+            <Button variant="outlined" onClick={handleCancel} disabled={loading}>
               Отмена
             </Button>
           </Stack>

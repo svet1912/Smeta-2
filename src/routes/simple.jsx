@@ -1,6 +1,4 @@
 import { createBrowserRouter } from 'react-router-dom';
-import { lazy } from 'react';
-import Loadable from 'components/Loadable';
 
 // Простые компоненты для тестирования
 const SimpleLanding = () => (

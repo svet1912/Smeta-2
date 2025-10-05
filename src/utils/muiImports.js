@@ -10,7 +10,7 @@ export { default as Grid } from '@mui/material/Grid';
 export { default as Stack } from '@mui/material/Stack';
 export { default as Typography } from '@mui/material/Typography';
 
-// List components  
+// List components
 export { default as List } from '@mui/material/List';
 export { default as ListItem } from '@mui/material/ListItem';
 export { default as ListItemAvatar } from '@mui/material/ListItemAvatar';

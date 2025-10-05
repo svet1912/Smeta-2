@@ -1,11 +1,10 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import MainCard from 'components/MainCard';
 import {
   Typography,
   Table,
   Button,
   Space,
-  Tag,
   Modal,
   Form,
   Input,
@@ -16,16 +15,22 @@ import {
   Row,
   Col,
   Statistic,
-  Divider,
   Tooltip,
   Popconfirm,
-  Badge,
   Image
 } from 'antd';
-import { PlusOutlined, MinusOutlined, CalculatorOutlined, DeleteOutlined, EditOutlined, FileTextOutlined, DownloadOutlined, SaveOutlined, PercentageOutlined, ReloadOutlined } from '@ant-design/icons';
-import { workMaterialsApi } from 'api/workMaterials';
+import {
+  PlusOutlined,
+  CalculatorOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  FileTextOutlined,
+  DownloadOutlined,
+  PercentageOutlined,
+  ReloadOutlined
+} from '@ant-design/icons';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const { Option } = Select;
 
 // Функция для получения правильного API URL
@@ -34,15 +39,15 @@ const getApiBaseUrl = () => {
   if (import.meta.env.VITE_API_BASE_URL) {
     return import.meta.env.VITE_API_BASE_URL;
   }
-  
+
   // Автоматическое определение для GitHub Codespaces
   const currentHost = window.location.hostname;
   if (currentHost.includes('.app.github.dev')) {
     // Заменяем порт 3000 на 3001 в GitHub Codespaces URL
-    return "/api-proxy";
+    return '/api-proxy';
     // Используем прокси через Vite dev server
   }
-  
+
   // Fallback для локальной разработки
   return 'http://localhost:3001/api';
 };
@@ -52,7 +57,7 @@ const API_BASE_URL = getApiBaseUrl();
 // Получить JWT токен из localStorage
 const getAuthHeaders = () => {
   const token = localStorage.getItem('authToken');
-  return token ? { 'Authorization': `Bearer ${token}` } : {};
+  return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
 // Функция для форматирования чисел с запятой (российский стандарт)
@@ -61,54 +66,29 @@ const formatNumberWithComma = (number) => {
   return parseFloat(number).toFixed(2).replace('.', ',');
 };
 
-// Функция для парсинга чисел с запятой в точку
-const parseNumberWithComma = (value) => {
-  if (typeof value === 'string') {
-    return parseFloat(value.replace(',', '.'));
-  }
-  return parseFloat(value) || 0;
-};
-
 // ==============================|| СМЕТА ЗАКАЗЧИКА ||============================== //
 
 export default function CustomerEstimatePage() {
-  const [works, setWorks] = useState([]);
-  const [materials, setMaterials] = useState([]);
   const [customerEstimates, setCustomerEstimates] = useState([]);
   const [currentEstimate, setCurrentEstimate] = useState(null);
   const [estimateItems, setEstimateItems] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [loading, setLoading] = useState(false);
-  
+
   // Refs для создания новой сметы
   const newEstimateNameRef = useRef();
   const newEstimateCustomerRef = useRef();
-  const [estimatesLoading, setEstimatesLoading] = useState(false);
   const [form] = Form.useForm();
-  const [expandedWorks, setExpandedWorks] = useState(new Set());
-
-  // Состояния для управления материалами
-  const [materialModalVisible, setMaterialModalVisible] = useState(false);
-  const [materialAction, setMaterialAction] = useState('add');
-  const [selectedWorkId, setSelectedWorkId] = useState(null);
-  const [selectedMaterialToReplace, setSelectedMaterialToReplace] = useState(null);
-  const [materialForm] = Form.useForm();
 
   // Состояния для применения коэффициентов
   const [coefficientModalVisible, setCoefficientModalVisible] = useState(false);
   const [coefficientForm] = Form.useForm();
 
-  // Состояния для создания новой сметы
-  const [newEstimateModalVisible, setNewEstimateModalVisible] = useState(false);
-  const [newEstimateForm] = Form.useForm();
-
   // Загрузка данных
   useEffect(() => {
-    loadWorks();
-    loadMaterials();
     loadCustomerEstimates();
-  }, []);
+  }, [loadCustomerEstimates]);
 
   // Загрузка смет заказчика с сервера
   const loadCustomerEstimates = async () => {
@@ -120,11 +100,11 @@ export default function CustomerEstimatePage() {
           ...getAuthHeaders()
         }
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setCustomerEstimates(data);
-        
+
         // Если есть сметы и нет текущей активной, установим первую
         if (data.length > 0 && !currentEstimate) {
           setCurrentEstimate(data[0]);
@@ -141,10 +121,10 @@ export default function CustomerEstimatePage() {
     } finally {
       setLoading(false);
     }
-  };  // Загрузка позиций сметы
+  }; // Загрузка позиций сметы
   const loadEstimateItems = async (estimateId) => {
     if (!estimateId) return;
-    
+
     try {
       setLoading(true);
       const response = await fetch(`${API_BASE_URL}/customer-estimates/${estimateId}/items`, {
@@ -155,7 +135,7 @@ export default function CustomerEstimatePage() {
       });
       if (response.ok) {
         const data = await response.json();
-        const itemsWithFlags = data.map(item => ({
+        const itemsWithFlags = data.map((item) => ({
           ...item,
           item_id: item.id,
           type: item.item_type,
@@ -164,18 +144,18 @@ export default function CustomerEstimatePage() {
           total: item.total_amount,
           image_url: item.image_url
         }));
-        
+
         // Группируем данные по блокам (работа + её материалы)
         const groupedData = [];
         const blockMap = new Map();
-        
+
         // Сначала создаем карту блоков
-        itemsWithFlags.forEach(item => {
+        itemsWithFlags.forEach((item) => {
           if (item.reference_id) {
             if (!blockMap.has(item.reference_id)) {
               blockMap.set(item.reference_id, { work: null, materials: [] });
             }
-            
+
             if (item.item_type === 'work') {
               blockMap.get(item.reference_id).work = item;
             } else {
@@ -186,10 +166,10 @@ export default function CustomerEstimatePage() {
             groupedData.push(item);
           }
         });
-        
+
         // Затем формируем окончательный массив в правильном порядке
         const sortedItems = [];
-        
+
         // Добавляем блоки в правильном порядке
         Array.from(blockMap.entries())
           .sort(([, a], [, b]) => {
@@ -202,17 +182,13 @@ export default function CustomerEstimatePage() {
             if (block.work) {
               sortedItems.push(block.work);
               // Добавляем материалы этого блока сразу после работы
-              block.materials
-                .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
-                .forEach(material => sortedItems.push(material));
+              block.materials.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)).forEach((material) => sortedItems.push(material));
             }
           });
-        
+
         // Добавляем элементы без группировки в конце
-        groupedData
-          .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
-          .forEach(item => sortedItems.push(item));
-        
+        groupedData.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)).forEach((item) => sortedItems.push(item));
+
         setEstimateItems(sortedItems);
       } else {
         message.error('Ошибка загрузки позиций сметы');
@@ -234,7 +210,7 @@ export default function CustomerEstimatePage() {
           'Content-Type': 'application/json',
           ...getAuthHeaders()
         },
-        body: JSON.stringify(estimateData),
+        body: JSON.stringify(estimateData)
       });
 
       if (response.ok) {
@@ -263,21 +239,14 @@ export default function CustomerEstimatePage() {
       title: 'Создать новую смету',
       content: (
         <div>
-          <Input 
-            placeholder="Название сметы" 
-            ref={newEstimateNameRef}
-            style={{ marginBottom: 8 }}
-          />
-          <Input 
-            placeholder="Имя заказчика" 
-            ref={newEstimateCustomerRef}
-          />
+          <Input placeholder="Название сметы" ref={newEstimateNameRef} style={{ marginBottom: 8 }} />
+          <Input placeholder="Имя заказчика" ref={newEstimateCustomerRef} />
         </div>
       ),
       onOk: async () => {
         const name = newEstimateNameRef.current?.input?.value;
         const customerName = newEstimateCustomerRef.current?.input?.value;
-        
+
         if (!name || !customerName) {
           message.error('Заполните название сметы и имя заказчика');
           return Promise.reject();
@@ -311,7 +280,7 @@ export default function CustomerEstimatePage() {
           if (response.ok) {
             await loadCustomerEstimates();
             if (customerEstimates.length > 1) {
-              const nextEstimate = customerEstimates.find(e => e.id !== currentEstimate.id);
+              const nextEstimate = customerEstimates.find((e) => e.id !== currentEstimate.id);
               if (nextEstimate) {
                 setCurrentEstimate(nextEstimate);
                 // Обновляем активную смету в localStorage
@@ -400,12 +369,12 @@ export default function CustomerEstimatePage() {
 
   // Статистика
   const stats = useMemo(() => {
-    const workItems = estimateItems.filter(item => item.type === 'work');
-    const materialItems = estimateItems.filter(item => item.type === 'material');
-    
+    const workItems = estimateItems.filter((item) => item.type === 'work');
+    const materialItems = estimateItems.filter((item) => item.type === 'material');
+
     const worksAmount = workItems.reduce((sum, item) => sum + (item.total || 0), 0);
     const materialsAmount = materialItems.reduce((sum, item) => sum + (item.total || 0), 0);
-    
+
     return {
       totalWorks: workItems.length,
       totalMaterials: materialItems.length,
@@ -448,7 +417,7 @@ export default function CustomerEstimatePage() {
 
       if (response.ok) {
         // Обновляем локальный список
-        const newItems = estimateItems.filter(item => item.id !== itemId);
+        const newItems = estimateItems.filter((item) => item.id !== itemId);
         setEstimateItems(newItems);
         message.success('Позиция удалена');
       } else {
@@ -480,11 +449,11 @@ export default function CustomerEstimatePage() {
         image_url: values.image_url || null,
         notes: values.notes || null
       };
-      
+
       if (selectedItem) {
         // Редактирование существующей позиции - пока обновим локально
-        const updatedItems = estimateItems.map(item => 
-          item.item_id === selectedItem.item_id 
+        const updatedItems = estimateItems.map((item) =>
+          item.item_id === selectedItem.item_id
             ? {
                 ...item,
                 ...values,
@@ -499,21 +468,22 @@ export default function CustomerEstimatePage() {
         message.success('Позиция обновлена');
       } else {
         // Добавление новой позиции через API
-      const response = await fetch(`${API_BASE_URL}/customer-estimates/${currentEstimate.id}/items`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...getAuthHeaders()
-        },
-        body: JSON.stringify(itemData),
-      });        if (response.ok) {
+        const response = await fetch(`${API_BASE_URL}/customer-estimates/${currentEstimate.id}/items`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeaders()
+          },
+          body: JSON.stringify(itemData)
+        });
+        if (response.ok) {
           await loadEstimateItems(currentEstimate.id);
           message.success('Позиция добавлена');
         } else {
           message.error('Ошибка добавления позиции');
         }
       }
-      
+
       setModalVisible(false);
       form.resetFields();
     } catch (error) {
@@ -532,7 +502,7 @@ export default function CustomerEstimatePage() {
       onOk: async () => {
         try {
           // Удаляем все элементы сметы через API
-          const deletePromises = estimateItems.map(item =>
+          const deletePromises = estimateItems.map((item) =>
             fetch(`${API_BASE_URL}/customer-estimates/${currentEstimate.id}/items/${item.id}`, {
               method: 'DELETE',
               headers: {
@@ -541,7 +511,7 @@ export default function CustomerEstimatePage() {
               }
             })
           );
-          
+
           await Promise.all(deletePromises);
           setEstimateItems([]);
           message.success('Смета очищена');
@@ -551,7 +521,7 @@ export default function CustomerEstimatePage() {
         }
       }
     });
-  };  // Функция открытия модального окна коэффициентов
+  }; // Функция открытия модального окна коэффициентов
   const handleOpenCoefficientModal = () => {
     coefficientForm.setFieldsValue({
       workCoefficient: 1,
@@ -571,10 +541,10 @@ export default function CustomerEstimatePage() {
         return;
       }
 
-      const updatedItems = estimateItems.map(item => {
+      const updatedItems = estimateItems.map((item) => {
         // Сохраняем оригинальную цену, если она еще не сохранена
         const originalPrice = item.original_unit_price || item.unit_price;
-        
+
         if (item.isWork) {
           // Применяем коэффициент к работам
           const newPrice = item.unit_price * workCoefficient;
@@ -598,7 +568,7 @@ export default function CustomerEstimatePage() {
 
       setEstimateItems(updatedItems);
       setCoefficientModalVisible(false);
-      
+
       message.success(`Коэффициенты применены: работы ×${workCoefficient}, материалы ×${materialCoefficient}`);
     } catch (error) {
       console.error('Ошибка применения коэффициентов:', error);
@@ -608,14 +578,14 @@ export default function CustomerEstimatePage() {
 
   // Функция отмены коэффициентов (восстановление оригинальных цен)
   const handleResetCoefficients = () => {
-    const hasOriginalPrices = estimateItems.some(item => item.original_unit_price && item.original_unit_price !== item.unit_price);
-    
+    const hasOriginalPrices = estimateItems.some((item) => item.original_unit_price && item.original_unit_price !== item.unit_price);
+
     if (!hasOriginalPrices) {
       message.info('Коэффициенты не применялись или цены уже в исходном состоянии');
       return;
     }
 
-    const resetItems = estimateItems.map(item => {
+    const resetItems = estimateItems.map((item) => {
       if (item.original_unit_price && item.original_unit_price !== item.unit_price) {
         return {
           ...item,
@@ -627,13 +597,13 @@ export default function CustomerEstimatePage() {
     });
 
     setEstimateItems(resetItems);
-    
+
     // Сбрасываем значения в форме
     coefficientForm.setFieldsValue({
       workCoefficient: 1,
       materialCoefficient: 1
     });
-    
+
     message.success('Цены восстановлены к исходным значениям');
   };
 
@@ -660,7 +630,7 @@ export default function CustomerEstimatePage() {
             style={{ width: '100%' }}
             value={currentEstimate?.id}
             onChange={(value) => {
-              const estimate = customerEstimates.find(e => e.id === value);
+              const estimate = customerEstimates.find((e) => e.id === value);
               if (estimate) {
                 setCurrentEstimate(estimate);
                 // Сохраняем ID активной сметы в localStorage
@@ -670,10 +640,9 @@ export default function CustomerEstimatePage() {
             }}
             loading={loading}
           >
-            {customerEstimates.map(estimate => (
+            {customerEstimates.map((estimate) => (
               <Select.Option key={`estimate-${estimate.id}`} value={estimate.id}>
-                {estimate.name} - {estimate.customer_name || 'Без имени'} 
-                ({new Date(estimate.created_at).toLocaleDateString()})
+                {estimate.name} - {estimate.customer_name || 'Без имени'}({new Date(estimate.created_at).toLocaleDateString()})
               </Select.Option>
             ))}
           </Select>
@@ -684,24 +653,19 @@ export default function CustomerEstimatePage() {
           </Button>
         </Col>
         <Col span={4}>
-          <Button 
-            danger 
-            onClick={handleDeleteEstimate} 
-            disabled={!currentEstimate}
-            loading={loading}
-          >
+          <Button danger onClick={handleDeleteEstimate} disabled={!currentEstimate} loading={loading}>
             Удалить смету
           </Button>
         </Col>
       </Row>
-      
+
       {/* Статистика */}
       <Row gutter={8} style={{ marginBottom: 16 }}>
         <Col span={6}>
           <Card size="small" style={{ padding: '8px' }}>
-            <Statistic 
-              title="Работ" 
-              value={stats.totalWorks} 
+            <Statistic
+              title="Работ"
+              value={stats.totalWorks}
               valueStyle={{ color: '#52c41a', fontSize: '16px' }}
               prefix={<CalculatorOutlined style={{ fontSize: '14px' }} />}
             />
@@ -709,9 +673,9 @@ export default function CustomerEstimatePage() {
         </Col>
         <Col span={6}>
           <Card size="small" style={{ padding: '8px' }}>
-            <Statistic 
-              title="Материалов" 
-              value={stats.totalMaterials} 
+            <Statistic
+              title="Материалов"
+              value={stats.totalMaterials}
               valueStyle={{ color: '#faad14', fontSize: '16px' }}
               prefix={<FileTextOutlined style={{ fontSize: '14px' }} />}
             />
@@ -719,20 +683,20 @@ export default function CustomerEstimatePage() {
         </Col>
         <Col span={6}>
           <Card size="small" style={{ padding: '8px' }}>
-            <Statistic 
-              title="Сумма работ" 
-              value={formatNumberWithComma(stats.worksAmount)} 
-              suffix="₽" 
+            <Statistic
+              title="Сумма работ"
+              value={formatNumberWithComma(stats.worksAmount)}
+              suffix="₽"
               valueStyle={{ color: '#52c41a', fontSize: '16px' }}
             />
           </Card>
         </Col>
         <Col span={6}>
           <Card size="small" style={{ padding: '8px' }}>
-            <Statistic 
-              title="Общая сумма" 
-              value={formatNumberWithComma(stats.totalAmount)} 
-              suffix="₽" 
+            <Statistic
+              title="Общая сумма"
+              value={formatNumberWithComma(stats.totalAmount)}
+              suffix="₽"
               valueStyle={{ color: '#722ed1', fontSize: '18px' }}
             />
           </Card>
@@ -764,12 +728,7 @@ export default function CustomerEstimatePage() {
           >
             Применить коэффициенты
           </Button>
-          <Button
-            icon={<DownloadOutlined />}
-            onClick={handleExportEstimate}
-            size="middle"
-            disabled={estimateItems.length === 0}
-          >
+          <Button icon={<DownloadOutlined />} onClick={handleExportEstimate} size="middle" disabled={estimateItems.length === 0}>
             Экспорт сметы
           </Button>
           <Popconfirm
@@ -780,12 +739,7 @@ export default function CustomerEstimatePage() {
             cancelText="Отмена"
             disabled={estimateItems.length === 0}
           >
-            <Button
-              danger
-              icon={<DeleteOutlined />}
-              size="middle"
-              disabled={estimateItems.length === 0}
-            >
+            <Button danger icon={<DeleteOutlined />} size="middle" disabled={estimateItems.length === 0}>
               Очистить смету
             </Button>
           </Popconfirm>
@@ -813,10 +767,13 @@ export default function CustomerEstimatePage() {
             key: 'item_id',
             width: 80,
             render: (text, record, index) => (
-              <Text strong style={{ 
-                fontSize: '14px',
-                color: record.type === 'work' ? '#1890ff' : '#52c41a'
-              }}>
+              <Text
+                strong
+                style={{
+                  fontSize: '14px',
+                  color: record.type === 'work' ? '#1890ff' : '#52c41a'
+                }}
+              >
                 {index + 1}
               </Text>
             )
@@ -844,9 +801,7 @@ export default function CustomerEstimatePage() {
                   />
                 );
               } else if (record.type === 'work') {
-                return (
-                  <CalculatorOutlined style={{ color: '#1890ff', fontSize: '16px' }} />
-                );
+                return <CalculatorOutlined style={{ color: '#1890ff', fontSize: '16px' }} />;
               }
               return null;
             }
@@ -856,18 +811,23 @@ export default function CustomerEstimatePage() {
             dataIndex: 'name',
             key: 'name',
             render: (text, record) => (
-              <div style={{
-                backgroundColor: record.type === 'work' ? '#f0f8ff' : '#f6ffed',
-                padding: '8px 12px',
-                borderRadius: '4px',
-                border: record.type === 'work' ? '1px solid #d6e4ff' : '1px solid #d9f7be',
-                borderLeft: record.type === 'work' ? '3px solid #1890ff' : '3px solid #52c41a'
-              }}>
+              <div
+                style={{
+                  backgroundColor: record.type === 'work' ? '#f0f8ff' : '#f6ffed',
+                  padding: '8px 12px',
+                  borderRadius: '4px',
+                  border: record.type === 'work' ? '1px solid #d6e4ff' : '1px solid #d9f7be',
+                  borderLeft: record.type === 'work' ? '3px solid #1890ff' : '3px solid #52c41a'
+                }}
+              >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Text strong={record.type === 'work'} style={{ 
-                    fontSize: '14px', 
-                    color: record.type === 'work' ? '#1890ff' : '#52c41a' 
-                  }}>
+                  <Text
+                    strong={record.type === 'work'}
+                    style={{
+                      fontSize: '14px',
+                      color: record.type === 'work' ? '#1890ff' : '#52c41a'
+                    }}
+                  >
                     {text}
                   </Text>
                 </div>
@@ -900,11 +860,7 @@ export default function CustomerEstimatePage() {
             key: 'unit_price',
             width: 120,
             align: 'right',
-            render: (text) => (
-              <Text style={{ color: '#722ed1' }}>
-                {formatNumberWithComma(text)} ₽
-              </Text>
-            )
+            render: (text) => <Text style={{ color: '#722ed1' }}>{formatNumberWithComma(text)} ₽</Text>
           },
           {
             title: 'Сумма',
@@ -913,10 +869,13 @@ export default function CustomerEstimatePage() {
             width: 140,
             align: 'right',
             render: (text, record) => (
-              <Text strong style={{ 
-                color: '#52c41a',
-                fontSize: '15px'
-              }}>
+              <Text
+                strong
+                style={{
+                  color: '#52c41a',
+                  fontSize: '15px'
+                }}
+              >
                 {formatNumberWithComma(text)} ₽
               </Text>
             )
@@ -945,12 +904,7 @@ export default function CustomerEstimatePage() {
                   cancelText="Отмена"
                 >
                   <Tooltip title="Удалить">
-                    <Button
-                      type="text"
-                      icon={<DeleteOutlined />}
-                      size="small"
-                      danger
-                    />
+                    <Button type="text" icon={<DeleteOutlined />} size="small" danger />
                   </Tooltip>
                 </Popconfirm>
               </Space>
@@ -1007,11 +961,7 @@ export default function CustomerEstimatePage() {
         >
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item
-                name="type"
-                label="Тип позиции"
-                rules={[{ required: true, message: 'Выберите тип' }]}
-              >
+              <Form.Item name="type" label="Тип позиции" rules={[{ required: true, message: 'Выберите тип' }]}>
                 <Select placeholder="Выберите тип">
                   <Option value="work">Работа</Option>
                   <Option value="material">Материал</Option>
@@ -1019,25 +969,14 @@ export default function CustomerEstimatePage() {
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item
-                name="unit"
-                label="Единица измерения"
-                rules={[{ required: true, message: 'Введите единицу измерения' }]}
-              >
+              <Form.Item name="unit" label="Единица измерения" rules={[{ required: true, message: 'Введите единицу измерения' }]}>
                 <Input placeholder="шт., м2, м3, кг..." />
               </Form.Item>
             </Col>
           </Row>
 
-          <Form.Item
-            name="name"
-            label="Наименование"
-            rules={[{ required: true, message: 'Введите наименование' }]}
-          >
-            <Input.TextArea 
-              placeholder="Введите наименование работы или материала"
-              rows={2}
-            />
+          <Form.Item name="name" label="Наименование" rules={[{ required: true, message: 'Введите наименование' }]}>
+            <Input.TextArea placeholder="Введите наименование работы или материала" rows={2} />
           </Form.Item>
 
           {/* Поле для URL изображения материала */}
@@ -1045,14 +984,8 @@ export default function CustomerEstimatePage() {
             {({ getFieldValue }) => {
               const type = getFieldValue('type');
               return type === 'material' ? (
-                <Form.Item
-                  name="image_url"
-                  label="URL изображения материала (необязательно)"
-                >
-                  <Input
-                    placeholder="https://example.com/image.jpg"
-                    allowClear
-                  />
+                <Form.Item name="image_url" label="URL изображения материала (необязательно)">
+                  <Input placeholder="https://example.com/image.jpg" allowClear />
                 </Form.Item>
               ) : null;
             }}
@@ -1068,12 +1001,7 @@ export default function CustomerEstimatePage() {
                   { type: 'number', min: 0.001, message: 'Количество должно быть больше 0' }
                 ]}
               >
-                <InputNumber
-                  placeholder="1.0"
-                  style={{ width: '100%' }}
-                  step={0.1}
-                  precision={3}
-                />
+                <InputNumber placeholder="1.0" style={{ width: '100%' }} step={0.1} precision={3} />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -1085,12 +1013,7 @@ export default function CustomerEstimatePage() {
                   { type: 'number', min: 0, message: 'Цена не может быть отрицательной' }
                 ]}
               >
-                <InputNumber
-                  placeholder="0.00"
-                  style={{ width: '100%' }}
-                  step={0.01}
-                  precision={2}
-                />
+                <InputNumber placeholder="0.00" style={{ width: '100%' }} step={0.01} precision={2} />
               </Form.Item>
             </Col>
           </Row>
@@ -1101,16 +1024,18 @@ export default function CustomerEstimatePage() {
               const quantity = getFieldValue('quantity') || 0;
               const unitPrice = getFieldValue('unit_price') || 0;
               const total = quantity * unitPrice;
-              
+
               return (
-                <div style={{
-                  padding: '12px',
-                  backgroundColor: '#f6ffed',
-                  border: '1px solid #b7eb8f',
-                  borderRadius: '6px',
-                  textAlign: 'center',
-                  marginTop: '16px'
-                }}>
+                <div
+                  style={{
+                    padding: '12px',
+                    backgroundColor: '#f6ffed',
+                    border: '1px solid #b7eb8f',
+                    borderRadius: '6px',
+                    textAlign: 'center',
+                    marginTop: '16px'
+                  }}
+                >
                   <Text strong style={{ fontSize: '16px', color: '#52c41a' }}>
                     Сумма: {formatNumberWithComma(total)} ₽
                   </Text>
@@ -1131,12 +1056,7 @@ export default function CustomerEstimatePage() {
         cancelText="Отмена"
         width={550}
         footer={[
-          <Button 
-            key="reset" 
-            icon={<ReloadOutlined />}
-            onClick={handleResetCoefficients}
-            disabled={estimateItems.length === 0}
-          >
+          <Button key="reset" icon={<ReloadOutlined />} onClick={handleResetCoefficients} disabled={estimateItems.length === 0}>
             Отменить коэффициенты
           </Button>,
           <Button key="cancel" onClick={() => setCoefficientModalVisible(false)}>
@@ -1148,11 +1068,9 @@ export default function CustomerEstimatePage() {
         ]}
       >
         <div style={{ marginBottom: 16 }}>
-          <Text type="secondary">
-            Коэффициенты будут применены ко всем позициям соответствующего типа в смете.
-          </Text>
+          <Text type="secondary">Коэффициенты будут применены ко всем позициям соответствующего типа в смете.</Text>
         </div>
-        
+
         <Form
           form={coefficientForm}
           layout="vertical"
@@ -1206,21 +1124,22 @@ export default function CustomerEstimatePage() {
             </Col>
           </Row>
 
-          <div style={{
-            padding: '12px',
-            backgroundColor: '#fffbe6',
-            border: '1px solid #ffe58f',
-            borderRadius: '6px',
-            marginTop: '16px'
-          }}>
+          <div
+            style={{
+              padding: '12px',
+              backgroundColor: '#fffbe6',
+              border: '1px solid #ffe58f',
+              borderRadius: '6px',
+              marginTop: '16px'
+            }}
+          >
             <Text style={{ fontSize: '14px' }}>
               <strong>Примеры коэффициентов:</strong>
               <br />
               • Увеличить на 20% → 1.2
               <br />
               • Уменьшить на 10% → 0.9
-              <br />
-              • Удвоить → 2.0
+              <br />• Удвоить → 2.0
             </Text>
           </div>
 
@@ -1229,36 +1148,28 @@ export default function CustomerEstimatePage() {
             {({ getFieldValue }) => {
               const workCoeff = getFieldValue('workCoefficient') || 1;
               const materialCoeff = getFieldValue('materialCoefficient') || 1;
-              
+
               const currentTotal = estimateItems.reduce((sum, item) => sum + (item.total || 0), 0);
-              const workTotal = estimateItems
-                .filter(item => item.isWork)
-                .reduce((sum, item) => sum + (item.total || 0), 0);
-              const materialTotal = estimateItems
-                .filter(item => !item.isWork)
-                .reduce((sum, item) => sum + (item.total || 0), 0);
-              
+              const workTotal = estimateItems.filter((item) => item.isWork).reduce((sum, item) => sum + (item.total || 0), 0);
+              const materialTotal = estimateItems.filter((item) => !item.isWork).reduce((sum, item) => sum + (item.total || 0), 0);
+
               const newWorkTotal = workTotal * workCoeff;
               const newMaterialTotal = materialTotal * materialCoeff;
               const newTotal = newWorkTotal + newMaterialTotal;
-              
+
               return (
-                <div style={{
-                  padding: '12px',
-                  backgroundColor: '#f0f8ff',
-                  border: '1px solid #d6e4ff',
-                  borderRadius: '6px',
-                  marginTop: '16px'
-                }}>
+                <div
+                  style={{
+                    padding: '12px',
+                    backgroundColor: '#f0f8ff',
+                    border: '1px solid #d6e4ff',
+                    borderRadius: '6px',
+                    marginTop: '16px'
+                  }}
+                >
                   <Row gutter={16}>
                     <Col span={8}>
-                      <Statistic
-                        title="Текущая сумма"
-                        value={currentTotal}
-                        precision={2}
-                        suffix="₽"
-                        valueStyle={{ fontSize: '14px' }}
-                      />
+                      <Statistic title="Текущая сумма" value={currentTotal} precision={2} suffix="₽" valueStyle={{ fontSize: '14px' }} />
                     </Col>
                     <Col span={8}>
                       <Statistic
@@ -1272,10 +1183,10 @@ export default function CustomerEstimatePage() {
                     <Col span={8}>
                       <Statistic
                         title="Изменение"
-                        value={((newTotal - currentTotal) / currentTotal * 100) || 0}
+                        value={((newTotal - currentTotal) / currentTotal) * 100 || 0}
                         precision={1}
                         suffix="%"
-                        valueStyle={{ 
+                        valueStyle={{
                           fontSize: '14px',
                           color: newTotal > currentTotal ? '#52c41a' : newTotal < currentTotal ? '#ff4d4f' : '#666'
                         }}

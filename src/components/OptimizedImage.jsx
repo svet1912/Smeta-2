@@ -5,14 +5,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Box, Skeleton } from '@mui/material';
 
-const OptimizedImage = ({ 
-  src, 
-  alt = '', 
-  width = '100%', 
-  height = 'auto',
-  placeholder = true,
-  ...props 
-}) => {
+const OptimizedImage = ({ src, alt = '', width = '100%', height = 'auto', placeholder = true, ...props }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(false);
   const [hasError, setHasError] = useState(false);
@@ -58,14 +51,9 @@ const OptimizedImage = ({
       }}
     >
       {placeholder && !isLoaded && (
-        <Skeleton
-          variant="rectangular"
-          width="100%"
-          height="100%"
-          sx={{ position: 'absolute', top: 0, left: 0 }}
-        />
+        <Skeleton variant="rectangular" width="100%" height="100%" sx={{ position: 'absolute', top: 0, left: 0 }} />
       )}
-      
+
       {isInView && (
         <img
           src={src}
@@ -84,7 +72,7 @@ const OptimizedImage = ({
           {...props}
         />
       )}
-      
+
       {hasError && (
         <Box
           sx={{

@@ -34,7 +34,7 @@ const Hero = ({ content }) => {
               >
                 {content.title}
               </Typography>
-              
+
               <Typography
                 variant="h4"
                 component="h2"
@@ -46,7 +46,7 @@ const Hero = ({ content }) => {
               >
                 {content.subtitle}
               </Typography>
-              
+
               <Typography
                 variant="h6"
                 component="p"
@@ -58,7 +58,7 @@ const Hero = ({ content }) => {
               >
                 {content.description}
               </Typography>
-              
+
               <Button
                 variant="contained"
                 size="large"
@@ -83,12 +83,9 @@ const Hero = ({ content }) => {
               </Button>
             </Stack>
           </Grid>
-          
+
           <Grid item xs={12} md={5}>
-            <LeadForm 
-              content={content.leadForm} 
-              variant="compact"
-            />
+            <LeadForm content={content.leadForm} variant="compact" />
           </Grid>
         </Grid>
       </Container>

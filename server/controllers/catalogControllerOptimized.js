@@ -13,12 +13,7 @@ import queryOptimizer from '../services/queryOptimizer.js';
 export async function getMaterials(req, res) {
   try {
     // Для публичного маршрута не требуется пользователь
-    const { 
-      search = '', 
-      limit = 50, 
-      offset = 0,
-      showOnlyOverrides = false 
-    } = req.query;
+    const { search = '', limit = 50, offset = 0, showOnlyOverrides = false } = req.query;
 
     // Строим WHERE условие для поиска
     let whereCondition = '';
@@ -37,7 +32,8 @@ export async function getMaterials(req, res) {
     }
 
     // Используем оптимизированный запрос с кэшированием
-    const result = await queryOptimizer.optimizedQuery(`
+    const result = await queryOptimizer.optimizedQuery(
+      `
       SELECT 
         id, 
         name, 
@@ -54,10 +50,13 @@ export async function getMaterials(req, res) {
       ${whereCondition}
       ORDER BY name
       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
-    `, [...params, parseInt(limit), parseInt(offset)], {
-      cacheKey: `materials_${search}_${showOnlyOverrides}_${limit}_${offset}`,
-      cacheTTL: 600000 // 10 минут
-    });
+    `,
+      [...params, parseInt(limit), parseInt(offset)],
+      {
+        cacheKey: `materials_${search}_${showOnlyOverrides}_${limit}_${offset}`,
+        cacheTTL: 600000 // 10 минут
+      }
+    );
 
     res.json(result.rows);
   } catch (error) {
@@ -73,25 +72,21 @@ export async function getMaterials(req, res) {
 export async function getWorks(req, res) {
   try {
     // Для публичного маршрута не требуется пользователь
-    const { 
-      search = '', 
-      limit = 50, 
-      offset = 0 
-    } = req.query;
+    const { search = '', limit = 50, offset = 0 } = req.query;
 
     const filters = {
       search
     };
-    
+
     const pagination = {
       limit: parseInt(limit),
       offset: parseInt(offset)
     };
 
     const result = await queryOptimizer.getWorksOptimized(filters, pagination);
-    
+
     // Преобразуем данные в нужный формат
-    const works = result.rows.map(row => ({
+    const works = result.rows.map((row) => ({
       id: row.id,
       name: row.name,
       unit: row.unit,
@@ -112,7 +107,7 @@ export async function getWorks(req, res) {
         total: result.rows.length,
         limit: parseInt(limit),
         offset: parseInt(offset),
-        hasMore: (parseInt(offset) + works.length) < result.rows.length
+        hasMore: parseInt(offset) + works.length < result.rows.length
       }
     });
   } catch (error) {
@@ -127,14 +122,18 @@ export async function getWorks(req, res) {
  */
 export async function getPhases(req, res) {
   try {
-    const result = await queryOptimizer.optimizedQuery(`
+    const result = await queryOptimizer.optimizedQuery(
+      `
       SELECT id, name, sort_order
       FROM phases
       ORDER BY sort_order, name
-    `, [], {
-      cacheKey: 'phases_all',
-      cacheTTL: 1800000 // 30 минут (фазы редко меняются)
-    });
+    `,
+      [],
+      {
+        cacheKey: 'phases_all',
+        cacheTTL: 1800000 // 30 минут (фазы редко меняются)
+      }
+    );
 
     res.json(result.rows);
   } catch (error) {
@@ -149,12 +148,8 @@ export async function getPhases(req, res) {
  */
 export async function getWorkMaterials(req, res) {
   try {
-    const { 
-      limit = 50, 
-      offset = 0,
-      workId = null
-    } = req.query;
-    
+    const { limit = 50, offset = 0, workId = null } = req.query;
+
     // Строим WHERE условие
     let whereCondition = '';
     const params = [];
@@ -165,8 +160,9 @@ export async function getWorkMaterials(req, res) {
       params.push(workId);
       paramIndex++;
     }
-    
-    const result = await queryOptimizer.optimizedQuery(`
+
+    const result = await queryOptimizer.optimizedQuery(
+      `
       SELECT 
         wm.work_id,
         wm.material_id,
@@ -186,20 +182,27 @@ export async function getWorkMaterials(req, res) {
       ${whereCondition}
       ORDER BY w.name, m.name
       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
-    `, [...params, parseInt(limit), parseInt(offset)], {
-      cacheKey: `work_materials_${workId || 'all'}_${limit}_${offset}`,
-      cacheTTL: 900000 // 15 минут
-    });
+    `,
+      [...params, parseInt(limit), parseInt(offset)],
+      {
+        cacheKey: `work_materials_${workId || 'all'}_${limit}_${offset}`,
+        cacheTTL: 900000 // 15 минут
+      }
+    );
 
     // Получаем общее количество
-    const countResult = await queryOptimizer.optimizedQuery(`
+    const countResult = await queryOptimizer.optimizedQuery(
+      `
       SELECT COUNT(*) as total
       FROM work_materials wm
       ${whereCondition}
-    `, params, {
-      cacheKey: `work_materials_count_${workId || 'all'}`,
-      cacheTTL: 900000
-    });
+    `,
+      params,
+      {
+        cacheKey: `work_materials_count_${workId || 'all'}`,
+        cacheTTL: 900000
+      }
+    );
 
     const total = parseInt(countResult.rows[0].total);
 
@@ -210,12 +213,12 @@ export async function getWorkMaterials(req, res) {
         total,
         limit: parseInt(limit),
         offset: parseInt(offset),
-        hasMore: (parseInt(offset) + parseInt(limit)) < total
+        hasMore: parseInt(offset) + parseInt(limit) < total
       }
     });
   } catch (error) {
     console.error('❌ Ошибка получения материалов работ:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Ошибка получения материалов работ',
       code: 'WORK_MATERIALS_FETCH_ERROR'
     });
@@ -238,11 +241,14 @@ export async function createMaterial(req, res) {
       });
     }
 
-    const result = await query(`
+    const result = await query(
+      `
       INSERT INTO materials (tenant_id, name, unit, unit_price, expenditure, weight, image_url, item_url)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING id, name, unit, unit_price, expenditure, weight, image_url, item_url, created_at
-    `, [user.tenantId, name, unit, parseFloat(unit_price), parseFloat(expenditure), weight, image_url, item_url]);
+    `,
+      [user.tenantId, name, unit, parseFloat(unit_price), parseFloat(expenditure), weight, image_url, item_url]
+    );
 
     // Очищаем кэш материалов
     queryOptimizer.clearCache();
@@ -267,7 +273,8 @@ export async function updateMaterial(req, res) {
     const { id } = req.params;
     const { name, unit, unit_price, expenditure, weight, image_url, item_url } = req.body;
 
-    const result = await query(`
+    const result = await query(
+      `
       UPDATE materials 
       SET name = COALESCE($2, name),
           unit = COALESCE($3, unit),
@@ -279,7 +286,19 @@ export async function updateMaterial(req, res) {
           updated_at = CURRENT_TIMESTAMP
       WHERE id = $1 AND tenant_id = $9
       RETURNING id, name, unit, unit_price, expenditure, weight, image_url, item_url, updated_at
-    `, [id, name, unit, unit_price ? parseFloat(unit_price) : null, expenditure ? parseFloat(expenditure) : null, weight, image_url, item_url, user.tenantId]);
+    `,
+      [
+        id,
+        name,
+        unit,
+        unit_price ? parseFloat(unit_price) : null,
+        expenditure ? parseFloat(expenditure) : null,
+        weight,
+        image_url,
+        item_url,
+        user.tenantId
+      ]
+    );
 
     if (result.rows.length === 0) {
       return res.status(404).json({
@@ -310,11 +329,14 @@ export async function deleteMaterial(req, res) {
     const user = getCurrentUser(req);
     const { id } = req.params;
 
-    const result = await query(`
+    const result = await query(
+      `
       DELETE FROM materials 
       WHERE id = $1 AND tenant_id = $2
       RETURNING id, name
-    `, [id, user.tenantId]);
+    `,
+      [id, user.tenantId]
+    );
 
     if (result.rows.length === 0) {
       return res.status(404).json({
@@ -352,11 +374,14 @@ export async function createWork(req, res) {
       });
     }
 
-    const result = await query(`
+    const result = await query(
+      `
       INSERT INTO works_ref (tenant_id, name, unit, unit_price, description, sort_order)
       VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING id, name, unit, unit_price, description, sort_order, created_at
-    `, [user.tenantId, name, unit, parseFloat(unit_price), description, parseInt(sort_order)]);
+    `,
+      [user.tenantId, name, unit, parseFloat(unit_price), description, parseInt(sort_order)]
+    );
 
     // Очищаем кэш работ
     queryOptimizer.clearCache();
@@ -377,6 +402,7 @@ export async function createWork(req, res) {
  */
 export async function addWorkMaterial(req, res) {
   try {
+    // eslint-disable-next-line no-unused-vars
     const user = getCurrentUser(req);
     const { workId } = req.params;
     const { material_id, consumption_per_work_unit, waste_coeff = 1.0 } = req.body;
@@ -388,11 +414,14 @@ export async function addWorkMaterial(req, res) {
       });
     }
 
-    const result = await query(`
+    const result = await query(
+      `
       INSERT INTO work_materials (work_id, material_id, consumption_per_work_unit, waste_coeff)
       VALUES ($1, $2, $3, $4)
       RETURNING work_id, material_id, consumption_per_work_unit, waste_coeff
-    `, [workId, material_id, parseFloat(consumption_per_work_unit), parseFloat(waste_coeff)]);
+    `,
+      [workId, material_id, parseFloat(consumption_per_work_unit), parseFloat(waste_coeff)]
+    );
 
     // Очищаем кэш материалов работ
     queryOptimizer.clearCache();
@@ -413,17 +442,26 @@ export async function addWorkMaterial(req, res) {
  */
 export async function updateWorkMaterial(req, res) {
   try {
+    // eslint-disable-next-line no-unused-vars
     const user = getCurrentUser(req);
     const { workId, materialId } = req.params;
     const { consumption_per_work_unit, waste_coeff } = req.body;
 
-    const result = await query(`
+    const result = await query(
+      `
       UPDATE work_materials 
       SET consumption_per_work_unit = COALESCE($3, consumption_per_work_unit),
           waste_coeff = COALESCE($4, waste_coeff)
       WHERE work_id = $1 AND material_id = $2
       RETURNING work_id, material_id, consumption_per_work_unit, waste_coeff
-    `, [workId, materialId, consumption_per_work_unit ? parseFloat(consumption_per_work_unit) : null, waste_coeff ? parseFloat(waste_coeff) : null]);
+    `,
+      [
+        workId,
+        materialId,
+        consumption_per_work_unit ? parseFloat(consumption_per_work_unit) : null,
+        waste_coeff ? parseFloat(waste_coeff) : null
+      ]
+    );
 
     if (result.rows.length === 0) {
       return res.status(404).json({
@@ -451,14 +489,18 @@ export async function updateWorkMaterial(req, res) {
  */
 export async function deleteWorkMaterial(req, res) {
   try {
+    // eslint-disable-next-line no-unused-vars
     const user = getCurrentUser(req);
     const { workId, materialId } = req.params;
 
-    const result = await query(`
+    const result = await query(
+      `
       DELETE FROM work_materials 
       WHERE work_id = $1 AND material_id = $2
       RETURNING work_id, material_id
-    `, [workId, materialId]);
+    `,
+      [workId, materialId]
+    );
 
     if (result.rows.length === 0) {
       return res.status(404).json({

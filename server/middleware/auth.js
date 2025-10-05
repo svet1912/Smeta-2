@@ -8,7 +8,6 @@ import { config } from '../config.js';
 
 // Настройки JWT
 const JWT_SECRET = config.jwtSecret;
-const JWT_ISSUER = 'smeta360-app';
 
 /**
  * Извлекает JWT токен из заголовков запроса
@@ -20,7 +19,7 @@ function extractJwtToken(req) {
   if (authHeader.startsWith('Bearer ')) {
     return authHeader.slice(7);
   }
-  
+
   return authHeader;
 }
 
@@ -49,16 +48,20 @@ function verifyJwtToken(token) {
 async function setDatabaseContext(userId, tenantId) {
   try {
     // PostgreSQL не поддерживает параметризованные запросы для SET
-    // Используем прямое значение, но с проверкой на SQL injection
+    // Используем прямое значение, но с проверкой на безопасность
     const safeUserId = parseInt(userId);
-    const safeTenantId = tenantId.replace(/[^a-f0-9-]/gi, '');
-    
+
+    // Проверяем, что tenantId является валидным UUID
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(tenantId)) {
+      throw new Error(`Некорректный формат tenant_id: ${tenantId}`);
+    }
+
     await query(`SET app.user_id = ${safeUserId}`);
-    await query(`SET app.tenant_id = '${safeTenantId}'`);
+    await query(`SET app.tenant_id = '${tenantId}'`);
   } catch (error) {
     console.error('❌ Ошибка установки контекста БД:', error.message);
     // Не выбрасываем ошибку, чтобы не блокировать работу приложения
-    // console.error('❌ Ошибка установки контекста БД:', error);
   }
 }
 
@@ -81,12 +84,13 @@ const PUBLIC_ROUTES = [
  * Проверяет, является ли маршрут публичным
  */
 function isPublicRoute(path) {
-  return PUBLIC_ROUTES.some(route => 
-    path === route || 
-    path.startsWith(route) ||
-    path.startsWith('/api/materials') ||
-    path.startsWith('/api/works') ||
-    path.startsWith('/api/phases')
+  return PUBLIC_ROUTES.some(
+    (route) =>
+      path === route ||
+      path.startsWith(route) ||
+      path.startsWith('/api/materials') ||
+      path.startsWith('/api/works') ||
+      path.startsWith('/api/phases')
   );
 }
 
@@ -103,7 +107,7 @@ export async function authMiddleware(req, res, next) {
     // Извлекаем токен
     const token = extractJwtToken(req);
     if (!token) {
-      return res.status(401).json({ 
+      return res.status(401).json({
         error: 'Не предоставлен токен авторизации',
         code: 'NO_AUTH_TOKEN'
       });
@@ -122,7 +126,7 @@ export async function authMiddleware(req, res, next) {
 
     // Извлекаем данные пользователя
     const userId = payload.id || payload.userId || payload.sub;
-    const tenantId = payload.tenantId || payload.tenant_id || 'default-tenant';  // Дефолтный tenant если не указан
+    const tenantId = payload.tenantId || payload.tenant_id; // Может быть null для новых пользователей
     const role = payload.role || 'user';
     const email = payload.email;
 
@@ -133,15 +137,22 @@ export async function authMiddleware(req, res, next) {
       });
     }
 
+    // Проверяем, что пользователь имеет tenant_id для приватных операций
+    if (!tenantId) {
+      return res.status(401).json({
+        error: 'Контекст тенанта не установлен',
+        code: 'MISSING_TENANT_CONTEXT'
+      });
+    }
+
     // Сохраняем данные пользователя в запросе
     req.user = {
       id: userId,
-      userId: userId,  // Добавляем для совместимости
+      userId: userId, // Добавляем для совместимости
       tenantId: tenantId,
       role: role,
       email: email
     };
-    
 
     // Устанавливаем контекст в БД
     try {
@@ -151,9 +162,8 @@ export async function authMiddleware(req, res, next) {
       // Продолжаем выполнение без установки контекста
     }
 
-    console.log(`🔐 Auth: user=${userId}, tenant=${tenantId.substring(0,8)}, role=${role}, path=${req.path}`);
+    console.log(`🔐 Auth: user=${userId}, tenant=${tenantId.substring(0, 8)}, role=${role}, path=${req.path}`);
     next();
-
   } catch (error) {
     console.error('❌ Ошибка в authMiddleware:', error);
     res.status(500).json({
@@ -168,7 +178,7 @@ export async function authMiddleware(req, res, next) {
  */
 export function requireRole(allowedRoles) {
   const roles = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
-  
+
   return (req, res, next) => {
     const user = req.user;
     if (!user) {

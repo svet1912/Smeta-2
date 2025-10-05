@@ -24,6 +24,7 @@ function createData(tracking_no, name, fat, carbs, protein) {
   return { tracking_no, name, fat, carbs, protein };
 }
 
+// eslint-disable-next-line no-unused-vars
 const rows = [
   createData(84564564, 'Camera Lens', 40, 2, 40570),
   createData(98764564, 'Laptop', 300, 0, 180139),

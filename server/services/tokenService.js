@@ -53,14 +53,17 @@ class TokenService {
     try {
       // Создаем хеш токена для безопасности
       const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
-      
+
       // Вычисляем время истечения
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 дней
 
-      await query(`
+      await query(
+        `
         INSERT INTO user_sessions (user_id, token_hash, expires_at, user_agent, ip_address)
         VALUES ($1, $2, $3, $4, $5);
-      `, [userId, tokenHash, expiresAt, userAgent, ipAddress]);
+      `,
+        [userId, tokenHash, expiresAt, userAgent, ipAddress]
+      );
 
       console.log(`🔑 Refresh токен сохранен для пользователя: ${userId}`);
     } catch (error) {
@@ -76,7 +79,7 @@ class TokenService {
     try {
       // Проверяем токен
       const decoded = jwt.verify(refreshToken, this.refreshTokenSecret);
-      
+
       if (decoded.type !== 'refresh') {
         throw new Error('Invalid token type');
       }
@@ -85,34 +88,42 @@ class TokenService {
 
       // Проверяем, что токен существует в базе и не истек
       const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
-      const sessionResult = await query(`
+      const sessionResult = await query(
+        `
         SELECT us.*, u.email, u.firstname, u.lastname
         FROM user_sessions us
         JOIN auth_users u ON u.id = us.user_id
         WHERE us.user_id = $1 AND us.token_hash = $2 AND us.expires_at > NOW();
-      `, [userId, tokenHash]);
+      `,
+        [userId, tokenHash]
+      );
 
       if (sessionResult.rows.length === 0) {
         throw new Error('Invalid or expired refresh token');
       }
 
-      const session = sessionResult.rows[0];
       const user = sessionResult.rows[0];
 
       // Удаляем старый токен
-      await query(`
+      await query(
+        `
         DELETE FROM user_sessions 
         WHERE user_id = $1 AND token_hash = $2;
-      `, [userId, tokenHash]);
+      `,
+        [userId, tokenHash]
+      );
 
       // Получаем текущий тенант пользователя
-      const tenantResult = await query(`
+      const tenantResult = await query(
+        `
         SELECT ut.tenant_id, t.name as tenant_name
         FROM user_tenants ut
         JOIN tenants t ON t.id = ut.tenant_id
         WHERE ut.user_id = $1 AND ut.is_current = true
         LIMIT 1;
-      `, [userId]);
+      `,
+        [userId]
+      );
 
       if (tenantResult.rows.length === 0) {
         throw new Error('No active tenant found');
@@ -140,7 +151,6 @@ class TokenService {
           tenantName: tenantInfo.tenant_name
         }
       };
-
     } catch (error) {
       console.error('❌ Ошибка ротации refresh токена:', error);
       return null;
@@ -153,11 +163,14 @@ class TokenService {
   async revokeRefreshToken(refreshToken) {
     try {
       const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
-      
-      await query(`
+
+      await query(
+        `
         DELETE FROM user_sessions 
         WHERE token_hash = $1;
-      `, [tokenHash]);
+      `,
+        [tokenHash]
+      );
 
       console.log('🔑 Refresh токен отозван');
     } catch (error) {

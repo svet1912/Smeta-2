@@ -21,7 +21,7 @@ import { Menu as MenuIcon, Close as CloseIcon } from '@mui/icons-material';
 
 function HideOnScroll({ children }) {
   const trigger = useScrollTrigger();
-  
+
   return (
     <Slide appear={false} direction="down" in={!trigger}>
       {children}
@@ -43,7 +43,7 @@ const Header = ({ content }) => {
     if (href.startsWith('#')) {
       const element = document.querySelector(href);
       if (element) {
-        element.scrollIntoView({ 
+        element.scrollIntoView({
           behavior: 'smooth',
           block: 'start'
         });
@@ -86,7 +86,7 @@ const Header = ({ content }) => {
       <List>
         {content.items.map((item) => (
           <ListItem key={item.label} disablePadding>
-            <ListItemButton 
+            <ListItemButton
               onClick={() => scrollToSection(item.href)}
               sx={{
                 backgroundColor: activeSection === item.href ? 'primary.light' : 'transparent',
@@ -98,11 +98,7 @@ const Header = ({ content }) => {
           </ListItem>
         ))}
         <ListItem sx={{ pt: 2 }}>
-          <Button
-            variant="contained"
-            fullWidth
-            onClick={() => scrollToSection(content.cta.href)}
-          >
+          <Button variant="contained" fullWidth onClick={() => scrollToSection(content.cta.href)}>
             {content.cta.text}
           </Button>
         </ListItem>
@@ -113,9 +109,9 @@ const Header = ({ content }) => {
   return (
     <>
       <HideOnScroll>
-        <AppBar 
-          position="fixed" 
-          sx={{ 
+        <AppBar
+          position="fixed"
+          sx={{
             backgroundColor: 'background.paper',
             backdropFilter: 'blur(10px)',
             borderBottom: '1px solid',
@@ -127,7 +123,7 @@ const Header = ({ content }) => {
               <Typography
                 variant="h5"
                 component="div"
-                sx={{ 
+                sx={{
                   fontWeight: 'bold',
                   color: 'primary.main',
                   cursor: 'pointer'
@@ -156,21 +152,12 @@ const Header = ({ content }) => {
                       {item.label}
                     </Button>
                   ))}
-                  <Button
-                    variant="contained"
-                    onClick={() => scrollToSection(content.cta.href)}
-                    sx={{ ml: 2 }}
-                  >
+                  <Button variant="contained" onClick={() => scrollToSection(content.cta.href)} sx={{ ml: 2 }}>
                     {content.cta.text}
                   </Button>
                 </Box>
               ) : (
-                <IconButton
-                  edge="start"
-                  color="inherit"
-                  onClick={handleDrawerToggle}
-                  sx={{ color: 'primary.main' }}
-                >
+                <IconButton edge="start" color="inherit" onClick={handleDrawerToggle} sx={{ color: 'primary.main' }}>
                   <MenuIcon />
                 </IconButton>
               )}
@@ -179,13 +166,7 @@ const Header = ({ content }) => {
         </AppBar>
       </HideOnScroll>
 
-      <Drawer
-        variant="temporary"
-        anchor="right"
-        open={mobileOpen}
-        onClose={handleDrawerToggle}
-        ModalProps={{ keepMounted: true }}
-      >
+      <Drawer variant="temporary" anchor="right" open={mobileOpen} onClose={handleDrawerToggle} ModalProps={{ keepMounted: true }}>
         {drawer}
       </Drawer>
 

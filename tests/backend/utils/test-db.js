@@ -15,7 +15,9 @@ export async function withTx(run) {
     await client.query('ROLLBACK'); // всегда откатываем
     return result;
   } catch (e) {
-    try { await client.query('ROLLBACK'); } catch {}
+    try {
+      await client.query('ROLLBACK');
+    } catch {}
     throw e;
   } finally {
     client.release();

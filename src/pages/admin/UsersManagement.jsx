@@ -1,32 +1,9 @@
 import { useState, useEffect } from 'react';
-import {
-  Table,
-  Button,
-  Space,
-  Tag,
-  Modal,
-  Form,
-  Select,
-  message,
-  Card,
-  Row,
-  Col,
-  Statistic,
-  Typography,
-  Popconfirm,
-  Tooltip
-} from 'antd';
-import {
-  UserOutlined,
-  CrownOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  PlusOutlined,
-  UserAddOutlined
-} from '@ant-design/icons';
+import { Table, Button, Space, Tag, Modal, Form, Select, message, Card, Row, Col, Statistic, Typography, Popconfirm, Tooltip } from 'antd';
+import { UserOutlined, CrownOutlined, EditOutlined, DeleteOutlined, PlusOutlined, UserAddOutlined } from '@ant-design/icons';
 import MainCard from 'components/MainCard';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const { Option } = Select;
 
 const UsersManagement = () => {
@@ -47,10 +24,12 @@ const UsersManagement = () => {
       const data = await response.json();
       console.log('Users response:', data); // Отладочный вывод
       // Проверяем, что каждый пользователь имеет массив ролей
-      const normalizedData = Array.isArray(data) ? data.map(user => ({
-        ...user,
-        roles: Array.isArray(user.roles) ? user.roles : []
-      })) : [];
+      const normalizedData = Array.isArray(data)
+        ? data.map((user) => ({
+            ...user,
+            roles: Array.isArray(user.roles) ? user.roles : []
+          }))
+        : [];
       setUsers(normalizedData);
     } catch (error) {
       console.error('Error loading users:', error); // Отладочный вывод
@@ -77,6 +56,7 @@ const UsersManagement = () => {
     }
   };
 
+  // eslint-disable-next-line no-unused-vars
   const loadUserRoles = async (userId) => {
     try {
       const response = await fetch(`/api-proxy/users/${userId}/roles`, {
@@ -84,7 +64,7 @@ const UsersManagement = () => {
       });
       const data = await response.json();
       return data;
-    } catch (error) {
+    } catch {
       return [];
     }
   };
@@ -114,7 +94,7 @@ const UsersManagement = () => {
       } else {
         message.error('Ошибка назначения роли');
       }
-    } catch (error) {
+    } catch {
       message.error('Ошибка назначения роли');
     }
   };
@@ -133,7 +113,7 @@ const UsersManagement = () => {
       } else {
         message.error('Ошибка отзыва роли');
       }
-    } catch (error) {
+    } catch {
       message.error('Ошибка отзыва роли');
     }
   };
@@ -159,7 +139,11 @@ const UsersManagement = () => {
         <Space>
           <UserOutlined />
           <div>
-            <div><strong>{record.firstname} {record.lastname}</strong></div>
+            <div>
+              <strong>
+                {record.firstname} {record.lastname}
+              </strong>
+            </div>
             <Text type="secondary">{record.email}</Text>
           </div>
         </Space>
@@ -175,10 +159,10 @@ const UsersManagement = () => {
       key: 'roles',
       render: (record) => (
         <Space wrap>
-          {Array.isArray(record.roles) && record.roles.length > 0 ? 
-            record.roles.map(role => (
-              <Tag 
-                key={role.id} 
+          {Array.isArray(record.roles) && record.roles.length > 0 ? (
+            record.roles.map((role) => (
+              <Tag
+                key={role.id}
                 color={getRoleColor(role.name)}
                 closable={role.name !== 'super_admin'}
                 onClose={() => revokeRole(record.id, role.id)}
@@ -186,18 +170,17 @@ const UsersManagement = () => {
                 {role.name === 'super_admin' && <CrownOutlined />}
                 {role.description}
               </Tag>
-            )) : <Text type="secondary">Нет ролей</Text>}
+            ))
+          ) : (
+            <Text type="secondary">Нет ролей</Text>
+          )}
         </Space>
       )
     },
     {
       title: 'Статус',
       key: 'status',
-      render: (record) => (
-        <Tag color={record.is_active ? 'green' : 'red'}>
-          {record.is_active ? 'Активен' : 'Неактивен'}
-        </Tag>
-      )
+      render: (record) => <Tag color={record.is_active ? 'green' : 'red'}>{record.is_active ? 'Активен' : 'Неактивен'}</Tag>
     },
     {
       title: 'Действия',
@@ -205,8 +188,8 @@ const UsersManagement = () => {
       render: (record) => (
         <Space>
           <Tooltip title="Назначить роль">
-            <Button 
-              type="primary" 
+            <Button
+              type="primary"
               icon={<UserAddOutlined />}
               onClick={() => {
                 setSelectedUser(record);
@@ -217,10 +200,12 @@ const UsersManagement = () => {
           <Tooltip title="Редактировать">
             <Button icon={<EditOutlined />} />
           </Tooltip>
-          {record.roles?.some(r => r.name === 'super_admin') ? null : (
+          {record.roles?.some((r) => r.name === 'super_admin') ? null : (
             <Popconfirm
               title="Деактивировать пользователя?"
-              onConfirm={() => {/* TODO: реализовать */}}
+              onConfirm={() => {
+                /* TODO: реализовать */
+              }}
             >
               <Button danger icon={<DeleteOutlined />} />
             </Popconfirm>
@@ -233,9 +218,9 @@ const UsersManagement = () => {
   // Статистика
   const stats = {
     total: users.length,
-    active: users.filter(u => u.is_active).length,
-    admins: users.filter(u => u.roles?.some(r => r.name === 'admin')).length,
-    superAdmins: users.filter(u => u.roles?.some(r => r.name === 'super_admin')).length
+    active: users.filter((u) => u.is_active).length,
+    admins: users.filter((u) => u.roles?.some((r) => r.name === 'admin')).length,
+    superAdmins: users.filter((u) => u.roles?.some((r) => r.name === 'super_admin')).length
   };
 
   return (
@@ -245,39 +230,22 @@ const UsersManagement = () => {
         <Row gutter={16} style={{ marginBottom: 24 }}>
           <Col span={6}>
             <Card>
-              <Statistic
-                title="Всего пользователей"
-                value={stats.total}
-                prefix={<UserOutlined />}
-              />
+              <Statistic title="Всего пользователей" value={stats.total} prefix={<UserOutlined />} />
             </Card>
           </Col>
           <Col span={6}>
             <Card>
-              <Statistic
-                title="Активных"
-                value={stats.active}
-                valueStyle={{ color: '#3f8600' }}
-              />
+              <Statistic title="Активных" value={stats.active} valueStyle={{ color: '#3f8600' }} />
             </Card>
           </Col>
           <Col span={6}>
             <Card>
-              <Statistic
-                title="Администраторов"
-                value={stats.admins}
-                valueStyle={{ color: '#1890ff' }}
-              />
+              <Statistic title="Администраторов" value={stats.admins} valueStyle={{ color: '#1890ff' }} />
             </Card>
           </Col>
           <Col span={6}>
             <Card>
-              <Statistic
-                title="Суперадминов"
-                value={stats.superAdmins}
-                prefix={<CrownOutlined />}
-                valueStyle={{ color: '#cf1322' }}
-              />
+              <Statistic title="Суперадминов" value={stats.superAdmins} prefix={<CrownOutlined />} valueStyle={{ color: '#cf1322' }} />
             </Card>
           </Col>
         </Row>
@@ -288,9 +256,7 @@ const UsersManagement = () => {
             <Button type="primary" icon={<PlusOutlined />}>
               Добавить пользователя
             </Button>
-            <Button onClick={loadUsers}>
-              Обновить
-            </Button>
+            <Button onClick={loadUsers}>Обновить</Button>
           </Space>
         </div>
 
@@ -320,26 +286,19 @@ const UsersManagement = () => {
         okText="Назначить"
         cancelText="Отмена"
       >
-        <Form
-          form={form}
-          onFinish={assignRole}
-          layout="vertical"
-        >
-          <Form.Item
-            name="roleId"
-            label="Выберите роль"
-            rules={[{ required: true, message: 'Выберите роль' }]}
-          >
+        <Form form={form} onFinish={assignRole} layout="vertical">
+          <Form.Item name="roleId" label="Выберите роль" rules={[{ required: true, message: 'Выберите роль' }]}>
             <Select placeholder="Выберите роль для назначения">
-              {Array.isArray(roles) && roles.map(role => (
-                <Option key={role.id} value={role.id}>
-                  <Space>
-                    {role.name === 'super_admin' && <CrownOutlined />}
-                    <Tag color={getRoleColor(role.name)}>{role.name}</Tag>
-                    {role.description}
-                  </Space>
-                </Option>
-              ))}
+              {Array.isArray(roles) &&
+                roles.map((role) => (
+                  <Option key={role.id} value={role.id}>
+                    <Space>
+                      {role.name === 'super_admin' && <CrownOutlined />}
+                      <Tag color={getRoleColor(role.name)}>{role.name}</Tag>
+                      {role.description}
+                    </Space>
+                  </Option>
+                ))}
             </Select>
           </Form.Item>
         </Form>

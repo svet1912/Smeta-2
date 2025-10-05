@@ -6,14 +6,14 @@ const getApiBaseUrl = () => {
   if (import.meta.env.VITE_API_BASE_URL) {
     return import.meta.env.VITE_API_BASE_URL;
   }
-  
+
   // В GitHub Codespaces используем относительный URL или localhost
   const currentHost = window.location.hostname;
   if (currentHost.includes('.app.github.dev')) {
     // Пробуем использовать относительный путь через прокси VS Code
     return '/api-proxy';
   }
-  
+
   // Fallback для локальной разработки
   return 'http://localhost:3001/api';
 };
@@ -66,7 +66,7 @@ const apiRequest = async (url, options = {}) => {
         console.warn('⚠️ Токен невалиден или истек, удаляем локально');
         removeAuthToken();
       }
-      
+
       throw new Error(data.message || data.error || 'Произошла ошибка при выполнении запроса');
     }
 
@@ -148,14 +148,14 @@ export const validateToken = async () => {
     if (!token) {
       return false;
     }
-    
+
     const response = await getCurrentUser();
     return response.success && response.user;
   } catch (error) {
     // НЕ удаляем токен при ошибках сети!
     // Токен будет удален автоматически при реальной 401 ошибке в apiRequest
     console.warn('⚠️ Ошибка проверки токена (возможно временная):', error.message);
-    
+
     // Если токен есть, предполагаем что он валиден (оптимистичный подход)
     // Реальная валидация произойдет при первом API запросе
     return !!getAuthToken();

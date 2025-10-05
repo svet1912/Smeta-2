@@ -72,15 +72,15 @@ router.get('/admin/cache/stats', async (req, res) => {
   try {
     const { default: queryOptimizer } = await import('../services/queryOptimizer.js');
     const queryCacheStats = queryOptimizer.getCacheStats();
-    
+
     // Также получаем статистику Redis кэша если доступен
     let redisStats = null;
     try {
-      const redisStats = await getCacheStats();
+      redisStats = await getCacheStats();
     } catch (error) {
       console.warn('Redis кэш недоступен:', error.message);
     }
-    
+
     res.json({
       queryCache: queryCacheStats,
       redisCache: redisStats,
@@ -98,12 +98,12 @@ router.get('/admin/cache/stats', async (req, res) => {
 router.delete('/admin/cache', async (req, res) => {
   try {
     const { default: queryOptimizer } = await import('../services/queryOptimizer.js');
-    
+
     // Очищаем кэш запросов
     queryOptimizer.clearCache();
-    
+
     // TODO: Очистка Redis кэша если доступен
-    
+
     res.json({
       message: 'Кеш очищен',
       timestamp: new Date().toISOString()

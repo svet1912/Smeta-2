@@ -9,11 +9,11 @@ async function startServer() {
   try {
     const result = await query('SELECT NOW() as current_time');
     console.log('✅ Подключение к базе данных проверено:', result.rows[0].current_time);
-    
+
     // Инициализируем таблицы только после успешного подключения
     setTimeout(() => {
       if (app.initializeTables) {
-        app.initializeTables().catch(err => console.log('⚠️ Пропускаем инициализацию БД'));
+        app.initializeTables().catch((err) => console.log('⚠️ Пропускаем инициализацию БД'));
       }
     }, 1000);
   } catch (error) {

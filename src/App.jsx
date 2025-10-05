@@ -4,7 +4,6 @@ import { Suspense } from 'react';
 
 // project imports
 import router from 'routes';
-import simpleRouter from 'routes/simple';
 import ThemeCustomization from 'themes';
 import { AuthProvider } from 'contexts/AuthContext';
 import ScrollTop from 'components/ScrollTop';

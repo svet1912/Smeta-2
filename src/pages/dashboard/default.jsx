@@ -1,7 +1,7 @@
 // material-ui (оптимизированные импорты)
 import {
   Avatar,
-  AvatarGroup, 
+  AvatarGroup,
   Button,
   Grid,
   List,
@@ -13,9 +13,6 @@ import {
   Typography,
   Box
 } from 'utils/muiImports';
-
-// third-party
-import { Suspense } from 'react';
 
 // project imports
 import MainCard from 'components/MainCard';
@@ -61,7 +58,7 @@ const actionSX = {
 export default function DashboardDefault() {
   // Используем кэшированные запросы вместо прямых API вызовов
   const { data: statistics = [], isLoading: statsLoading, error: statsError } = useStatistics();
-  const { data: orders = [], isLoading: ordersLoading, error: ordersError } = useOrders();
+  const { isLoading: ordersLoading, error: ordersError } = useOrders();
 
   const loading = statsLoading || ordersLoading;
 

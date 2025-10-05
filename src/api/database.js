@@ -6,14 +6,14 @@ const getApiBaseUrl = () => {
   if (import.meta.env.VITE_API_BASE_URL) {
     return import.meta.env.VITE_API_BASE_URL;
   }
-  
+
   // В GitHub Codespaces используем прокси через Vite
   const currentHost = window.location.hostname;
   if (currentHost.includes('.app.github.dev')) {
     // Используем прокси через Vite dev server
     return '/api-proxy';
   }
-  
+
   // Fallback для локальной разработки
   return 'http://localhost:3001/api';
 };
@@ -52,7 +52,7 @@ export const getStatistics = async () => {
   try {
     const response = await api.get('/statistics');
     return response.data;
-  } catch (error) {
+  } catch {
     // Возвращаем статические данные если API недоступен
     return [
       {
@@ -84,7 +84,7 @@ export const getOrders = async () => {
   try {
     const response = await api.get('/orders');
     return response.data;
-  } catch (error) {
+  } catch {
     // Возвращаем статические данные если API недоступен
     return [
       { id: 1, tracking_no: 84564564, product_name: 'Объектив камеры', quantity: 40, status: 2, amount: 40570.0, created_at: '2024-01-20' },
@@ -117,7 +117,7 @@ export const getUsers = async () => {
   try {
     const response = await api.get('/users');
     return response.data;
-  } catch (error) {
+  } catch {
     // Статические данные как fallback
     return [
       { id: 1, name: 'Иван Иванов', email: 'ivan@example.com', created_at: '2024-01-15' },
@@ -131,9 +131,9 @@ export const getMaterials = async () => {
   try {
     const response = await api.get('/materials?limit=2000&offset=0');
     const result = response.data;
-    
+
     console.log('🧱 getMaterials API ответ:', result);
-    
+
     // API возвращает {data: Array, pagination: {...}}
     if (result.data && Array.isArray(result.data)) {
       console.log(`✅ getMaterials: Загружено ${result.data.length} материалов`);

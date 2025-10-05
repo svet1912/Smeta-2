@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useAuth } from 'contexts/AuthContext';
 
 // material-ui
@@ -24,7 +23,6 @@ import EmailOutlined from '@ant-design/icons/MailOutlined';
 import PhoneOutlined from '@ant-design/icons/PhoneOutlined';
 import EnvironmentOutlined from '@ant-design/icons/EnvironmentOutlined';
 import CalendarOutlined from '@ant-design/icons/CalendarOutlined';
-import TeamOutlined from '@ant-design/icons/TeamOutlined';
 import TrophyOutlined from '@ant-design/icons/TrophyOutlined';
 import avatar1 from 'assets/images/users/avatar-1.png';
 
@@ -32,7 +30,7 @@ import avatar1 from 'assets/images/users/avatar-1.png';
 
 export default function ViewProfileTab() {
   const { user } = useAuth();
-  
+
   const profileData = {
     name: user ? `${user.firstname || ''} ${user.lastname || ''}`.trim() || user.email : 'Пользователь',
     position: 'Специалист по сметам',
@@ -194,11 +192,7 @@ export default function ViewProfileTab() {
                       {skill.level}%
                     </Typography>
                   </Box>
-                  <LinearProgress
-                    variant="determinate"
-                    value={skill.level}
-                    sx={{ height: 6, borderRadius: 3 }}
-                  />
+                  <LinearProgress variant="determinate" value={skill.level} sx={{ height: 6, borderRadius: 3 }} />
                 </Box>
               ))}
             </CardContent>
@@ -239,10 +233,7 @@ export default function ViewProfileTab() {
               <List>
                 {recentActivity.map((activity, index) => (
                   <ListItem key={index} divider={index < recentActivity.length - 1}>
-                    <ListItemText
-                      primary={activity.action}
-                      secondary={activity.date}
-                    />
+                    <ListItemText primary={activity.action} secondary={activity.date} />
                   </ListItem>
                 ))}
               </List>

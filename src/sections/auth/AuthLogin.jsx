@@ -171,12 +171,12 @@ export default function AuthLogin({ isDemo = false }) {
               </Grid>
               <Grid size={12}>
                 <AnimateButton>
-                  <Button 
-                    fullWidth 
-                    size="large" 
-                    type="submit" 
-                    variant="contained" 
-                    color="primary" 
+                  <Button
+                    fullWidth
+                    size="large"
+                    type="submit"
+                    variant="contained"
+                    color="primary"
                     disabled={isSubmitting}
                     data-testid="login-submit-button"
                   >

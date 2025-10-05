@@ -20,58 +20,58 @@ export const leadRateLimit = rateLimit({
 // Валидация полей формы
 const validateLeadData = (data) => {
   const errors = [];
-  
+
   // Обязательные поля
   if (!data.name || data.name.trim().length < 2) {
     errors.push('Имя должно содержать минимум 2 символа');
   }
-  
+
   if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
     errors.push('Введите корректный email адрес');
   }
-  
+
   if (!data.consent) {
     errors.push('Необходимо согласие на обработку персональных данных');
   }
-  
+
   // Проверка длины полей
   if (data.name && data.name.length > 100) {
     errors.push('Имя слишком длинное (максимум 100 символов)');
   }
-  
+
   if (data.email && data.email.length > 254) {
     errors.push('Email слишком длинный');
   }
-  
+
   if (data.phone && data.phone.length > 20) {
     errors.push('Телефон слишком длинный (максимум 20 символов)');
   }
-  
+
   if (data.company && data.company.length > 200) {
     errors.push('Название компании слишком длинное (максимум 200 символов)');
   }
-  
+
   if (data.message && data.message.length > 1000) {
     errors.push('Сообщение слишком длинное (максимум 1000 символов)');
   }
-  
+
   // Проверка на ханипот (скрытое поле)
   if (data.website) {
     errors.push('Обнаружена подозрительная активность');
   }
-  
+
   return errors;
 };
 
 // Функция отправки уведомления в Telegram
 const sendTelegramNotification = async (leadData) => {
   const { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID } = process.env;
-  
+
   if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
     console.log('📢 Telegram уведомления не настроены - пропускаем');
     return;
   }
-  
+
   try {
     const envLabel = process.env.ENV_NAME || 'unknown';
     const message = `🚀 Новая заявка с лендинга SMETA360 [${envLabel}]
@@ -99,7 +99,7 @@ ${leadData.message ? `💬 Сообщение: ${leadData.message}` : ''}
         parse_mode: 'HTML'
       })
     });
-    
+
     if (response.ok) {
       console.log('✅ Уведомление в Telegram отправлено');
     } else {
@@ -135,13 +135,13 @@ export const initializeLeadsTable = async () => {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    
+
     // Индекс для быстрого поиска по email и времени
     await query(`
       CREATE INDEX IF NOT EXISTS idx_leads_email_created 
       ON leads (email, created_at DESC)
     `);
-    
+
     console.log('✅ Таблица leads инициализирована');
   } catch (error) {
     console.error('❌ Ошибка создания таблицы leads:', error);
@@ -167,7 +167,7 @@ export const createLead = async (req, res) => {
       consent: req.body.consent,
       website: req.body.website // ханипот поле
     };
-    
+
     // Валидация данных
     const validationErrors = validateLeadData(leadData);
     if (validationErrors.length > 0) {
@@ -176,48 +176,54 @@ export const createLead = async (req, res) => {
         details: validationErrors
       });
     }
-    
+
     // Проверка на дублирование (тот же email в последние 10 минут)
-    const recentLead = await query(`
+    const recentLead = await query(
+      `
       SELECT id FROM leads 
       WHERE email = $1 AND created_at > NOW() - INTERVAL '10 minutes'
       LIMIT 1
-    `, [leadData.email]);
-    
+    `,
+      [leadData.email]
+    );
+
     if (recentLead.rows.length > 0) {
       return res.status(429).json({
         error: 'Заявка с этого email уже была отправлена недавно'
       });
     }
-    
+
     // Сохранение в базу данных
-    const result = await query(`
+    const result = await query(
+      `
       INSERT INTO leads (
         name, email, phone, company, project_type, budget, message,
         utm_source, utm_medium, utm_campaign, page_path, env_name,
         ip_address, user_agent, consent
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
       RETURNING id, created_at
-    `, [
-      leadData.name,
-      leadData.email, 
-      leadData.phone,
-      leadData.company,
-      leadData.project_type,
-      leadData.budget,
-      leadData.message,
-      leadData.utm_source,
-      leadData.utm_medium,
-      leadData.utm_campaign,
-      leadData.page_path,
-      leadData.env_name,
-      req.ip,
-      req.get('User-Agent'),
-      leadData.consent
-    ]);
-    
+    `,
+      [
+        leadData.name,
+        leadData.email,
+        leadData.phone,
+        leadData.company,
+        leadData.project_type,
+        leadData.budget,
+        leadData.message,
+        leadData.utm_source,
+        leadData.utm_medium,
+        leadData.utm_campaign,
+        leadData.page_path,
+        leadData.env_name,
+        req.ip,
+        req.get('User-Agent'),
+        leadData.consent
+      ]
+    );
+
     const savedLead = result.rows[0];
-    
+
     // Отправляем уведомление в Telegram (асинхронно)
     setImmediate(async () => {
       try {
@@ -230,15 +236,14 @@ export const createLead = async (req, res) => {
         console.error('Ошибка отправки уведомления:', error);
       }
     });
-    
+
     console.log(`✅ Новая заявка сохранена: ID ${savedLead.id}, Email: ${leadData.email}`);
-    
+
     res.status(201).json({
       success: true,
       id: savedLead.id,
       message: 'Заявка успешно отправлена! Мы свяжемся с вами в ближайшее время.'
     });
-    
   } catch (error) {
     console.error('❌ Ошибка создания заявки:', error);
     res.status(500).json({
@@ -251,9 +256,10 @@ export const createLead = async (req, res) => {
 export const getLeads = async (req, res) => {
   try {
     const { limit = 50, offset = 0 } = req.query;
-    
+
     // Получаем список заявок
-    const leadsResult = await query(`
+    const leadsResult = await query(
+      `
       SELECT 
         id,
         name,
@@ -274,7 +280,9 @@ export const getLeads = async (req, res) => {
       FROM leads 
       ORDER BY created_at DESC
       LIMIT $1 OFFSET $2
-    `, [limit, offset]);
+    `,
+      [limit, offset]
+    );
 
     // Получаем общее количество заявок
     const countResult = await query(`SELECT COUNT(*) as total FROM leads`);
@@ -287,10 +295,9 @@ export const getLeads = async (req, res) => {
         total,
         limit: parseInt(limit),
         offset: parseInt(offset),
-        hasMore: (parseInt(offset) + parseInt(limit)) < total
+        hasMore: parseInt(offset) + parseInt(limit) < total
       }
     });
-
   } catch (error) {
     console.error('❌ Ошибка получения заявок:', error);
     res.status(500).json({

@@ -53,11 +53,11 @@ export default defineConfig(({ mode }) => {
       react(),
       jsconfigPaths(),
       // Bundle analyzer - создает stats.html для анализа размера бандла
-      visualizer({ 
-        filename: 'dist/stats.html', 
+      visualizer({
+        filename: 'dist/stats.html',
         open: false, // не открываем автоматически в headless окружении
         gzipSize: true,
-        brotliSize: true 
+        brotliSize: true
       })
     ],
     build: {
@@ -84,7 +84,7 @@ export default defineConfig(({ mode }) => {
                 return 'vendor-react';
               }
               if (id.includes('@tanstack/react-query')) {
-                return 'vendor-query';  
+                return 'vendor-query';
               }
               if (id.includes('antd') && !id.includes('@ant-design/icons')) {
                 return 'vendor-antd';
@@ -117,16 +117,28 @@ export default defineConfig(({ mode }) => {
     optimizeDeps: {
       // Явно предбандлим «тяжёлых» - решение проблемы 329 JS модулей
       include: [
-        'react', 'react-dom', 'react/jsx-runtime',
+        'react',
+        'react-dom',
+        'react/jsx-runtime',
         '@tanstack/react-query',
-        'antd/es/button', 'antd/es/input', 'antd/es/table', 'antd/es/layout',
-        'antd/es/menu', 'antd/es/card', 'antd/es/form', 'antd/es/select',
+        'antd/es/button',
+        'antd/es/input',
+        'antd/es/table',
+        'antd/es/layout',
+        'antd/es/menu',
+        'antd/es/card',
+        'antd/es/form',
+        'antd/es/select',
         '@ant-design/icons',
-        '@mui/material', '@mui/material/Box', '@mui/material/Button',
+        '@mui/material',
+        '@mui/material/Box',
+        '@mui/material/Button',
         '@mui/icons-material',
         'hoist-non-react-statics',
-        '@emotion/react', '@emotion/styled',
-        'axios', 'react-router-dom'
+        '@emotion/react',
+        '@emotion/styled',
+        'axios',
+        'react-router-dom'
       ],
       // Заставляем Vite предкомпилировать проблемные ESM пакеты
       force: true

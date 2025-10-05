@@ -24,7 +24,7 @@ app.get('/health', (req, res) => {
 app.get('/api/customer-estimates', simpleAuth, async (req, res) => {
   try {
     console.log('📝 Запрос на получение смет заказчика');
-    
+
     const result = await query(`
       SELECT 
         ce.*,
@@ -39,7 +39,7 @@ app.get('/api/customer-estimates', simpleAuth, async (req, res) => {
       GROUP BY ce.id, cp.name, u.username
       ORDER BY ce.created_at DESC
     `);
-    
+
     console.log('✅ Найдено смет:', result.rows.length);
     res.json(result.rows);
   } catch (error) {
@@ -52,18 +52,20 @@ app.get('/api/customer-estimates', simpleAuth, async (req, res) => {
 app.post('/api/customer-estimates', simpleAuth, async (req, res) => {
   try {
     console.log('📝 Создание новой сметы заказчика:', req.body);
-    
+
     const { project_id, name, description, coefficients, status = 'draft' } = req.body;
-    
-    const result = await query(`
+
+    const result = await query(
+      `
       INSERT INTO customer_estimates (
         project_id, user_id, name, description,
         coefficients, status
       ) VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING *
-    `, [project_id, req.user.id, name, description, 
-        JSON.stringify(coefficients || {}), status]);
-    
+    `,
+      [project_id, req.user.id, name, description, JSON.stringify(coefficients || {}), status]
+    );
+
     console.log('✅ Смета создана:', result.rows[0]);
     res.status(201).json(result.rows[0]);
   } catch (error) {

@@ -25,7 +25,7 @@ export const prodLoggingMiddleware = pino({
   formatters: {
     level: (label) => {
       return { level: label };
-    },
+    }
   },
   customLogLevel: function (req, res, err) {
     if (res.statusCode >= 400 && res.statusCode < 500) {
@@ -38,8 +38,6 @@ export const prodLoggingMiddleware = pino({
 });
 
 // Выбираем подходящий middleware в зависимости от окружения
-export const loggingMiddleware = process.env.NODE_ENV === 'production' 
-  ? prodLoggingMiddleware 
-  : devLoggingMiddleware;
+export const loggingMiddleware = process.env.NODE_ENV === 'production' ? prodLoggingMiddleware : devLoggingMiddleware;
 
 export default loggingMiddleware;

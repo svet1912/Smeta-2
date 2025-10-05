@@ -32,7 +32,7 @@ export default function ProfileTab() {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [openModal, setOpenModal] = useState(false);
   const [modalContent, setModalContent] = useState(null);
-  
+
   const handleLogout = async () => {
     try {
       // Вызываем API logout для очистки сессии на сервере
@@ -48,10 +48,10 @@ export default function ProfileTab() {
       navigate('/login');
     }
   };
-  
+
   const handleListItemClick = (event, index) => {
     setSelectedIndex(index);
-    
+
     // Handle different actions based on index
     switch (index) {
       case 0: // Edit Profile
@@ -141,31 +141,36 @@ export default function ProfileTab() {
         closeAfterTransition
         BackdropComponent={Backdrop}
         BackdropProps={{
-          timeout: 500,
+          timeout: 500
         }}
       >
         <Fade in={openModal}>
           <Box sx={modalStyle}>
-            <Box sx={{ 
-              position: 'sticky', 
-              top: 0, 
-              bgcolor: 'background.paper', 
-              borderBottom: 1, 
-              borderColor: 'divider',
-              p: 2,
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              zIndex: 1
-            }}>
-              <Box sx={{ 
-                cursor: 'pointer',
+            <Box
+              sx={{
+                position: 'sticky',
+                top: 0,
+                bgcolor: 'background.paper',
+                borderBottom: 1,
+                borderColor: 'divider',
+                p: 2,
                 display: 'flex',
+                justifyContent: 'space-between',
                 alignItems: 'center',
-                p: 1,
-                borderRadius: 1,
-                '&:hover': { bgcolor: 'action.hover' }
-              }} onClick={handleCloseModal}>
+                zIndex: 1
+              }}
+            >
+              <Box
+                sx={{
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  p: 1,
+                  borderRadius: 1,
+                  '&:hover': { bgcolor: 'action.hover' }
+                }}
+                onClick={handleCloseModal}
+              >
                 <CloseOutlined />
               </Box>
             </Box>

@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getCurrentUser, validateToken, removeAuthToken } from 'api/auth';
+import { createContext, useContext, useState, useEffect } from 'react';
+import { getCurrentUser, removeAuthToken } from 'api/auth';
 
 const AuthContext = createContext(null);
 
@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }) => {
   // Загрузка данных пользователя при инициализации
   useEffect(() => {
     checkAuthStatus();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const checkAuthStatus = async () => {
     setIsLoading(true);
@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }) => {
         setIsLoading(false);
         return;
       }
-      
+
       // Пытаемся загрузить данные пользователя
       try {
         const response = await getCurrentUser();
@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }) => {
         // При ошибке сети - НЕ удаляем токен!
         // Токен будет проверен при следующем API запросе
         console.warn('⚠️ Ошибка загрузки пользователя (возможно временная):', error.message);
-        setIsAuthenticated(true);  // Оптимистично считаем что авторизован
+        setIsAuthenticated(true); // Оптимистично считаем что авторизован
       }
     } catch (error) {
       console.error('Критическая ошибка проверки auth:', error);
