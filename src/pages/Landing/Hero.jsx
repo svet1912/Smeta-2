@@ -20,7 +20,7 @@ const Hero = ({ content }) => {
     >
       <Container maxWidth="lg">
         <Grid container spacing={6} alignItems="center">
-          <Grid item xs={12} md={7}>
+          <Grid size={{ xs: 12, md: 7 }}>
             <Stack spacing={4} alignItems="flex-start" textAlign="left">
               <Typography
                 variant="h1"
@@ -84,7 +84,7 @@ const Hero = ({ content }) => {
             </Stack>
           </Grid>
 
-          <Grid item xs={12} md={5}>
+          <Grid size={{ xs: 12, md: 5 }}>
             <LeadForm content={content.leadForm} variant="compact" />
           </Grid>
         </Grid>

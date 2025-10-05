@@ -25,7 +25,7 @@ const Cases = ({ content }) => {
 
           <Grid container spacing={4}>
             {content.items.map((caseItem, index) => (
-              <Grid item xs={12} md={4} key={index}>
+              <Grid size={{ xs: 12, md: 4 }} key={index}>
                 <Card
                   sx={{
                     height: '100%',

@@ -173,7 +173,7 @@ export default function ProjectDashboard() {
       <Card sx={{ mb: 2 }}>
         <CardContent sx={{ py: 1.5 }}>
           <Grid container spacing={2}>
-            <Grid item xs={6} sm={3}>
+            <Grid size={{ xs: 6, sm: 3 }}>
               <Typography variant="caption" color="text.secondary" display="block">
                 <UserOutlined style={{ marginRight: 4, fontSize: 12 }} />
                 Подрядчик
@@ -182,7 +182,7 @@ export default function ProjectDashboard() {
                 {project.contractor_name}
               </Typography>
             </Grid>
-            <Grid item xs={6} sm={3}>
+            <Grid size={{ xs: 6, sm: 3 }}>
               <Typography variant="caption" color="text.secondary" display="block">
                 <FileTextOutlined style={{ marginRight: 4, fontSize: 12 }} />
                 Договор
@@ -191,7 +191,7 @@ export default function ProjectDashboard() {
                 {project.contract_number}
               </Typography>
             </Grid>
-            <Grid item xs={6} sm={3}>
+            <Grid size={{ xs: 6, sm: 3 }}>
               <Typography variant="caption" color="text.secondary" display="block">
                 <CalendarOutlined style={{ marginRight: 4, fontSize: 12 }} />
                 Создан
@@ -200,7 +200,7 @@ export default function ProjectDashboard() {
                 {new Date(project.created_at).toLocaleDateString('ru-RU')}
               </Typography>
             </Grid>
-            <Grid item xs={6} sm={3}>
+            <Grid size={{ xs: 6, sm: 3 }}>
               <Typography variant="caption" color="text.secondary" display="block">
                 <CalendarOutlined style={{ marginRight: 4, fontSize: 12 }} />
                 Deadline
@@ -215,16 +215,16 @@ export default function ProjectDashboard() {
 
       {/* Статистика проекта */}
       <Grid container spacing={1.5} sx={{ mb: 2 }}>
-        <Grid item xs={6} sm={3}>
+        <Grid size={{ xs: 6, sm: 3 }}>
           <AnalyticEcommerce title="Общий прогресс" count="75%" percentage={75} color="primary" />
         </Grid>
-        <Grid item xs={6} sm={3}>
+        <Grid size={{ xs: 6, sm: 3 }}>
           <AnalyticEcommerce title="Выполнено задач" count="12" extra="18" percentage={67} color="success" />
         </Grid>
-        <Grid item xs={6} sm={3}>
+        <Grid size={{ xs: 6, sm: 3 }}>
           <AnalyticEcommerce title="Потрачено дней" count="45" extra="60" percentage={75} color="warning" />
         </Grid>
-        <Grid item xs={6} sm={3}>
+        <Grid size={{ xs: 6, sm: 3 }}>
           <AnalyticEcommerce title="Бюджет" count="₽ 2,450,000" percentage={85} color="info" />
         </Grid>
       </Grid>

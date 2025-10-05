@@ -92,7 +92,7 @@ export default function SocialProfileTab() {
             Социальная активность
           </Typography>
           <Grid container spacing={2}>
-            <Grid item xs={4} sm={2}>
+            <Grid size={{ xs: 4, sm: 2 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h5" color="primary">
                   {socialStats.followers}
@@ -102,7 +102,7 @@ export default function SocialProfileTab() {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={4} sm={2}>
+            <Grid size={{ xs: 4, sm: 2 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h5" color="success.main">
                   {socialStats.following}
@@ -112,7 +112,7 @@ export default function SocialProfileTab() {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={4} sm={2}>
+            <Grid size={{ xs: 4, sm: 2 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h5" color="warning.main">
                   {socialStats.posts}
@@ -122,7 +122,7 @@ export default function SocialProfileTab() {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={4} sm={2}>
+            <Grid size={{ xs: 4, sm: 2 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h5" color="error.main">
                   {socialStats.likes}
@@ -132,7 +132,7 @@ export default function SocialProfileTab() {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={4} sm={2}>
+            <Grid size={{ xs: 4, sm: 2 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h5" color="info.main">
                   {socialStats.views}
@@ -142,7 +142,7 @@ export default function SocialProfileTab() {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={4} sm={2}>
+            <Grid size={{ xs: 4, sm: 2 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h5" color="secondary.main">
                   {socialStats.shares}
@@ -158,7 +158,7 @@ export default function SocialProfileTab() {
 
       <Grid container spacing={3}>
         {/* Recent Posts */}
-        <Grid item xs={12} md={8}>
+        <Grid size={{ xs: 12, md: 8 }}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -217,7 +217,7 @@ export default function SocialProfileTab() {
         </Grid>
 
         {/* Sidebar */}
-        <Grid item xs={12} md={4}>
+        <Grid size={{ xs: 12, md: 4 }}>
           {/* Connections */}
           <Card sx={{ mb: 3 }}>
             <CardContent>

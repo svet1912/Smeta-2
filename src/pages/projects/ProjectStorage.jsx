@@ -331,7 +331,7 @@ export default function ProjectStorage() {
       {/* Фильтры и поиск */}
       <Paper sx={{ p: 2, mb: 3 }}>
         <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} md={4}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <TextField
               fullWidth
               size="small"
@@ -348,7 +348,7 @@ export default function ProjectStorage() {
             />
           </Grid>
 
-          <Grid item xs={12} md={2}>
+          <Grid size={{ xs: 12, md: 2 }}>
             <FormControl fullWidth size="small">
               <InputLabel>Статус</InputLabel>
               <Select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
@@ -363,7 +363,7 @@ export default function ProjectStorage() {
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} md={2}>
+          <Grid size={{ xs: 12, md: 2 }}>
             <FormControl fullWidth size="small">
               <InputLabel>Категория</InputLabel>
               <Select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}>
@@ -376,7 +376,7 @@ export default function ProjectStorage() {
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} md={2}>
+          <Grid size={{ xs: 12, md: 2 }}>
             <FormControl fullWidth size="small">
               <InputLabel>Сортировка</InputLabel>
               <Select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
@@ -452,7 +452,7 @@ export default function ProjectStorage() {
       ) : (
         <Grid container spacing={3}>
           {sortedProjects.map((project) => (
-            <Grid item xs={12} sm={6} lg={4} key={project.id}>
+            <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={project.id}>
               <ProjectCard project={project} />
             </Grid>
           ))}

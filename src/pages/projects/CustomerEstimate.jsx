@@ -382,7 +382,7 @@ export default function CustomerEstimate({ projectId, project }) {
         <DialogTitle>{editingItem ? 'Редактировать позицию' : 'Добавить позицию сметы'}</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 1 }}>
-            <Grid item xs={12}>
+            <Grid size={12}>
               <TextField
                 fullWidth
                 label="Наименование"
@@ -391,7 +391,7 @@ export default function CustomerEstimate({ projectId, project }) {
                 required
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <FormControl fullWidth>
                 <InputLabel>Тип элемента</InputLabel>
                 <Select value={formData.item_type} label="Тип элемента" onChange={(e) => handleFormChange('item_type', e.target.value)}>
@@ -403,7 +403,7 @@ export default function CustomerEstimate({ projectId, project }) {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
                 label="Единица измерения"
@@ -412,7 +412,7 @@ export default function CustomerEstimate({ projectId, project }) {
                 required
               />
             </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid size={{ xs: 12, sm: 4 }}>
               <TextField
                 fullWidth
                 label="Количество"
@@ -422,7 +422,7 @@ export default function CustomerEstimate({ projectId, project }) {
                 required
               />
             </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid size={{ xs: 12, sm: 4 }}>
               <TextField
                 fullWidth
                 label="Цена за единицу"
@@ -432,7 +432,7 @@ export default function CustomerEstimate({ projectId, project }) {
                 required
               />
             </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid size={{ xs: 12, sm: 4 }}>
               <TextField
                 fullWidth
                 label="Общая стоимость"

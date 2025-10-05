@@ -182,7 +182,7 @@ export default function CreateProject() {
       <Card>
         <CardContent sx={{ p: 4 }}>
           <Grid container spacing={3}>
-            <Grid item xs={12}>
+            <Grid size={12}>
               <Typography variant="h6" gutterBottom color="primary">
                 Информация о проекте
               </Typography>
@@ -190,14 +190,14 @@ export default function CreateProject() {
 
             {/* Сообщения об ошибках или успехе */}
             {message && (
-              <Grid item xs={12}>
+              <Grid size={12}>
                 <Alert severity={message.type} sx={{ mb: 2 }}>
                   {message.text}
                 </Alert>
               </Grid>
             )}
 
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <TextField
                 fullWidth
                 label="Заказчик (ФИО) *"
@@ -210,7 +210,7 @@ export default function CreateProject() {
               />
             </Grid>
 
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <TextField
                 fullWidth
                 label="Подрядчик (Название) *"
@@ -223,7 +223,7 @@ export default function CreateProject() {
               />
             </Grid>
 
-            <Grid item xs={12}>
+            <Grid size={12}>
               <TextField
                 fullWidth
                 label="Адрес объекта *"
@@ -236,7 +236,7 @@ export default function CreateProject() {
               />
             </Grid>
 
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <TextField
                 fullWidth
                 label="Договор № *"
@@ -249,7 +249,7 @@ export default function CreateProject() {
               />
             </Grid>
 
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <TextField
                 fullWidth
                 label="Срок выполнения *"
@@ -263,7 +263,7 @@ export default function CreateProject() {
               />
             </Grid>
 
-            <Grid item xs={12}>
+            <Grid size={12}>
               <Box sx={{ display: 'flex', justifyContent: 'center', pt: 3 }}>
                 <Button
                   variant="contained"

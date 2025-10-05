@@ -34,7 +34,7 @@ const HowItWorks = ({ content }) => {
               const IconComponent = iconMap[index] || LoginIcon;
 
               return (
-                <Grid item xs={12} md={4} key={index}>
+                <Grid size={{ xs: 12, md: 4 }} key={index}>
                   <Stack spacing={3} alignItems="center" textAlign="center">
                     <Box sx={{ position: 'relative', display: 'inline-flex' }}>
                       <Avatar

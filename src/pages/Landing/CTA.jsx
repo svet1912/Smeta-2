@@ -33,7 +33,7 @@ const CTA = ({ content }) => {
 
       <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
         <Grid container spacing={8} alignItems="center">
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Stack spacing={4} alignItems="flex-start" textAlign="left">
               <Typography
                 variant="h2"
@@ -97,7 +97,7 @@ const CTA = ({ content }) => {
             </Stack>
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Paper
               sx={{
                 p: 4,

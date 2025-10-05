@@ -88,7 +88,7 @@ export default function ViewProfileTab() {
             </Box>
             <Box sx={{ textAlign: 'center' }}>
               <Grid container spacing={2}>
-                <Grid item xs={4}>
+                <Grid size={4}>
                   <Typography variant="h4" color="primary">
                     {profileData.projects}
                   </Typography>
@@ -96,7 +96,7 @@ export default function ViewProfileTab() {
                     Проектов
                   </Typography>
                 </Grid>
-                <Grid item xs={4}>
+                <Grid size={4}>
                   <Typography variant="h4" color="success.main">
                     {profileData.teamSize}
                   </Typography>
@@ -104,7 +104,7 @@ export default function ViewProfileTab() {
                     В команде
                   </Typography>
                 </Grid>
-                <Grid item xs={4}>
+                <Grid size={4}>
                   <Typography variant="h4" color="warning.main">
                     5.0
                   </Typography>
@@ -120,7 +120,7 @@ export default function ViewProfileTab() {
 
       <Grid container spacing={3}>
         {/* Contact Information */}
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -157,7 +157,7 @@ export default function ViewProfileTab() {
         </Grid>
 
         {/* About */}
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -178,7 +178,7 @@ export default function ViewProfileTab() {
         </Grid>
 
         {/* Skills */}
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -200,7 +200,7 @@ export default function ViewProfileTab() {
         </Grid>
 
         {/* Achievements */}
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -224,7 +224,7 @@ export default function ViewProfileTab() {
         </Grid>
 
         {/* Recent Activity */}
-        <Grid item xs={12}>
+        <Grid size={12}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>

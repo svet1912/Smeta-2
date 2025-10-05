@@ -182,13 +182,13 @@ export default function EditProfileTab() {
 
       {/* Form Fields */}
       <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <TextField fullWidth label="Имя" value={profile.firstName} onChange={handleChange('firstName')} variant="outlined" />
         </Grid>
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <TextField fullWidth label="Фамилия" value={profile.lastName} onChange={handleChange('lastName')} variant="outlined" />
         </Grid>
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <TextField
             fullWidth
             label="Email"
@@ -200,24 +200,24 @@ export default function EditProfileTab() {
             helperText="Email нельзя изменить после регистрации"
           />
         </Grid>
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <TextField fullWidth label="Телефон" value={profile.phone} onChange={handleChange('phone')} variant="outlined" />
         </Grid>
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <TextField fullWidth label="Должность" value={profile.position} onChange={handleChange('position')} variant="outlined" />
         </Grid>
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <TextField fullWidth label="Компания" value={profile.company} onChange={handleChange('company')} variant="outlined" />
         </Grid>
-        <Grid item xs={12}>
+        <Grid size={12}>
           <TextField fullWidth label="Местоположение" value={profile.location} onChange={handleChange('location')} variant="outlined" />
         </Grid>
-        <Grid item xs={12}>
+        <Grid size={12}>
           <TextField fullWidth label="О себе" value={profile.bio} onChange={handleChange('bio')} variant="outlined" multiline rows={4} />
         </Grid>
 
         {/* Skills Section */}
-        <Grid item xs={12}>
+        <Grid size={12}>
           <Typography variant="h6" gutterBottom>
             Навыки
           </Typography>
@@ -232,7 +232,7 @@ export default function EditProfileTab() {
         </Grid>
 
         {/* Action Buttons */}
-        <Grid item xs={12}>
+        <Grid size={12}>
           <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
             <Button
               variant="contained"
