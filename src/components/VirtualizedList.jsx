@@ -2,7 +2,7 @@
  * VirtualizedList Component
  * Компонент для виртуализации больших списков
  */
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Box, List, ListItem } from '@mui/material';
 
 const VirtualizedList = ({ items = [], itemHeight = 60, containerHeight = 400, overscan = 5, renderItem, onScroll, ...props }) => {
@@ -26,14 +26,17 @@ const VirtualizedList = ({ items = [], itemHeight = 60, containerHeight = 400, o
   // Смещение для виртуализации
   const offsetY = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan) * itemHeight;
 
-  const handleScroll = (event) => {
-    const newScrollTop = event.target.scrollTop;
-    setScrollTop(newScrollTop);
+  const handleScroll = useCallback(
+    (event) => {
+      const newScrollTop = event.target.scrollTop;
+      setScrollTop(newScrollTop);
 
-    if (onScroll) {
-      onScroll(newScrollTop);
-    }
-  };
+      if (onScroll) {
+        onScroll(newScrollTop);
+      }
+    },
+    [onScroll]
+  );
 
   useEffect(() => {
     const container = containerRef.current;
@@ -41,7 +44,7 @@ const VirtualizedList = ({ items = [], itemHeight = 60, containerHeight = 400, o
       container.addEventListener('scroll', handleScroll, { passive: true });
       return () => container.removeEventListener('scroll', handleScroll);
     }
-  }, []);
+  }, [handleScroll]);
 
   return (
     <Box

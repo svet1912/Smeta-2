@@ -78,7 +78,7 @@ export default function WorksPage() {
       const displayItems = createDisplayItems(filtered);
       setFilteredWorks(displayItems);
     },
-    [works]
+    [works, createDisplayItems]
   );
 
   // Функция для естественной сортировки ID (w.1, w.2, w.10 и т.д.)
@@ -111,7 +111,7 @@ export default function WorksPage() {
   };
 
   // Функция для группировки работ по стадиям и подстадиям
-  const groupWorksByStages = (works) => {
+  const groupWorksByStages = useCallback((works) => {
     const grouped = {};
 
     works.forEach((work) => {
@@ -152,46 +152,49 @@ export default function WorksPage() {
     });
 
     return grouped;
-  };
+  }, []);
 
   // Создаем список элементов для отображения
-  const createDisplayItems = (works) => {
-    const grouped = groupWorksByStages(works);
-    const displayItems = [];
+  const createDisplayItems = useCallback(
+    (works) => {
+      const grouped = groupWorksByStages(works);
+      const displayItems = [];
 
-    Object.entries(grouped).forEach(([stageName, stageGroup]) => {
-      // Добавляем заголовок стадии
-      displayItems.push({
-        key: `stage-${stageName}`,
-        type: 'stage',
-        name: stageName,
-        isHeader: true
-      });
+      Object.entries(grouped).forEach(([stageName, stageGroup]) => {
+        // Добавляем заголовок стадии
+        displayItems.push({
+          key: `stage-${stageName}`,
+          type: 'stage',
+          name: stageName,
+          isHeader: true
+        });
 
-      Object.entries(stageGroup.substages).forEach(([substageKey, substageGroup]) => {
-        // Добавляем заголовок подстадии, если она есть
-        if (substageGroup.substage) {
-          displayItems.push({
-            key: `substage-${substageGroup.substage}`,
-            type: 'substage',
-            name: substageGroup.substage,
-            isHeader: true
-          });
-        }
+        Object.entries(stageGroup.substages).forEach(([substageKey, substageGroup]) => {
+          // Добавляем заголовок подстадии, если она есть
+          if (substageGroup.substage) {
+            displayItems.push({
+              key: `substage-${substageGroup.substage}`,
+              type: 'substage',
+              name: substageGroup.substage,
+              isHeader: true
+            });
+          }
 
-        // Добавляем работы
-        substageGroup.works.forEach((work) => {
-          displayItems.push({
-            ...work,
-            type: 'work',
-            isHeader: false
+          // Добавляем работы
+          substageGroup.works.forEach((work) => {
+            displayItems.push({
+              ...work,
+              type: 'work',
+              isHeader: false
+            });
           });
         });
       });
-    });
 
-    return displayItems;
-  };
+      return displayItems;
+    },
+    [groupWorksByStages]
+  );
 
   // Обновляем отфильтрованные работы при изменении основного списка
   useEffect(() => {
@@ -203,9 +206,9 @@ export default function WorksPage() {
     loadWorks();
     loadPhases();
     loadMaterials();
-  }, []);
+  }, [loadWorks]);
 
-  const loadWorks = async () => {
+  const loadWorks = useCallback(async () => {
     setLoading(true);
     try {
       // Загружаем все работы без ограничений
@@ -239,7 +242,7 @@ export default function WorksPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const loadPhases = async () => {
     try {

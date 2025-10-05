@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // material-ui
@@ -51,9 +51,9 @@ export default function CreateProject() {
   // Проверка аутентификации при загрузке
   useEffect(() => {
     checkAuthentication();
-  }, []);
+  }, [checkAuthentication]);
 
-  const checkAuthentication = async () => {
+  const checkAuthentication = useCallback(async () => {
     try {
       const token = localStorage.getItem('authToken');
       if (!token) {
@@ -73,7 +73,7 @@ export default function CreateProject() {
     } finally {
       setAuthChecked(true);
     }
-  };
+  }, [navigate]);
 
   const handleChange = (field) => (event) => {
     setProject((prev) => ({ ...prev, [field]: event.target.value }));

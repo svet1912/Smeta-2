@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 
 // material-ui
@@ -72,9 +72,9 @@ export default function CustomerEstimate({ projectId, project }) {
   // Загрузка сметы и её элементов
   useEffect(() => {
     loadCustomerEstimate();
-  }, [projectId]);
+  }, [projectId, loadCustomerEstimate]);
 
-  const loadCustomerEstimate = async () => {
+  const loadCustomerEstimate = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -100,7 +100,7 @@ export default function CustomerEstimate({ projectId, project }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [projectId]);
 
   const loadEstimateItems = async (estimateId) => {
     try {

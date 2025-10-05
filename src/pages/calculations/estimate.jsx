@@ -621,13 +621,13 @@ export default function EstimateCalculationPage({ projectId: propProjectId }) {
   //     const blockKeys = Object.keys(groupedItems);
   //     const blockKey = blockKeys[blockIndex];
   //     const block = groupedItems[blockKey];
-  
+
   //     // Удаляем работу и все связанные материалы
   //     const workId = block.work.item_id;
-  
+
   //     // Находим все материалы, связанные с этой работой, и удаляем их из БД
   //     const materialsToDelete = estimateItems.filter((item) => item.work_id === workId && item.type === 'material');
-  
+
   //     // Удаляем каждый материал из базы данных
   //     for (const material of materialsToDelete) {
   //       const result = await workMaterialsApi.removeMaterialFromWork(workId, material.item_id);
@@ -636,12 +636,12 @@ export default function EstimateCalculationPage({ projectId: propProjectId }) {
   //         // Продолжаем удаление остальных материалов даже при ошибке
   //       }
   //     }
-  
+
   //     // Обновляем локальное состояние
   //     const newItems = estimateItems.filter(
   //       (item) => !(item.item_id === workId && item.type === 'work') && !(item.work_id === workId && item.type === 'material')
   //     );
-  
+
   //     setEstimateItems(newItems);
   //     message.success('Блок работ и связанные материалы удалены из сметы и базы данных');
   //   } catch (error) {

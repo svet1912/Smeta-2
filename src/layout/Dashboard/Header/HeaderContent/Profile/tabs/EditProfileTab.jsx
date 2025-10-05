@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 // material-ui
 import {
@@ -60,7 +60,7 @@ export default function EditProfileTab() {
   }, [user]);
 
   // Вычисление процента заполненности профиля
-  const calculateCompletion = () => {
+  const calculateCompletion = useCallback(() => {
     const fields = [
       profile.firstName,
       profile.lastName,
@@ -73,13 +73,13 @@ export default function EditProfileTab() {
     ];
     const filled = fields.filter((field) => field && field.trim()).length;
     return Math.round((filled / fields.length) * 100);
-  };
+  }, [profile]);
 
   const [profileCompletion, setProfileCompletion] = useState(0);
 
   useEffect(() => {
     setProfileCompletion(calculateCompletion());
-  }, [profile]);
+  }, [profile, calculateCompletion]);
 
   const handleChange = (field) => (event) => {
     setProfile((prev) => ({

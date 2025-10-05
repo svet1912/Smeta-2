@@ -121,7 +121,7 @@ export const usePreloadResources = (resources) => {
 /**
  * Хук для оптимизации ре-рендеров
  */
-export const useOptimizedCallback = (callback, deps) => {
+export const useOptimizedCallback = (callback, deps = []) => {
   const callbackRef = useRef(callback);
 
   useEffect(() => {
@@ -130,6 +130,7 @@ export const useOptimizedCallback = (callback, deps) => {
 
   return useCallback((...args) => {
     return callbackRef.current(...args);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 };
 
@@ -192,7 +193,7 @@ export const useLazyLoad = (options = {}) => {
 /**
  * Хук для мемоизации дорогих вычислений
  */
-export const useMemoizedValue = (computeFn, deps) => {
+export const useMemoizedValue = (computeFn, deps = []) => {
   return useMemo(() => {
     const startTime = Date.now();
     const result = computeFn();
@@ -203,7 +204,8 @@ export const useMemoizedValue = (computeFn, deps) => {
     }
 
     return result;
-  }, deps);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [computeFn, ...deps]);
 };
 
 export default {
