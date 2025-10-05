@@ -2421,6 +2421,111 @@ app.get('/api/object-parameters/:objectParamsId/rooms', authMiddleware, async (r
   }
 });
 
+// Обновление помещения
+app.put('/api/rooms/:roomId', authMiddleware, async (req, res) => {
+  try {
+    const { roomId } = req.params;
+    const userId = req.user.userId || req.user.id || req.user.sub;
+    const tenantId = req.user.tenantId || 'default-tenant';
+
+    console.log(`📝 PUT /api/rooms/${roomId} [user=${userId}]`);
+    console.log(`📦 Request body:`, req.body);
+
+    const {
+      roomName,
+      area,
+      height,
+      volume,
+      finishClass,
+      purpose,
+      sortOrder,
+      perimeter,
+      prostenki,
+      window1Width,
+      window1Height,
+      window2Width,
+      window2Height,
+      window3Width,
+      window3Height,
+      portal1Width,
+      portal1Height,
+      portal2Width,
+      portal2Height
+    } = req.body;
+
+    const result = await query(
+      `
+      UPDATE project_rooms SET
+        room_name = $2,
+        area = $3,
+        height = $4,
+        volume = $5,
+        finish_class = $6,
+        purpose = $7,
+        sort_order = $8,
+        perimeter = $9,
+        prostenki = $10,
+        window1_width = $11,
+        window1_height = $12,
+        window2_width = $13,
+        window2_height = $14,
+        window3_width = $15,
+        window3_height = $16,
+        portal1_width = $17,
+        portal1_height = $18,
+        portal2_width = $19,
+        portal2_height = $20,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = $1 AND tenant_id = $21
+      RETURNING *
+      `,
+      [
+        roomId,
+        roomName,
+        area,
+        height,
+        volume,
+        finishClass,
+        purpose,
+        sortOrder,
+        perimeter,
+        prostenki,
+        window1Width,
+        window1Height,
+        window2Width,
+        window2Height,
+        window3Width,
+        window3Height,
+        portal1Width,
+        portal1Height,
+        portal2Width,
+        portal2Height,
+        tenantId
+      ]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        error: 'Помещение не найдено',
+        code: 'ROOM_NOT_FOUND'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Помещение обновлено',
+      data: result.rows[0]
+    });
+  } catch (error) {
+    console.error('❌ Ошибка обновления помещения:', error);
+    res.status(500).json({
+      error: 'Ошибка сервера',
+      code: 'INTERNAL_SERVER_ERROR',
+      message: error.message
+    });
+  }
+});
+
 // ==============================|| STEP 5: MATERIALS / WORKS / WORK-MATERIALS API ||============================== //
 
 // 🔹 ШАГ 5.1 — Works API (Справочник работ)
