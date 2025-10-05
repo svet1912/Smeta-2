@@ -62,25 +62,6 @@ export default function WorksPage() {
   const [searchText, setSearchText] = useState('');
   const [filteredWorks, setFilteredWorks] = useState([]);
 
-  // Функция для поиска и фильтрации работ
-  const handleSearch = useCallback(
-    (value) => {
-      setSearchText(value);
-      let filtered = works.filter(
-        (work) =>
-          work.name.toLowerCase().includes(value.toLowerCase()) ||
-          work.phase_name?.toLowerCase().includes(value.toLowerCase()) ||
-          work.stage_name?.toLowerCase().includes(value.toLowerCase()) ||
-          work.id.toString().includes(value)
-      );
-
-      // Создаем элементы для отображения с группировкой
-      const displayItems = createDisplayItems(filtered);
-      setFilteredWorks(displayItems);
-    },
-    [works, createDisplayItems]
-  );
-
   // Функция для естественной сортировки ID (w.1, w.2, w.10 и т.д.)
   const naturalSort = (arr) => {
     return arr.sort((a, b) => {
@@ -95,17 +76,16 @@ export default function WorksPage() {
         const aPart = aParts[i] || '';
         const bPart = bParts[i] || '';
 
-        // Если обе части - числа, сравниваем как числа
+        // Если обе части числа, сравниваем как числа
         if (!isNaN(aPart) && !isNaN(bPart)) {
-          const diff = parseInt(aPart) - parseInt(bPart);
+          const diff = parseInt(aPart, 10) - parseInt(bPart, 10);
           if (diff !== 0) return diff;
         } else {
           // Иначе сравниваем как строки
-          const diff = aPart.localeCompare(bPart);
-          if (diff !== 0) return diff;
+          const comparison = aPart.localeCompare(bPart);
+          if (comparison !== 0) return comparison;
         }
       }
-
       return 0;
     });
   };
@@ -194,6 +174,25 @@ export default function WorksPage() {
       return displayItems;
     },
     [groupWorksByStages]
+  );
+
+  // Функция для поиска и фильтрации работ
+  const handleSearch = useCallback(
+    (value) => {
+      setSearchText(value);
+      let filtered = works.filter(
+        (work) =>
+          work.name.toLowerCase().includes(value.toLowerCase()) ||
+          work.phase_name?.toLowerCase().includes(value.toLowerCase()) ||
+          work.stage_name?.toLowerCase().includes(value.toLowerCase()) ||
+          work.id.toString().includes(value)
+      );
+
+      // Создаем элементы для отображения с группировкой
+      const displayItems = createDisplayItems(filtered);
+      setFilteredWorks(displayItems);
+    },
+    [works, createDisplayItems]
   );
 
   // Обновляем отфильтрованные работы при изменении основного списка

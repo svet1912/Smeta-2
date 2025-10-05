@@ -54,8 +54,8 @@ export default function DashboardLayout() {
     // Можно добавить другие маршруты по мере необходимости
   }, [location.pathname]);
 
-  // Определяем, нужно ли показывать подвкладки (только на страницах расчетов)
-  const showSubNavTabs = location.pathname.includes('/calculations/') || location.pathname.includes('/projects/');
+  // Определяем, нужно ли показывать подвкладки (только на страницах расчетов, исключая проекты)
+  const showSubNavTabs = location.pathname.includes('/calculations/') && !location.pathname.includes('/projects/');
 
   const handleSubTabChange = (key) => {
     setActiveSubTab(key);

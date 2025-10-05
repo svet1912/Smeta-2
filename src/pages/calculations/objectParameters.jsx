@@ -206,65 +206,8 @@ const ObjectParameters = ({ projectId: propProjectId }) => {
     heatingType: 'central'
   });
 
-  const [rooms, setRooms] = useState([
-    {
-      id: 1,
-      name: 'Гостиная',
-      perimeter: 18.0,
-      height: 2.7,
-      floorArea: 20.0,
-      prostenki: 0,
-      doorsCount: 2,
-      window1Width: 1.5,
-      window1Height: 1.2,
-      window2Width: 0,
-      window2Height: 0,
-      window3Width: 0,
-      window3Height: 0,
-      portal1Width: 0,
-      portal1Height: 0,
-      portal2Width: 0,
-      portal2Height: 0
-    },
-    {
-      id: 2,
-      name: 'Спальня',
-      perimeter: 15.0,
-      height: 2.7,
-      floorArea: 14.0,
-      prostenki: 0,
-      doorsCount: 1,
-      window1Width: 1.2,
-      window1Height: 1.2,
-      window2Width: 0,
-      window2Height: 0,
-      window3Width: 0,
-      window3Height: 0,
-      portal1Width: 0,
-      portal1Height: 0,
-      portal2Width: 0,
-      portal2Height: 0
-    },
-    {
-      id: 3,
-      name: 'Кухня',
-      perimeter: 13.0,
-      height: 2.7,
-      floorArea: 10.5,
-      prostenki: 0,
-      doorsCount: 1,
-      window1Width: 1.0,
-      window1Height: 1.0,
-      window2Width: 0.8,
-      window2Height: 1.0,
-      window3Width: 0,
-      window3Height: 0,
-      portal1Width: 0,
-      portal1Height: 0,
-      portal2Width: 0,
-      portal2Height: 0
-    }
-  ]);
+  // Инициализируем пустой массив, данные загрузятся из БД
+  const [rooms, setRooms] = useState([]);
 
   const [constructiveParams, setConstructiveParams] = useState({
     wallMaterial: 'brick',
@@ -436,8 +379,10 @@ const ObjectParameters = ({ projectId: propProjectId }) => {
 
         if (roomsResponse.ok) {
           const roomsData = await roomsResponse.json();
+          console.log('🏠 Загружены помещения из БД:', roomsData);
+          
           if (roomsData.length > 0) {
-            // Преобразуем данные из БД в формат компонента
+            // Если есть помещения в БД, используем их
             const formattedRooms = roomsData.map((room) => ({
               id: room.id,
               name: room.room_name || room.name,
@@ -458,6 +403,76 @@ const ObjectParameters = ({ projectId: propProjectId }) => {
               portal2Height: room.portal2_height || 0
             }));
             setRooms(formattedRooms);
+            console.log('✅ Установлены помещения из БД:', formattedRooms);
+            console.log('🔍 Проверяем второе помещение:', formattedRooms[1]);
+            console.log('🪟 Окна второго помещения:', {
+              window1: `${formattedRooms[1]?.window1Width}x${formattedRooms[1]?.window1Height}`,
+              window2: `${formattedRooms[1]?.window2Width}x${formattedRooms[1]?.window2Height}`,
+              window3: `${formattedRooms[1]?.window3Width}x${formattedRooms[1]?.window3Height}`
+            });
+          } else {
+            // Если помещений нет, создаем дефолтные
+            console.log('ℹ️ Помещений в БД нет, создаем дефолтные');
+            const defaultRooms = [
+              {
+                id: 1,
+                name: 'Гостиная',
+                perimeter: 18.0,
+                height: 2.7,
+                floorArea: 20.0,
+                prostenki: 0,
+                doorsCount: 2,
+                window1Width: 1.5,
+                window1Height: 1.2,
+                window2Width: 0,
+                window2Height: 0,
+                window3Width: 0,
+                window3Height: 0,
+                portal1Width: 0,
+                portal1Height: 0,
+                portal2Width: 0,
+                portal2Height: 0
+              },
+              {
+                id: 2,
+                name: 'Спальня',
+                perimeter: 15.0,
+                height: 2.7,
+                floorArea: 14.0,
+                prostenki: 0,
+                doorsCount: 1,
+                window1Width: 1.2,
+                window1Height: 1.2,
+                window2Width: 0,
+                window2Height: 0,
+                window3Width: 0,
+                window3Height: 0,
+                portal1Width: 0,
+                portal1Height: 0,
+                portal2Width: 0,
+                portal2Height: 0
+              },
+              {
+                id: 3,
+                name: 'Кухня',
+                perimeter: 13.0,
+                height: 2.7,
+                floorArea: 10.5,
+                prostenki: 0,
+                doorsCount: 1,
+                window1Width: 1.0,
+                window1Height: 1.0,
+                window2Width: 0.8,
+                window2Height: 1.0,
+                window3Width: 0,
+                window3Height: 0,
+                portal1Width: 0,
+                portal1Height: 0,
+                portal2Width: 0,
+                portal2Height: 0
+              }
+            ];
+            setRooms(defaultRooms);
           }
         }
 
@@ -576,20 +591,27 @@ const ObjectParameters = ({ projectId: propProjectId }) => {
           perimeter: room.perimeter,
           prostenki: room.prostenki,
           doorsCount: room.doorsCount,
-          window1Width: room.window1Width,
-          window1Height: room.window1Height,
-          window2Width: room.window2Width,
-          window2Height: room.window2Height,
-          window3Width: room.window3Width,
-          window3Height: room.window3Height,
-          portal1Width: room.portal1Width,
-          portal1Height: room.portal1Height,
-          portal2Width: room.portal2Width,
-          portal2Height: room.portal2Height
+          // Конвертируем пустые строки в числовые значения для корректной отправки на сервер
+          window1Width: room.window1Width === '' ? '0.00' : room.window1Width,
+          window1Height: room.window1Height === '' ? '0.00' : room.window1Height,
+          window2Width: room.window2Width === '' ? '0.00' : room.window2Width,
+          window2Height: room.window2Height === '' ? '0.00' : room.window2Height,
+          window3Width: room.window3Width === '' ? '0.00' : room.window3Width,
+          window3Height: room.window3Height === '' ? '0.00' : room.window3Height,
+          portal1Width: room.portal1Width === '' ? '0.00' : room.portal1Width,
+          portal1Height: room.portal1Height === '' ? '0.00' : room.portal1Height,
+          portal2Width: room.portal2Width === '' ? '0.00' : room.portal2Width,
+          portal2Height: room.portal2Height === '' ? '0.00' : room.portal2Height
         };
 
-        // Проверяем, является ли помещение новым (ID сгенерирован локально или это дефолтные помещения)
-        const isNewRoom = room.id > 1000000 || room.id <= 3; // ID 1,2,3 - это дефолтные помещения
+        console.log(`🔍 Подготовка данных для помещения ${room.id}:`, {
+          room,
+          roomData
+        });
+
+        // Помещения с большим ID (временные) создаются через POST
+        // Помещения с обычным ID обновляются через PUT
+        const isNewRoom = room.id > 1000000;
 
         if (isNewRoom) {
           // Новое помещение - создаем через POST
@@ -609,7 +631,8 @@ const ObjectParameters = ({ projectId: propProjectId }) => {
           }
         } else {
           // Существующее помещение пользователя - обновляем через PUT
-          await fetch(`/api-proxy/rooms/${room.id}`, {
+          console.log(`🏠 Сохраняем помещение ${room.id}:`, roomData);
+          const response = await fetch(`/api-proxy/rooms/${room.id}`, {
             method: 'PUT',
             headers: {
               Authorization: `Bearer ${token}`,
@@ -617,6 +640,13 @@ const ObjectParameters = ({ projectId: propProjectId }) => {
             },
             body: JSON.stringify(roomData)
           });
+          
+          if (response.ok) {
+            const result = await response.json();
+            console.log('✅ Помещение сохранено:', result);
+          } else {
+            console.error('❌ Ошибка сохранения помещения:', response.status);
+          }
         }
       }
 
@@ -653,22 +683,50 @@ const ObjectParameters = ({ projectId: propProjectId }) => {
     }
   }, [projectId, propProjectId, loadObjectParameters]);
 
-  // Автосохранение при изменении данных (с задержкой)
+  // Автосохранение каждые 10 минут
   useEffect(() => {
     if (loading || saving || !isAuthenticated) return; // Не сохраняем для неавторизованных пользователей
 
-    const timeoutId = setTimeout(() => {
-      console.log('Автосохранение данных...');
+    const intervalId = setInterval(() => {
+      console.log('Плановое автосохранение данных (10 минут)...');
       saveObjectParameters();
-    }, 3000); // Автосохранение через 3 секунды после изменения
+    }, 600000); // Автосохранение каждые 10 минут (600000 мс)
+
+    return () => clearInterval(intervalId);
+  }, [isAuthenticated, loading, saving, saveObjectParameters]);
+
+  // Сохранение при изменении данных (с задержкой для предотвращения спама)
+  useEffect(() => {
+    if (loading || saving || !isAuthenticated) return;
+
+    const timeoutId = setTimeout(() => {
+      console.log('Отложенное автосохранение данных (изменения)...');
+      // Сохраняем только если прошло более 30 секунд с последнего сохранения
+      const now = Date.now();
+      const lastSaveKey = 'lastObjectParametersSave';
+      const lastSave = localStorage.getItem(lastSaveKey);
+      
+      if (!lastSave || now - parseInt(lastSave) > 30000) {
+        localStorage.setItem(lastSaveKey, now.toString());
+        saveObjectParameters();
+      }
+    }, 5000); // Задержка 5 секунд после изменения
 
     return () => clearTimeout(timeoutId);
-  }, [rooms, buildingParams, constructiveParams, engineeringParams, isAuthenticated, loading, saving]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [rooms, buildingParams, constructiveParams, engineeringParams, isAuthenticated, loading, saving, saveObjectParameters]);
 
   // Функции для обновления данных
   const updateBuildingParam = (key, value) => {
     setBuildingParams((prev) => ({ ...prev, [key]: value }));
   };
+
+  // Функция для сохранения при потере фокуса или Enter
+  const handleSaveOnBlurOrEnter = useCallback(async () => {
+    if (loading || saving || !isAuthenticated) return;
+    
+    console.log('Сохранение при потере фокуса/Enter...');
+    await saveObjectParameters();
+  }, [loading, saving, isAuthenticated, saveObjectParameters]);
 
   // Функция валидации значений
   const validateRoomValue = (field, value) => {
@@ -714,22 +772,50 @@ const ObjectParameters = ({ projectId: propProjectId }) => {
       wallArea: 32.4,
       slopes: 2.0,
       doorsCount: 1,
-      window1Width: 0,
-      window1Height: 0,
-      window2Width: 0,
-      window2Height: 0,
-      window3Width: 0,
-      window3Height: 0,
-      portal1Width: 0,
-      portal1Height: 0,
-      portal2Width: 0,
-      portal2Height: 0
+      // Убираем принудительную установку нулевых значений для окон и порталов
+      // Пользователь сам заполнит нужные поля
+      window1Width: '',
+      window1Height: '',
+      window2Width: '',
+      window2Height: '',
+      window3Width: '',
+      window3Height: '',
+      portal1Width: '',
+      portal1Height: '',
+      portal2Width: '',
+      portal2Height: ''
     };
     setRooms([...rooms, newRoom]);
   };
 
-  const removeRoom = (roomId) => {
-    setRooms(rooms.filter((room) => room.id !== roomId));
+  const removeRoom = async (roomId) => {
+    try {
+      const response = await fetch(`/api-proxy/rooms/${roomId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Удаляем из локального состояния только после успешного удаления на сервере
+      setRooms(rooms.filter((room) => room.id !== roomId));
+      
+      notification.success({
+        message: 'Помещение удалено',
+        description: 'Помещение успешно удалено из проекта'
+      });
+    } catch (error) {
+      console.error('Ошибка удаления помещения:', error);
+      notification.error({
+        message: 'Ошибка удаления',
+        description: 'Не удалось удалить помещение'
+      });
+    }
   };
 
   const updateConstructiveParam = (key, value) => {
@@ -768,6 +854,10 @@ const ObjectParameters = ({ projectId: propProjectId }) => {
         <FormulaInput
           value={value}
           onChange={(val) => updateRoom(record.id, 'perimeter', val || 0)}
+          onBlur={handleSaveOnBlurOrEnter}
+          onKeyPress={(e) => {
+            if (e.key === 'Enter') handleSaveOnBlurOrEnter();
+          }}
           style={{ width: '100%', ...compactInputStyles }}
         />
       )
@@ -781,6 +871,10 @@ const ObjectParameters = ({ projectId: propProjectId }) => {
         <FormulaInput
           value={value}
           onChange={(val) => updateRoom(record.id, 'height', val || 0)}
+          onBlur={handleSaveOnBlurOrEnter}
+          onKeyPress={(e) => {
+            if (e.key === 'Enter') handleSaveOnBlurOrEnter();
+          }}
           style={{ width: '100%', ...compactInputStyles }}
         />
       )
@@ -794,6 +888,10 @@ const ObjectParameters = ({ projectId: propProjectId }) => {
         <FormulaInput
           value={value}
           onChange={(val) => updateRoom(record.id, 'floorArea', val)}
+          onBlur={handleSaveOnBlurOrEnter}
+          onKeyPress={(e) => {
+            if (e.key === 'Enter') handleSaveOnBlurOrEnter();
+          }}
           style={{ width: '100%', ...compactInputStyles }}
         />
       )
@@ -880,6 +978,10 @@ const ObjectParameters = ({ projectId: propProjectId }) => {
         <FormulaInput
           value={value}
           onChange={(val) => updateRoom(record.id, 'prostenki', val)}
+          onBlur={handleSaveOnBlurOrEnter}
+          onKeyPress={(e) => {
+            if (e.key === 'Enter') handleSaveOnBlurOrEnter();
+          }}
           style={{ width: '100%', ...compactInputStyles }}
         />
       )
@@ -893,6 +995,10 @@ const ObjectParameters = ({ projectId: propProjectId }) => {
         <InputNumber
           value={value}
           onChange={(val) => updateRoom(record.id, 'doorsCount', val || 0)}
+          onBlur={handleSaveOnBlurOrEnter}
+          onKeyPress={(e) => {
+            if (e.key === 'Enter') handleSaveOnBlurOrEnter();
+          }}
           min={0}
           step={1}
           size="small"
@@ -910,6 +1016,10 @@ const ObjectParameters = ({ projectId: propProjectId }) => {
           <FormulaInput
             value={record.window1Width}
             onChange={(val) => updateRoom(record.id, 'window1Width', val || 0)}
+            onBlur={handleSaveOnBlurOrEnter}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') handleSaveOnBlurOrEnter();
+            }}
             style={{
               width: '50%',
               fontSize: '12px'
@@ -919,6 +1029,10 @@ const ObjectParameters = ({ projectId: propProjectId }) => {
           <FormulaInput
             value={record.window1Height}
             onChange={(val) => updateRoom(record.id, 'window1Height', val || 0)}
+            onBlur={handleSaveOnBlurOrEnter}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') handleSaveOnBlurOrEnter();
+            }}
             style={{
               width: '50%',
               fontSize: '12px'
@@ -937,6 +1051,10 @@ const ObjectParameters = ({ projectId: propProjectId }) => {
           <FormulaInput
             value={record.window2Width}
             onChange={(val) => updateRoom(record.id, 'window2Width', val || 0)}
+            onBlur={handleSaveOnBlurOrEnter}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') handleSaveOnBlurOrEnter();
+            }}
             style={{
               width: '50%',
               fontSize: '12px'
@@ -946,6 +1064,10 @@ const ObjectParameters = ({ projectId: propProjectId }) => {
           <FormulaInput
             value={record.window2Height}
             onChange={(val) => updateRoom(record.id, 'window2Height', val || 0)}
+            onBlur={handleSaveOnBlurOrEnter}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') handleSaveOnBlurOrEnter();
+            }}
             style={{
               width: '50%',
               fontSize: '12px'
@@ -964,6 +1086,10 @@ const ObjectParameters = ({ projectId: propProjectId }) => {
           <FormulaInput
             value={record.window3Width}
             onChange={(val) => updateRoom(record.id, 'window3Width', val || 0)}
+            onBlur={handleSaveOnBlurOrEnter}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') handleSaveOnBlurOrEnter();
+            }}
             style={{
               width: '50%',
               fontSize: '12px'
@@ -973,6 +1099,10 @@ const ObjectParameters = ({ projectId: propProjectId }) => {
           <FormulaInput
             value={record.window3Height}
             onChange={(val) => updateRoom(record.id, 'window3Height', val || 0)}
+            onBlur={handleSaveOnBlurOrEnter}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') handleSaveOnBlurOrEnter();
+            }}
             style={{
               width: '50%',
               fontSize: '12px'
@@ -991,6 +1121,10 @@ const ObjectParameters = ({ projectId: propProjectId }) => {
           <FormulaInput
             value={record.portal1Width}
             onChange={(val) => updateRoom(record.id, 'portal1Width', val || 0)}
+            onBlur={handleSaveOnBlurOrEnter}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') handleSaveOnBlurOrEnter();
+            }}
             style={{
               width: '50%',
               fontSize: '12px'
@@ -1000,6 +1134,10 @@ const ObjectParameters = ({ projectId: propProjectId }) => {
           <FormulaInput
             value={record.portal1Height}
             onChange={(val) => updateRoom(record.id, 'portal1Height', val || 0)}
+            onBlur={handleSaveOnBlurOrEnter}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') handleSaveOnBlurOrEnter();
+            }}
             style={{
               width: '50%',
               fontSize: '12px'
@@ -1018,6 +1156,10 @@ const ObjectParameters = ({ projectId: propProjectId }) => {
           <FormulaInput
             value={record.portal2Width}
             onChange={(val) => updateRoom(record.id, 'portal2Width', val || 0)}
+            onBlur={handleSaveOnBlurOrEnter}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') handleSaveOnBlurOrEnter();
+            }}
             style={{
               width: '50%',
               fontSize: '12px'
@@ -1027,6 +1169,10 @@ const ObjectParameters = ({ projectId: propProjectId }) => {
           <FormulaInput
             value={record.portal2Height}
             onChange={(val) => updateRoom(record.id, 'portal2Height', val || 0)}
+            onBlur={handleSaveOnBlurOrEnter}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') handleSaveOnBlurOrEnter();
+            }}
             style={{
               width: '50%',
               fontSize: '12px'
@@ -1086,6 +1232,8 @@ const ObjectParameters = ({ projectId: propProjectId }) => {
               <InputNumber
                 value={buildingParams.floors}
                 onChange={(val) => updateBuildingParam('floors', val)}
+                onBlur={handleSaveOnBlurOrEnter}
+                onPressEnter={handleSaveOnBlurOrEnter}
                 min={1}
                 max={20}
                 style={{ width: '100%', marginTop: '4px', ...inputStyles }}
@@ -1098,7 +1246,10 @@ const ObjectParameters = ({ projectId: propProjectId }) => {
               <label>Назначение здания</label>
               <Select
                 value={buildingParams.purpose}
-                onChange={(val) => updateBuildingParam('purpose', val)}
+                onChange={(val) => {
+                  updateBuildingParam('purpose', val);
+                  handleSaveOnBlurOrEnter();
+                }}
                 style={{ width: '100%', marginTop: '4px', ...inputStyles }}
               >
                 <Option value="residential">Жилое</Option>
@@ -1113,7 +1264,10 @@ const ObjectParameters = ({ projectId: propProjectId }) => {
               <label>Класс энергоэффективности</label>
               <Select
                 value={buildingParams.energyClass}
-                onChange={(val) => updateBuildingParam('energyClass', val)}
+                onChange={(val) => {
+                  updateBuildingParam('energyClass', val);
+                  handleSaveOnBlurOrEnter();
+                }}
                 style={{ width: '100%', marginTop: '4px', ...inputStyles }}
               >
                 <Option value="A++">A++</Option>
@@ -1130,7 +1284,10 @@ const ObjectParameters = ({ projectId: propProjectId }) => {
               <label>Тип отопления</label>
               <Select
                 value={buildingParams.heatingType}
-                onChange={(val) => updateBuildingParam('heatingType', val)}
+                onChange={(val) => {
+                  updateBuildingParam('heatingType', val);
+                  handleSaveOnBlurOrEnter();
+                }}
                 style={{ width: '100%', marginTop: '4px', ...inputStyles }}
               >
                 <Option value="central">Центральное</Option>
@@ -1145,13 +1302,25 @@ const ObjectParameters = ({ projectId: propProjectId }) => {
           <Col span={8}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <label>Наличие подвала</label>
-              <Switch checked={buildingParams.hasBasement} onChange={(val) => updateBuildingParam('hasBasement', val)} />
+              <Switch
+                checked={buildingParams.hasBasement}
+                onChange={(val) => {
+                  updateBuildingParam('hasBasement', val);
+                  handleSaveOnBlurOrEnter();
+                }}
+              />
             </div>
           </Col>
           <Col span={8}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <label>Наличие чердака</label>
-              <Switch checked={buildingParams.hasAttic} onChange={(val) => updateBuildingParam('hasAttic', val)} />
+              <Switch
+                checked={buildingParams.hasAttic}
+                onChange={(val) => {
+                  updateBuildingParam('hasAttic', val);
+                  handleSaveOnBlurOrEnter();
+                }}
+              />
             </div>
           </Col>
         </Row>

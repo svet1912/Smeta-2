@@ -2439,6 +2439,7 @@ app.put('/api/rooms/:roomId', authMiddleware, async (req, res) => {
       sortOrder,
       perimeter,
       prostenki,
+      doorsCount,
       window1Width,
       window1Height,
       window2Width,
@@ -2463,18 +2464,19 @@ app.put('/api/rooms/:roomId', authMiddleware, async (req, res) => {
         sort_order = $8,
         perimeter = $9,
         prostenki = $10,
-        window1_width = $11,
-        window1_height = $12,
-        window2_width = $13,
-        window2_height = $14,
-        window3_width = $15,
-        window3_height = $16,
-        portal1_width = $17,
-        portal1_height = $18,
-        portal2_width = $19,
-        portal2_height = $20,
+        doors_count = $11,
+        window1_width = $12,
+        window1_height = $13,
+        window2_width = $14,
+        window2_height = $15,
+        window3_width = $16,
+        window3_height = $17,
+        portal1_width = $18,
+        portal1_height = $19,
+        portal2_width = $20,
+        portal2_height = $21,
         updated_at = CURRENT_TIMESTAMP
-      WHERE id = $1 AND tenant_id = $21
+      WHERE id = $1 AND tenant_id = $22
       RETURNING *
       `,
       [
@@ -2488,6 +2490,7 @@ app.put('/api/rooms/:roomId', authMiddleware, async (req, res) => {
         sortOrder,
         perimeter,
         prostenki,
+        doorsCount,
         window1Width,
         window1Height,
         window2Width,
@@ -2516,6 +2519,46 @@ app.put('/api/rooms/:roomId', authMiddleware, async (req, res) => {
     });
   } catch (error) {
     console.error('❌ Ошибка обновления помещения:', error);
+    res.status(500).json({
+      error: 'Ошибка сервера',
+      code: 'INTERNAL_SERVER_ERROR',
+      message: error.message
+    });
+  }
+});
+
+// Удаление помещения
+app.delete('/api/rooms/:roomId', authMiddleware, async (req, res) => {
+  try {
+    const { roomId } = req.params;
+    const userId = req.user.userId || req.user.id || req.user.sub;
+    const tenantId = req.user.tenantId || 'default-tenant';
+
+    console.log(`🗑️ DELETE /api/rooms/${roomId} [user=${userId}]`);
+
+    const result = await query(
+      `
+      DELETE FROM project_rooms 
+      WHERE id = $1 AND tenant_id = $2
+      RETURNING *
+      `,
+      [roomId, tenantId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        error: 'Помещение не найдено',
+        code: 'ROOM_NOT_FOUND'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Помещение удалено',
+      data: result.rows[0]
+    });
+  } catch (error) {
+    console.error('❌ Ошибка удаления помещения:', error);
     res.status(500).json({
       error: 'Ошибка сервера',
       code: 'INTERNAL_SERVER_ERROR',
