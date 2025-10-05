@@ -201,13 +201,6 @@ export default function WorksPage() {
     handleSearch(searchText);
   }, [works, handleSearch, searchText]);
 
-  // Загрузка данных
-  useEffect(() => {
-    loadWorks();
-    loadPhases();
-    loadMaterials();
-  }, [loadWorks]);
-
   const loadWorks = useCallback(async () => {
     setLoading(true);
     try {
@@ -243,6 +236,13 @@ export default function WorksPage() {
       setLoading(false);
     }
   }, []);
+
+  // Загрузка данных
+  useEffect(() => {
+    loadWorks();
+    loadPhases();
+    loadMaterials();
+  }, [loadWorks]);
 
   const loadPhases = async () => {
     try {

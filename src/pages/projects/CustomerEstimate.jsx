@@ -69,11 +69,6 @@ export default function CustomerEstimate({ projectId, project }) {
     { value: 'overhead', label: 'Накладные расходы' }
   ];
 
-  // Загрузка сметы и её элементов
-  useEffect(() => {
-    loadCustomerEstimate();
-  }, [projectId, loadCustomerEstimate]);
-
   const loadCustomerEstimate = useCallback(async () => {
     try {
       setLoading(true);
@@ -101,6 +96,11 @@ export default function CustomerEstimate({ projectId, project }) {
       setLoading(false);
     }
   }, [projectId]);
+
+  // Загрузка сметы и её элементов
+  useEffect(() => {
+    loadCustomerEstimate();
+  }, [projectId, loadCustomerEstimate]);
 
   const loadEstimateItems = async (estimateId) => {
     try {
