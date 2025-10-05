@@ -1329,21 +1329,19 @@ app.get('/api/auth/me', async (req, res) => {
 
     res.json({
       success: true,
-      data: {
-        user: {
-          id: user.id,
-          email: user.email,
-          firstname: user.firstname,
-          lastname: user.lastname,
-          company: user.company,
-          phone: user.phone,
-          position: user.position,
-          location: user.location,
-          bio: user.bio,
-          emailVerified: user.email_verified,
-          lastLogin: user.last_login,
-          createdAt: user.created_at
-        }
+      user: {
+        id: user.id,
+        email: user.email,
+        firstname: user.firstname,
+        lastname: user.lastname,
+        company: user.company,
+        phone: user.phone,
+        position: user.position,
+        location: user.location,
+        bio: user.bio,
+        emailVerified: user.email_verified,
+        lastLogin: user.last_login,
+        createdAt: user.created_at
       }
     });
   } catch (error) {
