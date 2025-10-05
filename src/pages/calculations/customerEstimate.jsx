@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import MainCard from 'components/MainCard';
 import {
   Typography,
@@ -85,13 +85,8 @@ export default function CustomerEstimatePage() {
   const [coefficientModalVisible, setCoefficientModalVisible] = useState(false);
   const [coefficientForm] = Form.useForm();
 
-  // Загрузка данных
-  useEffect(() => {
-    loadCustomerEstimates();
-  }, [loadCustomerEstimates]);
-
   // Загрузка смет заказчика с сервера
-  const loadCustomerEstimates = async () => {
+  const loadCustomerEstimates = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`${API_BASE_URL}/customer-estimates`, {
@@ -121,7 +116,14 @@ export default function CustomerEstimatePage() {
     } finally {
       setLoading(false);
     }
-  }; // Загрузка позиций сметы
+  }, [currentEstimate]);
+
+  // Загрузка данных
+  useEffect(() => {
+    loadCustomerEstimates();
+  }, [loadCustomerEstimates]);
+
+  // Загрузка позиций сметы
   const loadEstimateItems = async (estimateId) => {
     if (!estimateId) return;
 

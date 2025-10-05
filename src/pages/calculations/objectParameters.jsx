@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, Row, Col, InputNumber, Select, Switch, Table, Button, Statistic, Space, Input, notification } from 'antd';
 import { getAuthToken, removeAuthToken } from '../../api/auth';
 import {
@@ -347,143 +347,146 @@ const ObjectParameters = ({ projectId: propProjectId }) => {
   };
 
   // Функции для работы с API
-  const loadObjectParameters = async (currentProjectId = projectId) => {
-    try {
-      setLoading(true);
+  const loadObjectParameters = useCallback(
+    async (currentProjectId = projectId) => {
+      try {
+        setLoading(true);
 
-      const token = getAuthToken();
-      if (!token) {
-        console.log('Токен не найден, работаем в режиме просмотра');
-        notification.info({
-          message: 'Режим просмотра',
-          description: 'Войдите в систему для сохранения данных'
-        });
-        setLoading(false);
-        return;
-      }
-
-      // Если нет projectId, загружаем первый проект
-      if (!currentProjectId) {
-        const loadedProjectId = await loadFirstProject();
-        if (!loadedProjectId) {
+        const token = getAuthToken();
+        if (!token) {
+          console.log('Токен не найден, работаем в режиме просмотра');
+          notification.info({
+            message: 'Режим просмотра',
+            description: 'Войдите в систему для сохранения данных'
+          });
           setLoading(false);
           return;
         }
-        currentProjectId = loadedProjectId;
-      }
 
-      // Проверяем валидность токена
-      const isTokenValid = await checkTokenValidity(token);
-      if (!isTokenValid) {
-        console.log('Токен недействителен, работаем в режиме просмотра');
-        removeAuthToken(); // Удаляем недействительный токен
-        setIsAuthenticated(false);
-        notification.warning({
-          message: 'Сессия истекла',
-          description: 'Пожалуйста, войдите в систему заново'
-        });
-        setLoading(false);
-        return;
-      }
-
-      setIsAuthenticated(true);
-
-      // Загружаем параметры объекта
-      const objectParamsResponse = await fetch(`${getApiBaseUrl()}/projects/${currentProjectId}/object-parameters`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
+        // Если нет projectId, загружаем первый проект
+        if (!currentProjectId) {
+          const loadedProjectId = await loadFirstProject();
+          if (!loadedProjectId) {
+            setLoading(false);
+            return;
+          }
+          currentProjectId = loadedProjectId;
         }
-      });
 
-      if (objectParamsResponse.status === 404) {
-        // Параметры не найдены - создаем их с значениями по умолчанию
-        console.log('Параметры объекта не найдены, создаем с значениями по умолчанию');
-        setLoading(false);
-
-        // Автоматически сохраняем параметры по умолчанию через 1 секунду
-        setTimeout(() => {
-          console.log('Создаем параметры объекта по умолчанию...');
-          saveObjectParameters();
-        }, 1000);
-        return;
-      }
-
-      if (objectParamsResponse.status === 401) {
-        console.log('Токен недействителен или истек, используем значения по умолчанию');
-        notification.warning({
-          message: 'Не авторизован',
-          description: 'Пожалуйста, войдите в систему для сохранения данных'
-        });
-        setLoading(false);
-        return;
-      }
-
-      if (!objectParamsResponse.ok) {
-        throw new Error('Ошибка загрузки параметров объекта');
-      }
-
-      const objectParams = await objectParamsResponse.json();
-
-      // Загружаем помещения
-      const roomsResponse = await fetch(`${getApiBaseUrl()}/object-parameters/${objectParams.id}/rooms`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
+        // Проверяем валидность токена
+        const isTokenValid = await checkTokenValidity(token);
+        if (!isTokenValid) {
+          console.log('Токен недействителен, работаем в режиме просмотра');
+          removeAuthToken(); // Удаляем недействительный токен
+          setIsAuthenticated(false);
+          notification.warning({
+            message: 'Сессия истекла',
+            description: 'Пожалуйста, войдите в систему заново'
+          });
+          setLoading(false);
+          return;
         }
-      });
 
-      if (roomsResponse.ok) {
-        const roomsData = await roomsResponse.json();
-        if (roomsData.length > 0) {
-          // Преобразуем данные из БД в формат компонента
-          const formattedRooms = roomsData.map((room) => ({
-            id: room.id,
-            name: room.room_name || room.name,
-            perimeter: room.perimeter || 0,
-            height: room.height || 2.7,
-            floorArea: room.area || room.floor_area || 0,
-            prostenki: room.prostenki || 0,
-            doorsCount: room.doors_count || 0,
-            window1Width: room.window1_width || 0,
-            window1Height: room.window1_height || 0,
-            window2Width: room.window2_width || 0,
-            window2Height: room.window2_height || 0,
-            window3Width: room.window3_width || 0,
-            window3Height: room.window3_height || 0,
-            portal1Width: room.portal1_width || 0,
-            portal1Height: room.portal1_height || 0,
-            portal2Width: room.portal2_width || 0,
-            portal2Height: room.portal2_height || 0
+        setIsAuthenticated(true);
+
+        // Загружаем параметры объекта
+        const objectParamsResponse = await fetch(`${getApiBaseUrl()}/projects/${currentProjectId}/object-parameters`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (objectParamsResponse.status === 404) {
+          // Параметры не найдены - создаем их с значениями по умолчанию
+          console.log('Параметры объекта не найдены, создаем с значениями по умолчанию');
+          setLoading(false);
+
+          // Автоматически сохраняем параметры по умолчанию через 1 секунду
+          setTimeout(() => {
+            console.log('Создаем параметры объекта по умолчанию...');
+            saveObjectParameters();
+          }, 1000);
+          return;
+        }
+
+        if (objectParamsResponse.status === 401) {
+          console.log('Токен недействителен или истек, используем значения по умолчанию');
+          notification.warning({
+            message: 'Не авторизован',
+            description: 'Пожалуйста, войдите в систему для сохранения данных'
+          });
+          setLoading(false);
+          return;
+        }
+
+        if (!objectParamsResponse.ok) {
+          throw new Error('Ошибка загрузки параметров объекта');
+        }
+
+        const objectParams = await objectParamsResponse.json();
+
+        // Загружаем помещения
+        const roomsResponse = await fetch(`${getApiBaseUrl()}/object-parameters/${objectParams.id}/rooms`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (roomsResponse.ok) {
+          const roomsData = await roomsResponse.json();
+          if (roomsData.length > 0) {
+            // Преобразуем данные из БД в формат компонента
+            const formattedRooms = roomsData.map((room) => ({
+              id: room.id,
+              name: room.room_name || room.name,
+              perimeter: room.perimeter || 0,
+              height: room.height || 2.7,
+              floorArea: room.area || room.floor_area || 0,
+              prostenki: room.prostenki || 0,
+              doorsCount: room.doors_count || 0,
+              window1Width: room.window1_width || 0,
+              window1Height: room.window1_height || 0,
+              window2Width: room.window2_width || 0,
+              window2Height: room.window2_height || 0,
+              window3Width: room.window3_width || 0,
+              window3Height: room.window3_height || 0,
+              portal1Width: room.portal1_width || 0,
+              portal1Height: room.portal1_height || 0,
+              portal2Width: room.portal2_width || 0,
+              portal2Height: room.portal2_height || 0
+            }));
+            setRooms(formattedRooms);
+          }
+        }
+
+        // Обновляем параметры здания если они есть в objectParams
+        if (objectParams.building_floors) {
+          setBuildingParams((prev) => ({
+            ...prev,
+            floors: objectParams.building_floors,
+            purpose: objectParams.building_purpose || prev.purpose,
+            energyClass: objectParams.energy_class || prev.energyClass,
+            hasBasement: objectParams.has_basement || prev.hasBasement,
+            hasAttic: objectParams.has_attic || prev.hasAttic,
+            heatingType: objectParams.heating_type || prev.heatingType
           }));
-          setRooms(formattedRooms);
         }
+      } catch (error) {
+        console.error('Ошибка загрузки данных:', error);
+        notification.error({
+          message: 'Ошибка загрузки',
+          description: 'Не удалось загрузить данные объекта'
+        });
+      } finally {
+        setLoading(false);
       }
+    },
+    [projectId] // eslint-disable-line react-hooks/exhaustive-deps
+  );
 
-      // Обновляем параметры здания если они есть в objectParams
-      if (objectParams.building_floors) {
-        setBuildingParams((prev) => ({
-          ...prev,
-          floors: objectParams.building_floors,
-          purpose: objectParams.building_purpose || prev.purpose,
-          energyClass: objectParams.energy_class || prev.energyClass,
-          hasBasement: objectParams.has_basement || prev.hasBasement,
-          hasAttic: objectParams.has_attic || prev.hasAttic,
-          heatingType: objectParams.heating_type || prev.heatingType
-        }));
-      }
-    } catch (error) {
-      console.error('Ошибка загрузки данных:', error);
-      notification.error({
-        message: 'Ошибка загрузки',
-        description: 'Не удалось загрузить данные объекта'
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const saveObjectParameters = async () => {
+  const saveObjectParameters = useCallback(async () => {
     try {
       setSaving(true);
 
@@ -630,7 +633,7 @@ const ObjectParameters = ({ projectId: propProjectId }) => {
     } finally {
       setSaving(false);
     }
-  };
+  }, [projectId, rooms, buildingParams]);
 
   // Загрузка данных при монтировании компонента
   useEffect(() => {
@@ -648,7 +651,7 @@ const ObjectParameters = ({ projectId: propProjectId }) => {
     } else {
       loadObjectParameters();
     }
-  }, [projectId, propProjectId]);
+  }, [projectId, propProjectId, loadObjectParameters]);
 
   // Автосохранение при изменении данных (с задержкой)
   useEffect(() => {
@@ -660,7 +663,7 @@ const ObjectParameters = ({ projectId: propProjectId }) => {
     }, 3000); // Автосохранение через 3 секунды после изменения
 
     return () => clearTimeout(timeoutId);
-  }, [rooms, buildingParams, constructiveParams, engineeringParams, isAuthenticated]);
+  }, [rooms, buildingParams, constructiveParams, engineeringParams, isAuthenticated, loading, saving]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Функции для обновления данных
   const updateBuildingParam = (key, value) => {
