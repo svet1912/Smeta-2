@@ -10,6 +10,7 @@ const router = express.Router();
 
 // ============ PUBLIC WORKS ROUTES ============
 // Эти маршруты не требуют авторизации
+router.get('/search', catalogController.searchWorks);
 router.get('/', catalogController.getWorks);
 
 // ============ PROTECTED WORKS ROUTES ============

@@ -1,7 +1,9 @@
 import dotenv from 'dotenv';
 import crypto from 'crypto';
+import path from 'path';
 
-dotenv.config();
+// Загружаем .env файл из корневого каталога проекта
+dotenv.config({ path: path.join(process.cwd(), '..', '.env') });
 
 // Генерируем сильные секреты если не заданы
 const generateStrongSecret = () => crypto.randomBytes(64).toString('hex');

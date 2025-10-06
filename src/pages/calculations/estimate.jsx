@@ -97,6 +97,15 @@ const formatNumberWithComma = (number) => {
   return parseFloat(number).toFixed(2).replace('.', ',');
 };
 
+// Простая функция debounce
+const debounce = (func, delay) => {
+  let timeoutId;
+  return (...args) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func.apply(null, args), delay);
+  };
+};
+
 // ==============================|| ХУКИ И УТИЛИТЫ ||============================== //
 
 // ==============================|| МЕМОИЗИРОВАННЫЕ КОМПОНЕНТЫ ||============================== //
@@ -128,11 +137,15 @@ export default function EstimateCalculationPage({ projectId: propProjectId }) {
   const [selectedMaterialToReplace, setSelectedMaterialToReplace] = useState(null);
   const [materialForm] = Form.useForm();
 
-  // Загрузка данных
+  // Состояния для ленивой загрузки
+  const [workOptions, setWorkOptions] = useState([]);
+  const [materialOptions, setMaterialOptions] = useState([]);
+  const [workSearchLoading, setWorkSearchLoading] = useState(false);
+  const [materialSearchLoading, setMaterialSearchLoading] = useState(false);
+
+  // Загрузка смет заказчика при инициализации
   useEffect(() => {
-    loadWorks();
-    loadMaterials();
-    loadAllWorkMaterials();
+    loadCustomerEstimates();
   }, []);
 
   const loadWorks = async () => {
@@ -409,6 +422,66 @@ export default function EstimateCalculationPage({ projectId: propProjectId }) {
   useEffect(() => {
     loadCustomerEstimates();
   }, []);
+
+  // Функции для ленивой загрузки
+  const searchWorks = async (searchQuery) => {
+    if (!searchQuery || searchQuery.length < 2) {
+      setWorkOptions([]);
+      return;
+    }
+
+    setWorkSearchLoading(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/works/search?q=${encodeURIComponent(searchQuery)}&limit=20`);
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && Array.isArray(result.data)) {
+          setWorkOptions(result.data);
+          console.log(`🔍 Найдено работ: ${result.data.length} для запроса "${searchQuery}"`);
+        }
+      }
+    } catch (error) {
+      console.error('Ошибка поиска работ:', error);
+      setWorkOptions([]);
+    } finally {
+      setWorkSearchLoading(false);
+    }
+  };
+
+  const searchMaterials = async (searchQuery) => {
+    if (!searchQuery || searchQuery.length < 2) {
+      setMaterialOptions([]);
+      return;
+    }
+
+    setMaterialSearchLoading(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/materials/search?q=${encodeURIComponent(searchQuery)}&limit=20`);
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && Array.isArray(result.data)) {
+          setMaterialOptions(result.data);
+          console.log(`🔍 Найдено материалов: ${result.data.length} для запроса "${searchQuery}"`);
+        }
+      }
+    } catch (error) {
+      console.error('Ошибка поиска материалов:', error);
+      setMaterialOptions([]);
+    } finally {
+      setMaterialSearchLoading(false);
+    }
+  };
+
+  // Debounced поиск
+  const debouncedSearchWorks = useCallback(
+    debounce(searchWorks, 300),
+    []
+  );
+
+  const debouncedSearchMaterials = useCallback(
+    debounce(searchMaterials, 300),
+    []
+  );
 
   const handleAddItem = () => {
     setSelectedItem(null);
@@ -1689,12 +1762,14 @@ export default function EstimateCalculationPage({ projectId: propProjectId }) {
             rules={[{ required: true, message: 'Выберите работу' }]}
           >
             <Select
-              placeholder="Выберите работу"
+              placeholder="Начните вводить название работы..."
               size="large"
               showSearch
-              filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
+              filterOption={false}
+              loading={workSearchLoading}
+              onSearch={debouncedSearchWorks}
               onChange={async (value) => {
-                const item = works.find((w) => w.id === value);
+                const item = workOptions.find((w) => w.id === value);
                 if (item) {
                   form.setFieldsValue({
                     name: item.name,
@@ -1707,12 +1782,13 @@ export default function EstimateCalculationPage({ projectId: propProjectId }) {
                 }
               }}
             >
-              {works.map((work) => (
+              {workOptions.map((work) => (
                 <Option key={work.id} value={work.id}>
                   <div>
                     <div style={{ fontWeight: 'bold' }}>{work.name}</div>
                     <div style={{ fontSize: '12px', color: '#666' }}>
                       {work.unit_price ? `${work.unit_price} ₽/${work.unit}` : 'цена не указана'}
+                      {work.phase_name && ` • ${work.phase_name}`}
                     </div>
                   </div>
                 </Option>
@@ -1859,14 +1935,12 @@ export default function EstimateCalculationPage({ projectId: propProjectId }) {
                 <Select
                   placeholder="Начните вводить название материала..."
                   showSearch
-                  optionFilterProp="children"
-                  filterOption={(input, option) => {
-                    const materialName = option.key || '';
-                    return materialName.toLowerCase().includes(input.toLowerCase());
-                  }}
+                  filterOption={false}
+                  loading={materialSearchLoading}
+                  onSearch={debouncedSearchMaterials}
                   size="large"
                   onChange={(value) => {
-                    const selectedMaterial = materials.find((m) => m.id === value);
+                    const selectedMaterial = materialOptions.find((m) => m.id === value);
                     if (selectedMaterial) {
                       // Принудительно обновляем поля формы
                       const fieldsToUpdate = {
@@ -1884,7 +1958,7 @@ export default function EstimateCalculationPage({ projectId: propProjectId }) {
                     }
                   }}
                 >
-                  {materials.map((material) => (
+                  {materialOptions.map((material) => (
                     <Option key={material.name} value={material.id}>
                       <div style={{ display: 'flex', flexDirection: 'column', padding: '4px 0' }}>
                         <Text strong style={{ fontSize: '14px', lineHeight: '1.2' }}>

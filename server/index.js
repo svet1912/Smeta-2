@@ -1448,6 +1448,8 @@ app.get('/api/phases', async (req, res) => {
   }
 });
 
+
+
 // Получение всех работ с их связями (с кешированием Redis)
 app.get(
   '/api/works',
@@ -1692,6 +1694,102 @@ app.delete('/api/materials/:id', async (req, res) => {
     res.status(500).json({ error: 'Ошибка удаления материала' });
   }
 });
+
+// ==============================|| SEARCH API ||============================== //
+
+// Быстрый поиск работ для автодополнения
+app.get('/api/works/search', async (req, res) => {
+  try {
+    const { q = '', limit = 20 } = req.query;
+    
+    if (!q || q.length < 2) {
+      return res.json({ success: true, data: [] });
+    }
+
+    console.log(`🔍 Поиск работ: "${q}"`);
+
+    const result = await query(
+      `
+      SELECT 
+        id, 
+        name, 
+        unit, 
+        unit_price,
+        phase_name,
+        stage_name
+      FROM works
+      WHERE name ILIKE $1
+      ORDER BY 
+        CASE 
+          WHEN name ILIKE $2 THEN 1  -- Начинается с поискового запроса
+          ELSE 2                     -- Содержит поисковый запрос
+        END,
+        name
+      LIMIT $3
+    `,
+      [`%${q}%`, `${q}%`, parseInt(limit)]
+    );
+
+    console.log(`✅ Найдено работ: ${result.rows.length}`);
+
+    res.json({
+      success: true,
+      data: result.rows,
+      query: q
+    });
+  } catch (error) {
+    console.error('Ошибка поиска работ:', error);
+    res.status(500).json({ error: 'Ошибка поиска работ' });
+  }
+});
+
+// Быстрый поиск материалов для автодополнения
+app.get('/api/materials/search', async (req, res) => {
+  try {
+    const { q = '', limit = 20 } = req.query;
+    
+    if (!q || q.length < 2) {
+      return res.json({ success: true, data: [] });
+    }
+
+    console.log(`🔍 Поиск материалов: "${q}"`);
+
+    const result = await query(
+      `
+      SELECT 
+        id, 
+        name, 
+        unit, 
+        unit_price,
+        image_url,
+        item_url
+      FROM materials
+      WHERE name ILIKE $1
+      ORDER BY 
+        CASE 
+          WHEN name ILIKE $2 THEN 1  -- Начинается с поискового запроса
+          ELSE 2                     -- Содержит поисковый запрос
+        END,
+        name
+      LIMIT $3
+    `,
+      [`%${q}%`, `${q}%`, parseInt(limit)]
+    );
+
+    console.log(`✅ Найдено материалов: ${result.rows.length}`);
+
+    res.json({
+      success: true,
+      data: result.rows,
+      query: q
+    });
+  } catch (error) {
+    console.error('Ошибка поиска материалов:', error);
+    res.status(500).json({ error: 'Ошибка поиска материалов' });
+  }
+});
+
+// ==============================|| WORKS API ||============================== //
 
 // Создание новой работы
 app.post('/api/works', async (req, res) => {
@@ -2037,66 +2135,87 @@ app.put('/api/auth/profile', authMiddleware, async (req, res) => {
 // ==============================|| OBJECT PARAMETERS API ||============================== //
 
 // 🔹 ШАГ 4 - Object Parameters API
-// Получение параметров объекта по ID проекта (1:1 связь с проектом)
-app.get('/api/projects/:id/object-parameters', authMiddleware, async (req, res) => {
-  try {
-    const { id: projectId } = req.params;
-    const userId = req.user.userId || req.user.id || req.user.sub;
+// Получение параметров объекта по ID проекта (1:1 связь с проектом) - с кэшированием
+app.get('/api/projects/:id/object-parameters', authMiddleware, 
+  withCatalogCache(async (req, res) => {
+    try {
+      const { id: projectId } = req.params;
+      const userId = req.user.userId || req.user.id || req.user.sub;
+      const tenantId = req.user.tenantId;
 
-    console.log(`📋 GET /api/projects/${projectId}/object-parameters [user=${userId}]`);
+      console.log(`📋 GET /api/projects/${projectId}/object-parameters [user=${userId}]`);
 
-    // Проверяем существование проекта и наследуем tenant_id
-    const projectCheck = await query(
-      `
-      SELECT id, tenant_id FROM construction_projects 
-      WHERE id = $1 AND tenant_id = $2
-    `,
-      [projectId, req.user.tenantId]
-    );
+      // Настройки кэша
+      const ttl = Number(process.env.CACHE_TTL_OBJECT_PARAMS || 300); // 5 минут по умолчанию
+      const useCache = process.env.CACHE_ENABLED === 'true';
+      
+      // Уникальный ключ кэша включает tenant и project
+      const key = `object-parameters:project:${projectId}:tenant:${tenantId}`;
 
-    if (projectCheck.rows.length === 0) {
-      console.log(`❌ Проект ${projectId} не найден или не принадлежит тенанту ${req.user.tenantId}`);
-      return res.status(403).json({
-        error: 'Проект не найден или отсутствует доступ',
-        code: 'PROJECT_NOT_ACCESSIBLE'
+      const data = await cacheGetOrSet(
+        key,
+        ttl,
+        async () => {
+          console.log(`🔄 Загрузка параметров объекта проекта ${projectId} из базы данных...`);
+
+          // Проверяем существование проекта и наследуем tenant_id
+          const projectCheck = await query(
+            `
+            SELECT id, tenant_id FROM construction_projects 
+            WHERE id = $1 AND tenant_id = $2
+          `,
+            [projectId, tenantId]
+          );
+
+          if (projectCheck.rows.length === 0) {
+            throw new Error(`Проект ${projectId} не найден или не принадлежит тенанту ${tenantId}`);
+          }
+
+          const projectTenantId = projectCheck.rows[0].tenant_id;
+
+          // Получаем параметры объекта (1:1 связь с проектом)
+          const result = await query(
+            `
+            SELECT 
+              op.*,
+              cp.customer_name as project_name,
+              au.firstname || ' ' || au.lastname as created_by_name
+            FROM object_parameters op
+            LEFT JOIN construction_projects cp ON op.project_id = cp.id
+            LEFT JOIN auth_users au ON op.user_id = au.id
+            WHERE op.project_id = $1 AND op.tenant_id = $2
+          `,
+            [projectId, projectTenantId]
+          );
+
+          if (result.rows.length === 0) {
+            throw new Error(`Параметры объекта для проекта ${projectId} не найдены`);
+          }
+
+          console.log(`✅ Найдены параметры объекта для проекта ${projectId}`);
+          return result.rows[0];
+        },
+        { skip: !useCache }
+      );
+
+      res.json(data);
+    } catch (error) {
+      console.error('❌ Ошибка получения параметров объекта:', error);
+      
+      if (error.message.includes('не найден')) {
+        return res.status(404).json({
+          error: error.message,
+          code: 'OBJECT_PARAMETERS_NOT_FOUND'
+        });
+      }
+      
+      res.status(500).json({
+        error: 'Ошибка сервера',
+        code: 'INTERNAL_SERVER_ERROR'
       });
     }
-
-    const projectTenantId = projectCheck.rows[0].tenant_id;
-
-    // Получаем параметры объекта (1:1 связь с проектом)
-    const result = await query(
-      `
-      SELECT 
-        op.*,
-        cp.customer_name as project_name,
-        au.firstname || ' ' || au.lastname as created_by_name
-      FROM object_parameters op
-      LEFT JOIN construction_projects cp ON op.project_id = cp.id
-      LEFT JOIN auth_users au ON op.user_id = au.id
-      WHERE op.project_id = $1 AND op.tenant_id = $2
-    `,
-      [projectId, projectTenantId]
-    );
-
-    if (result.rows.length === 0) {
-      console.log(`❌ Параметры объекта для проекта ${projectId} не найдены`);
-      return res.status(404).json({
-        error: 'Параметры объекта не найдены',
-        code: 'OBJECT_PARAMETERS_NOT_FOUND'
-      });
-    }
-
-    console.log(`✅ Найдены параметры объекта для проекта ${projectId}`);
-    res.json(result.rows[0]);
-  } catch (error) {
-    console.error('❌ Ошибка получения параметров объекта:', error);
-    res.status(500).json({
-      error: 'Ошибка сервера',
-      code: 'INTERNAL_SERVER_ERROR'
-    });
-  }
-});
+  })
+);
 
 // Создание/обновление параметров объекта (Idempotent Upsert)
 app.put('/api/projects/:id/object-parameters', authMiddleware, async (req, res) => {
@@ -2401,27 +2520,47 @@ app.post('/api/object-parameters/:objectParamsId/rooms', authMiddleware, async (
   }
 });
 
-// Получение помещений для параметров объекта
-app.get('/api/object-parameters/:objectParamsId/rooms', authMiddleware, async (req, res) => {
-  try {
-    const { objectParamsId } = req.params;
-    const tenantId = req.user.tenantId || 'default-tenant';
+// Получение помещений для параметров объекта - с кэшированием
+app.get('/api/object-parameters/:objectParamsId/rooms', authMiddleware,
+  withCatalogCache(async (req, res) => {
+    try {
+      const { objectParamsId } = req.params;
+      const tenantId = req.user.tenantId || 'default-tenant';
 
-    const result = await query(
-      `
-      SELECT * FROM project_rooms 
-      WHERE object_parameters_id = $1 AND tenant_id = $2
-      ORDER BY sort_order, room_name
-    `,
-      [objectParamsId, tenantId]
-    );
+      // Настройки кэша
+      const ttl = Number(process.env.CACHE_TTL_ROOMS || 300); // 5 минут
+      const useCache = process.env.CACHE_ENABLED === 'true';
+      
+      // Уникальный ключ кэша
+      const key = `rooms:object-params:${objectParamsId}:tenant:${tenantId}`;
 
-    res.json(result.rows);
-  } catch (error) {
-    console.error('Ошибка получения помещений:', error);
-    res.status(500).json({ error: 'Ошибка сервера' });
-  }
-});
+      const data = await cacheGetOrSet(
+        key,
+        ttl,
+        async () => {
+          console.log(`🔄 Загрузка помещений для объекта ${objectParamsId} из базы данных...`);
+
+          const result = await query(
+            `
+            SELECT * FROM project_rooms 
+            WHERE object_parameters_id = $1 AND tenant_id = $2
+            ORDER BY sort_order, room_name
+          `,
+            [objectParamsId, tenantId]
+          );
+
+          return result.rows;
+        },
+        { skip: !useCache }
+      );
+
+      res.json(data);
+    } catch (error) {
+      console.error('Ошибка получения помещений:', error);
+      res.status(500).json({ error: 'Ошибка сервера' });
+    }
+  })
+);
 
 // Обновление помещения
 app.put('/api/rooms/:roomId', authMiddleware, async (req, res) => {
@@ -2459,6 +2598,7 @@ app.put('/api/rooms/:roomId', authMiddleware, async (req, res) => {
     } = req.body;
 
     console.log(`🏠 Поля потолка: ceiling_area=${ceilingArea}, ceiling_slopes=${ceilingSlopes}`);
+
 
     const result = await query(
       `
@@ -4716,32 +4856,41 @@ app.get('/api/customer-estimates/:id', authMiddleware, async (req, res) => {
 
     console.log('🔍 Поиск сметы заказчика:', id, 'для тенанта:', tenantId);
 
-    const queryText = `
-      SELECT 
-        ce.*,
-        cp.customer_name as project_customer_name,
-        cp.object_address as project_address,
-        cp.project_name,
-        COUNT(cei.id) as items_count,
-        COALESCE(SUM(cei.total_amount), 0) as calculated_total
-      FROM customer_estimates ce
-      LEFT JOIN construction_projects cp ON ce.project_id = cp.id
-      LEFT JOIN customer_estimate_items cei ON ce.id = cei.estimate_id
-      WHERE ce.id = $1 AND ce.tenant_id = $2
-      GROUP BY ce.id, cp.customer_name, cp.object_address, cp.project_name
-    `;
+    const cacheKey = `customer-estimate:${id}:tenant:${tenantId}`;
+    
+    const result = await cacheGetOrSet(
+      cacheKey,
+      300, // TTL 5 минут
+      async () => {
+        const queryText = `
+          SELECT 
+            ce.*,
+            cp.customer_name as project_customer_name,
+            cp.object_address as project_address,
+            COUNT(cei.id) as items_count,
+            COALESCE(SUM(cei.total_amount), 0) as calculated_total
+          FROM customer_estimates ce
+          LEFT JOIN construction_projects cp ON ce.project_id = cp.id
+          LEFT JOIN customer_estimate_items cei ON ce.id = cei.estimate_id
+          WHERE ce.id = $1 AND ce.tenant_id = $2
+          GROUP BY ce.id, cp.customer_name, cp.object_address
+        `;
 
-    const result = await query(queryText, [id, tenantId]);
+        const queryResult = await query(queryText, [id, tenantId]);
+        return queryResult.rows;
+      }
+    );
 
-    if (result.rows.length === 0) {
+    if (!result || result.length === 0) {
       return res.status(404).json({
         error: 'Смета не найдена',
         code: 'NOT_FOUND'
       });
     }
 
-    console.log('✅ Смета заказчика найдена:', result.rows[0].name);
-    res.json(result.rows[0]);
+    const estimateData = result[0];
+    console.log('✅ Смета заказчика найдена:', estimateData.name);
+    res.json(estimateData);
   } catch (error) {
     console.error('❌ Ошибка получения сметы заказчика:', error);
     res.status(500).json({

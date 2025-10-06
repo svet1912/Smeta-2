@@ -522,6 +522,108 @@ export async function deleteWorkMaterial(req, res) {
   }
 }
 
+/**
+ * Быстрый поиск работ для автодополнения
+ * GET /works/search?q=поисковый_запрос&limit=20
+ */
+export async function searchWorks(req, res) {
+  try {
+    const { q = '', limit = 20 } = req.query;
+    
+    if (!q || q.length < 2) {
+      return res.json({ success: true, data: [] });
+    }
+
+    const result = await queryOptimizer.optimizedQuery(
+      `
+      SELECT 
+        id, 
+        name, 
+        unit, 
+        unit_price,
+        phase_name,
+        stage_name
+      FROM works
+      WHERE name ILIKE $1
+      ORDER BY 
+        CASE 
+          WHEN name ILIKE $2 THEN 1  -- Начинается с поискового запроса
+          ELSE 2                     -- Содержит поисковый запрос
+        END,
+        name
+      LIMIT $3
+    `,
+      [`%${q}%`, `${q}%`, parseInt(limit)],
+      {
+        cacheKey: `works_search_${q}_${limit}`,
+        cacheTTL: 300000 // 5 минут для поисковых запросов
+      }
+    );
+
+    console.log(`🔍 Поиск работ "${q}": найдено ${result.rows.length}`);
+
+    res.json({
+      success: true,
+      data: result.rows,
+      query: q
+    });
+  } catch (error) {
+    console.error('Ошибка поиска работ:', error);
+    res.status(500).json({ error: 'Ошибка сервера' });
+  }
+}
+
+/**
+ * Быстрый поиск материалов для автодополнения
+ * GET /materials/search?q=поисковый_запрос&limit=20
+ */
+export async function searchMaterials(req, res) {
+  try {
+    const { q = '', limit = 20 } = req.query;
+    
+    if (!q || q.length < 2) {
+      return res.json({ success: true, data: [] });
+    }
+
+    const result = await queryOptimizer.optimizedQuery(
+      `
+      SELECT 
+        id, 
+        name, 
+        unit, 
+        unit_price,
+        image_url,
+        item_url
+      FROM materials
+      WHERE name ILIKE $1
+      ORDER BY 
+        CASE 
+          WHEN name ILIKE $2 THEN 1  -- Начинается с поискового запроса
+          ELSE 2                     -- Содержит поисковый запрос
+        END,
+        name
+      LIMIT $3
+    `,
+      [`%${q}%`, `${q}%`, parseInt(limit)],
+      {
+        cacheKey: `materials_search_${q}_${limit}`,
+        cacheTTL: 300000 // 5 минут для поисковых запросов
+      }
+    );
+
+    console.log(`🔍 Поиск материалов "${q}": найдено ${result.rows.length}`);
+
+    res.json({
+      success: true,
+      data: result.rows,
+      query: q
+    });
+  } catch (error) {
+    console.error('Ошибка поиска материалов:', error);
+    res.status(500).json({ error: 'Ошибка сервера' });
+  }
+}
+
 // Экспорт всех контроллеров
 export default {
   getMaterials,
@@ -529,6 +631,8 @@ export default {
   updateMaterial,
   deleteMaterial,
   getWorks,
+  searchWorks,
+  searchMaterials,
   createWork,
   getPhases,
   getWorkMaterials,

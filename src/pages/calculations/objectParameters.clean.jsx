@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Card, Table, Input, Button, notification, Space, Spin } from 'antd';
-import { SaveOutlined, PlusOutlined, DeleteOutlined, LoadingOutlined, SettingOutlined } from '@ant-design/icons';
+import { Card, Table, Input, Button, notification, Space, Spin, message } from 'antd';
+import { SaveOutlined, PlusOutlined, DeleteOutlined, LoadingOutlined, SettingOutlined, ReloadOutlined } from '@ant-design/icons';
 import { getAuthToken } from '../../api/auth';
 
 // CSS стили для скрытия стрелочек у input[type="number"]
@@ -339,6 +339,13 @@ const ObjectParametersNew = ({ projectId = 56 }) => {
           });
 
           if (!response.ok) {
+            if (response.status === 404) {
+              console.warn(`⚠️ Помещение "${room.name}" не найдено в базе данных (ID: ${room.id}). Требуется обновить страницу.`);
+              message.warning(`Помещение "${room.name}" было удалено из базы данных. Обновите страницу для получения актуальных данных.`);
+              // Обновляем страницу автоматически
+              window.location.reload();
+              return;
+            }
             throw new Error(`Ошибка сохранения помещения "${room.name}"`);
           }
 
@@ -426,7 +433,12 @@ const ObjectParametersNew = ({ projectId = 56 }) => {
         });
 
         if (!response.ok) {
-          throw new Error('Ошибка удаления помещения из базы данных');
+          if (response.status === 404) {
+            console.warn(`⚠️ Помещение с ID ${roomId} не найдено в базе данных. Возможно, уже удалено.`);
+            message.info('Помещение уже удалено из базы данных');
+          } else {
+            throw new Error('Ошибка удаления помещения из базы данных');
+          }
         }
 
         console.log('✅ Помещение удалено из БД');
@@ -683,6 +695,16 @@ const ObjectParametersNew = ({ projectId = 56 }) => {
               </Button>
               <Button type="dashed" icon={<PlusOutlined />} onClick={addRoom} size="small">
                 Добавить помещение
+              </Button>
+              <Button
+                type="default"
+                icon={loading ? <LoadingOutlined /> : <ReloadOutlined />}
+                onClick={loadData}
+                size="small"
+                loading={loading}
+                title="Обновить данные с сервера"
+              >
+                {loading ? 'Загрузка...' : 'Обновить'}
               </Button>
             </Space>
           </div>
