@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>API Test для Параметров Объекта</h1>
+    <div id="results"></div>
+    
+    <script>
+        const results = document.getElementById('results');
+        
+        // Функция для получения правильного API URL
+        const getApiBaseUrl = () => {
+            // Автоматическое определение для GitHub Codespaces
+            const currentHost = window.location.hostname;
+            console.log('🔧 Current hostname:', currentHost);
+            
+            if (currentHost.includes('.app.github.dev')) {
+                console.log('🔧 GitHub Codespaces detected, using /api-proxy');
+                return '/api-proxy';
+            }
+            
+            console.log('🔧 Local development, using direct API URL');
+            return 'http://localhost:3001/api';
+        };
+        
+        async function testAPI() {
+            const apiBaseUrl = getApiBaseUrl();
+            console.log('🔧 API Base URL:', apiBaseUrl);
+            
+            // Тест токена
+            const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImVtYWlsIjoia2l5MDI2QHlhbmRleC5ydSIsImZpcnN0bmFtZSI6ItCY0LvRjNGPIiwibGFzdG5hbWUiOiLQmtGD0LfRjNC80LjQvSIsInJvbGUiOiJzdXBlcl9hZG1pbiIsInRlbmFudElkIjoiY2Q1ZmZiMGYtODYxNi00MjI3LWEwNTYtNGY3MjllZDY5MzNjIiwiaWF0IjoxNzU5NzM1MjA1LCJleHAiOjE3NTk4MjE2MDV9.oHO_xou0LFkBRmXW0uYWLZJjJ0uDeWlHxEghHxlY7i4';
+            
+            try {
+                // Тест 1: Загрузка параметров объекта
+                console.log('📤 Тест 1: Загрузка параметров объекта');
+                const response1 = await fetch(`${apiBaseUrl}/projects/56/object-parameters`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                console.log('📡 Ответ 1 статус:', response1.status);
+                if (response1.ok) {
+                    const data1 = await response1.json();
+                    console.log('✅ Параметры объекта загружены:', data1);
+                    results.innerHTML += '<p>✅ Тест 1: Параметры объекта загружены</p>';
+                } else {
+                    console.log('❌ Ошибка загрузки параметров:', response1.status);
+                    results.innerHTML += '<p>❌ Тест 1: Ошибка ' + response1.status + '</p>';
+                }
+                
+                // Тест 2: Загрузка помещений
+                console.log('📤 Тест 2: Загрузка помещений');
+                const response2 = await fetch(`${apiBaseUrl}/object-parameters/29/rooms`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                console.log('📡 Ответ 2 статус:', response2.status);
+                if (response2.ok) {
+                    const data2 = await response2.json();
+                    console.log('✅ Помещения загружены:', data2);
+                    results.innerHTML += '<p>✅ Тест 2: Помещения загружены (' + data2.length + ' шт.)</p>';
+                } else {
+                    console.log('❌ Ошибка загрузки помещений:', response2.status);
+                    results.innerHTML += '<p>❌ Тест 2: Ошибка ' + response2.status + '</p>';
+                }
+                
+            } catch (error) {
+                console.error('❌ Ошибка тестирования:', error);
+                results.innerHTML += '<p>❌ Ошибка: ' + error.message + '</p>';
+            }
+        }
+        
+        // Запуск тестов
+        testAPI();
+    </script>
+</body>
+</html>

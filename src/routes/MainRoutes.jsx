@@ -22,6 +22,7 @@ const ProjectDashboard = Loadable(lazy(() => import('pages/projects/ProjectDashb
 
 // render - calculations
 const CustomerEstimatePage = Loadable(lazy(() => import('pages/calculations/customerEstimate')));
+const ObjectParameters = Loadable(lazy(() => import('pages/calculations/objectParameters.clean')));
 
 // render - admin pages
 const UsersManagement = Loadable(lazy(() => import('pages/admin/UsersManagement')));
@@ -92,6 +93,10 @@ const MainRoutes = {
         {
           path: 'customer-estimate',
           element: <CustomerEstimatePage />
+        },
+        {
+          path: 'object-parameters',
+          element: <ObjectParameters />
         }
       ]
     },

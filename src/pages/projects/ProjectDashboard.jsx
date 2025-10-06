@@ -5,7 +5,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Button, Grid, Stack, Typography, Box, Card, CardContent, Chip, IconButton, Tabs, Tab, Paper } from '@mui/material';
 import AnalyticEcommerce from 'components/cards/statistics/AnalyticEcommerce';
 import CustomerEstimate from './CustomerEstimate';
-import ObjectParameters from '../calculations/objectParameters';
+import ObjectParameters from '../calculations/objectParameters.clean';
 import EstimateCalculation from '../calculations/estimate';
 
 // API
@@ -32,7 +32,7 @@ export default function ProjectDashboard() {
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [tabValue, setTabValue] = useState(3); // Открываем сразу "Смета заказчика"
+  const [tabValue, setTabValue] = useState(0); // Открываем сразу "Параметры объекта" (новый компонент)
 
   // Загрузка данных проекта
   useEffect(() => {

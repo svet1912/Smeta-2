@@ -2306,6 +2306,8 @@ app.post('/api/object-parameters/:objectParamsId/rooms', authMiddleware, async (
       sortOrder,
       perimeter,
       prostenki,
+      ceilingArea,
+      ceilingSlopes,
       doorsCount,
       window1Width,
       window1Height,
@@ -2352,11 +2354,11 @@ app.post('/api/object-parameters/:objectParamsId/rooms', authMiddleware, async (
       `
       INSERT INTO project_rooms (
         object_parameters_id, room_name, area, height, volume, finish_class, purpose, sort_order,
-        perimeter, prostenki, doors_count,
+        perimeter, prostenki, ceiling_area, ceiling_slopes, doors_count,
         window1_width, window1_height, window2_width, window2_height, window3_width, window3_height,
         portal1_width, portal1_height, portal2_width, portal2_height,
         user_id, tenant_id
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25)
       RETURNING *
     `,
       [
@@ -2370,6 +2372,8 @@ app.post('/api/object-parameters/:objectParamsId/rooms', authMiddleware, async (
         sortOrder,
         perimeter,
         prostenki,
+        ceilingArea,
+        ceilingSlopes,
         doorsCount,
         window1Width,
         window1Height,
@@ -2439,6 +2443,8 @@ app.put('/api/rooms/:roomId', authMiddleware, async (req, res) => {
       sortOrder,
       perimeter,
       prostenki,
+      ceilingArea,
+      ceilingSlopes,
       doorsCount,
       window1Width,
       window1Height,
@@ -2452,6 +2458,8 @@ app.put('/api/rooms/:roomId', authMiddleware, async (req, res) => {
       portal2Height
     } = req.body;
 
+    console.log(`🏠 Поля потолка: ceiling_area=${ceilingArea}, ceiling_slopes=${ceilingSlopes}`);
+
     const result = await query(
       `
       UPDATE project_rooms SET
@@ -2464,19 +2472,21 @@ app.put('/api/rooms/:roomId', authMiddleware, async (req, res) => {
         sort_order = $8,
         perimeter = $9,
         prostenki = $10,
-        doors_count = $11,
-        window1_width = $12,
-        window1_height = $13,
-        window2_width = $14,
-        window2_height = $15,
-        window3_width = $16,
-        window3_height = $17,
-        portal1_width = $18,
-        portal1_height = $19,
-        portal2_width = $20,
-        portal2_height = $21,
+        ceiling_area = $11,
+        ceiling_slopes = $12,
+        doors_count = $13,
+        window1_width = $14,
+        window1_height = $15,
+        window2_width = $16,
+        window2_height = $17,
+        window3_width = $18,
+        window3_height = $19,
+        portal1_width = $20,
+        portal1_height = $21,
+        portal2_width = $22,
+        portal2_height = $23,
         updated_at = CURRENT_TIMESTAMP
-      WHERE id = $1 AND tenant_id = $22
+      WHERE id = $1 AND tenant_id = $24
       RETURNING *
       `,
       [
@@ -2490,6 +2500,8 @@ app.put('/api/rooms/:roomId', authMiddleware, async (req, res) => {
         sortOrder,
         perimeter,
         prostenki,
+        ceilingArea,
+        ceilingSlopes,
         doorsCount,
         window1Width,
         window1Height,
