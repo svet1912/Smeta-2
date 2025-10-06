@@ -4757,32 +4757,68 @@ app.post('/api/customer-estimates', authMiddleware, async (req, res) => {
     console.log('📨 POST /api/customer-estimates [' + req.requestId + ']');
     console.log('📨 POST /api/customer-estimates - ' + req.ip);
 
-    const { project_id, customer_name, estimate_name, description, status = 'draft' } = req.body;
+    let { project_id, customer_name, estimate_name, description, status = 'draft' } = req.body;
     const userId = req.user.id;
     const tenantId = req.user.tenantId;
 
     // Валидация обязательных полей
-    if (!project_id || !estimate_name) {
+    if (!estimate_name) {
       return res.status(400).json({
-        error: 'Отсутствуют обязательные поля: project_id, estimate_name',
+        error: 'Отсутствуют обязательные поля: estimate_name',
         code: 'MISSING_REQUIRED_FIELDS'
       });
     }
 
-    // Проверяем, что проект принадлежит текущему тенанту
-    const projectCheck = await query(
-      `
-      SELECT id, tenant_id FROM construction_projects 
-      WHERE id = $1 AND tenant_id = $2
-    `,
-      [project_id, tenantId]
-    );
+    // Если project_id не указан, найдем или создадим проект по умолчанию для тенанта
+    if (!project_id) {
+      console.log('🔍 Поиск проекта по умолчанию для тенанта:', tenantId?.substring(0, 8) + '...');
 
-    if (projectCheck.rows.length === 0) {
-      return res.status(403).json({
-        error: 'Проект не принадлежит текущему тенанту',
-        code: 'FOREIGN_TENANT'
-      });
+      // Пытаемся найти существующий проект по умолчанию для тенанта
+      const defaultProjectCheck = await query(
+        `
+        SELECT id FROM construction_projects 
+        WHERE name = 'Общие сметы заказчика' AND tenant_id = $1
+        LIMIT 1
+      `,
+        [tenantId]
+      );
+
+      if (defaultProjectCheck.rows.length > 0) {
+        project_id = defaultProjectCheck.rows[0].id;
+        console.log('✅ Найден существующий проект по умолчанию:', project_id);
+      } else {
+        // Создаем новый проект по умолчанию для тенанта
+        console.log('🆕 Создаем новый проект по умолчанию для тенанта');
+        const newProject = await query(
+          `
+          INSERT INTO construction_projects 
+          (name, customer_name, contractor_name, contract_number, tenant_id, object_address, status, user_id)
+          VALUES 
+          ('Общие сметы заказчика', 'Различные заказчики', 'Подрядчик', 'ОБЩИЙ-' || EXTRACT(EPOCH FROM NOW())::bigint, $1, 'Различные адреса', 'active', $2)
+          RETURNING id
+        `,
+          [tenantId, userId]
+        );
+
+        project_id = newProject.rows[0].id;
+        console.log('✅ Создан новый проект по умолчанию:', project_id);
+      }
+    } else {
+      // Проверяем, что указанный проект принадлежит текущему тенанту
+      const projectCheck = await query(
+        `
+        SELECT id, tenant_id FROM construction_projects 
+        WHERE id = $1 AND tenant_id = $2
+      `,
+        [project_id, tenantId]
+      );
+
+      if (projectCheck.rows.length === 0) {
+        return res.status(403).json({
+          error: 'Проект не принадлежит текущему тенанту',
+          code: 'FOREIGN_TENANT'
+        });
+      }
     }
 
     // Проверяем уникальность estimate_name в рамках проекта
@@ -5158,6 +5194,101 @@ app.delete('/api/customer-estimates/:estimateId/items/:itemId', authMiddleware, 
   } catch (error) {
     console.error('Ошибка удаления элемента сметы:', error);
     res.status(500).json({ message: 'Ошибка сервера' });
+  }
+});
+
+// Дополнительные эндпоинты для работы с позициями смет заказчика
+// Обновить позицию сметы (простая версия)
+app.put('/api/customer-estimate-items/:itemId', authMiddleware, async (req, res) => {
+  try {
+    const { itemId } = req.params;
+    const tenantId = req.user.tenantId;
+    const { item_type, name, unit, quantity, unit_price, description, total_amount } = req.body;
+
+    console.log('📨 PUT /api/customer-estimate-items/:itemId [' + req.requestId + ']');
+    console.log('Обновление позиции', itemId, 'тенант:', tenantId?.substring(0, 8) + '...');
+
+    // Проверяем, что позиция принадлежит тенанту
+    const ownershipCheck = await query(
+      `
+      SELECT cei.id 
+      FROM customer_estimate_items cei
+      JOIN customer_estimates ce ON cei.estimate_id = ce.id
+      WHERE cei.id = $1 AND ce.tenant_id = $2
+    `,
+      [itemId, tenantId]
+    );
+
+    if (ownershipCheck.rows.length === 0) {
+      return res.status(404).json({
+        error: 'Позиция не найдена или не принадлежит текущему тенанту',
+        code: 'ITEM_NOT_FOUND'
+      });
+    }
+
+    const result = await query(
+      `
+      UPDATE customer_estimate_items 
+      SET item_type = $1, name = $2, unit = $3, quantity = $4, 
+          unit_price = $5, description = $6, total_amount = $7,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE id = $8
+      RETURNING *
+    `,
+      [item_type, name, unit, quantity, unit_price, description, total_amount, itemId]
+    );
+
+    console.log('✅ Позиция успешно обновлена:', result.rows[0].id);
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('❌ Ошибка обновления позиции сметы:', error);
+    res.status(500).json({
+      error: 'Внутренняя ошибка сервера',
+      code: 'INTERNAL_ERROR'
+    });
+  }
+});
+
+// Удалить позицию сметы (простая версия)
+app.delete('/api/customer-estimate-items/:itemId', authMiddleware, async (req, res) => {
+  try {
+    const { itemId } = req.params;
+    const tenantId = req.user.tenantId;
+
+    console.log('📨 DELETE /api/customer-estimate-items/:itemId [' + req.requestId + ']');
+    console.log('Удаление позиции', itemId, 'тенант:', tenantId?.substring(0, 8) + '...');
+
+    // Проверяем, что позиция принадлежит тенанту
+    const ownershipCheck = await query(
+      `
+      SELECT cei.id 
+      FROM customer_estimate_items cei
+      JOIN customer_estimates ce ON cei.estimate_id = ce.id
+      WHERE cei.id = $1 AND ce.tenant_id = $2
+    `,
+      [itemId, tenantId]
+    );
+
+    if (ownershipCheck.rows.length === 0) {
+      return res.status(404).json({
+        error: 'Позиция не найдена или не принадлежит текущему тенанту',
+        code: 'ITEM_NOT_FOUND'
+      });
+    }
+
+    const result = await query('DELETE FROM customer_estimate_items WHERE id = $1 RETURNING *', [itemId]);
+
+    console.log('✅ Позиция успешно удалена:', result.rows[0].id);
+    res.json({
+      message: 'Позиция успешно удалена',
+      deletedItem: result.rows[0]
+    });
+  } catch (error) {
+    console.error('❌ Ошибка удаления позиции сметы:', error);
+    res.status(500).json({
+      error: 'Внутренняя ошибка сервера',
+      code: 'INTERNAL_ERROR'
+    });
   }
 });
 

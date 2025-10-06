@@ -30,7 +30,9 @@ import {
   FileTextOutlined,
   DownloadOutlined,
   SaveOutlined,
-  CopyOutlined
+  CopyOutlined,
+  EyeOutlined,
+  EyeInvisibleOutlined
 } from '@ant-design/icons';
 import { workMaterialsApi } from 'api/workMaterials';
 
@@ -57,6 +59,12 @@ const getApiBaseUrl = () => {
 };
 
 const API_BASE_URL = getApiBaseUrl();
+
+// Получить JWT токен из localStorage
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('authToken');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
 
 // Функция для безопасного вычисления математических выражений
 const safeEvaluate = (expression) => {
@@ -105,6 +113,13 @@ export default function EstimateCalculationPage({ projectId: propProjectId }) {
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
   const [expandedWorks, setExpandedWorks] = useState(new Set());
+
+  // Состояние для управления видимостью колонки изображений
+  const [showImageColumn, setShowImageColumn] = useState(true);
+
+  // Состояния для копирования в смету заказчика
+  const [customerEstimates, setCustomerEstimates] = useState([]);
+  const [selectedCustomerEstimate, setSelectedCustomerEstimate] = useState(null);
 
   // Новые состояния для управления материалами
   const [materialModalVisible, setMaterialModalVisible] = useState(false);
@@ -371,6 +386,29 @@ export default function EstimateCalculationPage({ projectId: propProjectId }) {
       setLoading(false);
     }
   };
+
+  // Загрузка смет заказчика для копирования
+  const loadCustomerEstimates = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/customer-estimates`, {
+        headers: getAuthHeaders()
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const estimates = Array.isArray(data) ? data : data.items || [];
+        setCustomerEstimates(estimates);
+        console.log(`✅ Загружено ${estimates.length} смет заказчика для копирования`);
+      }
+    } catch (error) {
+      console.error('Ошибка загрузки смет заказчика:', error);
+      setCustomerEstimates([]);
+    }
+  };
+
+  // Загружаем сметы заказчика при первой загрузке компонента
+  useEffect(() => {
+    loadCustomerEstimates();
+  }, []);
 
   const handleAddItem = () => {
     setSelectedItem(null);
@@ -824,25 +862,14 @@ export default function EstimateCalculationPage({ projectId: propProjectId }) {
   // Функция копирования блока в смету заказчика
   const handleCopyBlockToCustomer = async (workRecord) => {
     try {
-      // Получаем ID активной сметы заказчика из localStorage
-      const activeEstimateId = localStorage.getItem('activeCustomerEstimateId');
-
-      if (!activeEstimateId) {
-        message.error('Нет активной сметы заказчика. Перейдите во вкладку "Смета заказчика" и создайте или выберите смету.');
+      // Проверяем, выбрана ли смета для копирования
+      if (!selectedCustomerEstimate) {
+        message.error('Выберите смету заказчика, в которую нужно копировать данные');
         return;
       }
 
-      // Получаем информацию об активной смете
-      const estimateResponse = await fetch(`${API_BASE_URL}/customer-estimates/${activeEstimateId}`);
-      if (!estimateResponse.ok) {
-        message.error('Активная смета заказчика не найдена. Обновите смету во вкладке "Смета заказчика".');
-        return;
-      }
-
-      const activeEstimate = await estimateResponse.json();
-
-      // Сразу копируем в активную смету без диалога выбора
-      await performCopy(activeEstimate);
+      // Сразу копируем в выбранную смету
+      await performCopy(selectedCustomerEstimate);
 
       // Функция выполнения копирования
       async function performCopy(targetEstimate) {
@@ -853,17 +880,26 @@ export default function EstimateCalculationPage({ projectId: propProjectId }) {
         let totalCost = 0;
 
         // Получаем текущие элементы сметы заказчика, чтобы определить следующий sort_order
-        const currentItemsResponse = await fetch(`${API_BASE_URL}/customer-estimates/${targetEstimate.id}/items`);
+        const currentItemsResponse = await fetch(`${API_BASE_URL}/customer-estimates/${targetEstimate.id}/items`, {
+          headers: getAuthHeaders()
+        });
         let nextSortOrder = 0;
         if (currentItemsResponse.ok) {
-          const currentItems = await currentItemsResponse.json();
+          const data = await currentItemsResponse.json();
+          const currentItems = Array.isArray(data) ? data : data.items || [];
           // Находим максимальный sort_order среди существующих элементов
           const maxSortOrder = currentItems.length > 0 ? Math.max(...currentItems.map((item) => parseInt(item.sort_order) || 0)) : -1;
           nextSortOrder = maxSortOrder + 1;
+          console.log(`🔢 Текущий maxSortOrder: ${maxSortOrder}, следующий: ${nextSortOrder}`);
         }
 
         // Генерируем уникальный идентификатор блока для связи работы и материалов
-        const blockId = `block_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const timestamp = Date.now();
+        const blockId = `block_${timestamp}_${Math.random().toString(36).substr(2, 9)}`;
+        
+        // Используем timestamp как базу для sort_order, чтобы избежать конфликтов
+        const timestampSortOrder = Math.floor(timestamp / 1000); // Конвертируем в секунды
+        let currentSortOrder = Math.max(nextSortOrder, timestampSortOrder);
 
         // Добавляем саму работу
         const workData = {
@@ -875,30 +911,17 @@ export default function EstimateCalculationPage({ projectId: propProjectId }) {
           unit_price: workRecord.unit_price || 0,
           total_amount: (workRecord.quantity || 1) * (workRecord.unit_price || 0),
           original_unit_price: workRecord.unit_price || 0,
-          sort_order: nextSortOrder
+          sort_order: currentSortOrder
         };
+        
+        console.log(`📝 Копируем работу "${workRecord.name}" с sort_order: ${currentSortOrder}`);
 
         try {
-          const workResponse = await fetch(`${API_BASE_URL}/customer-estimates/${targetEstimate.id}/items`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(workData)
-          });
-
-          if (workResponse.ok) {
-            successCount++;
-            totalCost += workData.total_amount;
-            nextSortOrder++; // Увеличиваем для следующего элемента
-          } else {
-            const errorText = await workResponse.text();
-            console.error('Ошибка добавления работы:', errorText);
-          }
-
-          // Добавляем материалы сразу после работы с тем же blockId
-          for (let i = 0; i < relatedMaterials.length; i++) {
-            const material = relatedMaterials[i];
+          // 🚀 ОПТИМИЗАЦИЯ: Подготавливаем все элементы для параллельной отправки
+          const allItems = [workData]; // Начинаем с работы
+          
+          // Добавляем все материалы в массив
+          relatedMaterials.forEach((material) => {
             const materialData = {
               item_type: 'material',
               reference_id: blockId, // Связываем материал с тем же блоком
@@ -908,23 +931,43 @@ export default function EstimateCalculationPage({ projectId: propProjectId }) {
               unit_price: material.unit_price || 0,
               total_amount: (material.quantity || 1) * (material.unit_price || 0),
               original_unit_price: material.unit_price || 0,
-              sort_order: nextSortOrder + i // Материалы идут сразу после работы
+              sort_order: currentSortOrder // Материалы идут сразу после работы
             };
+            
+            console.log(`🧱 Подготавливаем материал "${material.name}" с sort_order: ${currentSortOrder}`);
+            allItems.push(materialData);
+            currentSortOrder++; // Увеличиваем sort_order для каждого материала
+          });
 
-            const materialResponse = await fetch(`${API_BASE_URL}/customer-estimates/${targetEstimate.id}/items`, {
+          console.log(`🚀 Отправляем ${allItems.length} элементов параллельно...`);
+
+          // 🚀 ПАРАЛЛЕЛЬНАЯ ОТПРАВКА: Отправляем все запросы одновременно
+          const promises = allItems.map((itemData) =>
+            fetch(`${API_BASE_URL}/customer-estimates/${targetEstimate.id}/items`, {
               method: 'POST',
               headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                ...getAuthHeaders()
               },
-              body: JSON.stringify(materialData)
-            });
+              body: JSON.stringify(itemData)
+            })
+          );
 
-            if (materialResponse.ok) {
+          // Ждем завершения всех запросов
+          const responses = await Promise.all(promises);
+
+          // Обрабатываем результаты
+          for (let i = 0; i < responses.length; i++) {
+            const response = responses[i];
+            const itemData = allItems[i];
+            
+            if (response.ok) {
               successCount++;
-              totalCost += materialData.total_amount;
+              totalCost += itemData.total_amount;
+              console.log(`✅ ${itemData.item_type === 'work' ? 'Работа' : 'Материал'} "${itemData.name}" добавлен`);
             } else {
-              const errorText = await materialResponse.text();
-              console.error('Ошибка добавления материала:', errorText);
+              const errorText = await response.text();
+              console.error(`❌ Ошибка добавления ${itemData.item_type === 'work' ? 'работы' : 'материала'}:`, errorText);
             }
           }
 
@@ -1027,6 +1070,41 @@ export default function EstimateCalculationPage({ projectId: propProjectId }) {
         </Col>
       </Row>
 
+      {/* Панель выбора сметы заказчика */}
+      <Card size="small" style={{ marginBottom: 16, backgroundColor: '#f6ffed' }}>
+        <Row gutter={16} align="middle">
+          <Col span={6}>
+            <Text strong style={{ color: '#52c41a' }}>
+              Копирование в смету заказчика:
+            </Text>
+          </Col>
+          <Col span={10}>
+            <Select
+              placeholder="Выберите смету заказчика"
+              style={{ width: '100%' }}
+              value={selectedCustomerEstimate?.id}
+              onChange={(value) => {
+                const estimate = customerEstimates.find((e) => e.id === value);
+                setSelectedCustomerEstimate(estimate);
+              }}
+              allowClear
+              onClear={() => setSelectedCustomerEstimate(null)}
+            >
+              {customerEstimates.map((estimate) => (
+                <Option key={estimate.id} value={estimate.id}>
+                  {estimate.name} ({estimate.customer_name || 'Без названия'})
+                </Option>
+              ))}
+            </Select>
+          </Col>
+          <Col span={8}>
+            <Button size="small" onClick={loadCustomerEstimates} loading={loading}>
+              Обновить список смет
+            </Button>
+          </Col>
+        </Row>
+      </Card>
+
       {/* Кнопки управления */}
       <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Space wrap size="small">
@@ -1049,6 +1127,16 @@ export default function EstimateCalculationPage({ projectId: propProjectId }) {
           <Button icon={<DownloadOutlined />} onClick={handleExportEstimate} size="middle" disabled={estimateItems.length === 0}>
             Экспорт сметы
           </Button>
+          <Tooltip title={showImageColumn ? 'Скрыть колонку изображений' : 'Показать колонку изображений'}>
+            <Button
+              icon={showImageColumn ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+              onClick={() => setShowImageColumn(!showImageColumn)}
+              type={showImageColumn ? 'default' : 'dashed'}
+              size="middle"
+            >
+              {showImageColumn ? 'Скрыть' : 'Показать'} изображения
+            </Button>
+          </Tooltip>
           <Popconfirm
             title="Очистить смету?"
             description="Все позиции будут удалены. Это действие нельзя отменить."
@@ -1061,6 +1149,16 @@ export default function EstimateCalculationPage({ projectId: propProjectId }) {
               Очистить смету
             </Button>
           </Popconfirm>
+          <Tooltip title={showImageColumn ? 'Скрыть колонку изображений' : 'Показать колонку изображений'}>
+            <Button
+              icon={showImageColumn ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+              onClick={() => setShowImageColumn(!showImageColumn)}
+              type={showImageColumn ? 'default' : 'dashed'}
+              size="middle"
+            >
+              {showImageColumn ? 'Скрыть' : 'Показать'} изображения
+            </Button>
+          </Tooltip>
         </Space>
 
         <div style={{ textAlign: 'right' }}>
@@ -1201,69 +1299,74 @@ export default function EstimateCalculationPage({ projectId: propProjectId }) {
               </div>
             )
           },
-          {
-            title: 'Изображение',
-            dataIndex: 'image_url',
-            key: 'image_url',
-            width: 60,
-            align: 'center',
-            render: (imageUrl, record) => {
-              if (record.isMaterial && imageUrl) {
-                return (
-                  <Image
-                    src={imageUrl}
-                    alt={record.name}
-                    width={24}
-                    height={24}
-                    style={{
-                      objectFit: 'cover',
-                      borderRadius: '3px',
-                      border: '1px solid #d9d9d9'
-                    }}
-                    fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMIAAADDCAYAAADQvc6UAAABRWlDQ1BJQ0MgUHJvZmlsZQAAKJFjYGASSSwoyGFhYGDIzSspCnJ3UoiIjFJgf8LAwSDCIMogwMCcmFxc4BgQ4ANUwgCjUcG3awyMIPqyLsis7PPOq3QdDFcvjV3jOD1boQVTPQrgSkktTgbSf4A4LbmgqISBgTEFyFYuLykAsTuAbJEioKOA7DkgdjqEvQHEToKwj4DVhAQ5A9k3gGyB5IxEoBmML4BsnSQk8XQkNtReEOBxcfXxUQg1Mjc0dyHgXNJBSWpFCYh2zi+oLMpMzyhRcASGUqqCZ16yno6CkYGRAQMDKMwhqj/fAIcloxgHQqxAjIHBEugw5sUIsSQpBobtQPdLciLEVJYzMPBHMDBsayhILEqEO4DxG0txmrERhM29nYGBddr//5/DGRjYNRkY/l7////39v///y4Dmn+LgeHANwDrkl1AuO+pmgAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAwqADAAQAAAABAAAAwwAAAAD9b/HnAAAHlklEQVR4Ae3dP3Ik1RnG4W+FgYxN"
-                  />
-                );
-              } else if (record.isWork) {
-                return (
-                  <div
-                    style={{
-                      width: '24px',
-                      height: '24px',
-                      backgroundColor: '#1890ff',
-                      borderRadius: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '10px',
-                      color: 'white',
-                      margin: '0 auto'
-                    }}
-                  >
-                    🔨
-                  </div>
-                );
-              } else {
-                return (
-                  <div
-                    style={{
-                      width: '24px',
-                      height: '24px',
-                      backgroundColor: '#52c41a',
-                      borderRadius: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '10px',
-                      color: 'white',
-                      margin: '0 auto'
-                    }}
-                  >
-                    📦
-                  </div>
-                );
-              }
-            }
-          },
+          // Условно включаем колонку изображения
+          ...(showImageColumn
+            ? [
+                {
+                  title: 'Изображение',
+                  dataIndex: 'image_url',
+                  key: 'image_url',
+                  width: 60,
+                  align: 'center',
+                  render: (imageUrl, record) => {
+                    if (record.isMaterial && imageUrl) {
+                      return (
+                        <Image
+                          src={imageUrl}
+                          alt={record.name}
+                          width={24}
+                          height={24}
+                          style={{
+                            objectFit: 'cover',
+                            borderRadius: '3px',
+                            border: '1px solid #d9d9d9'
+                          }}
+                          fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMIAAADDCAYAAADQvc6UAAABRWlDQ1BJQ0MgUHJvZmlsZQAAKJFjYGASSSwoyGFhYGDIzSspCnJ3UoiIjFJgf8LAwSDCIMogwMCcmFxc4BgQ4ANUwgCjUcG3awyMIPqyLsis7PPOq3QdDFcvjV3jOD1boQVTPQrgSkktTgbSf4A4LbmgqISBgTEFyFYuLykAsTuAbJEioKOA7DkgdjqEvQHEToKwj4DVhAQ5A9k3gGyB5IxEoBmML4BsnSQk8XQkNtReEOBxcfXxUQg1Mjc0dyHgXNJBSWpFCYh2zi+oLMpMzyhRcASGUqqCZ16yno6CkYGRAQMDKMwhqj/fAIcloxgHQqxAjIHBEugw5sUIsSQpBobtQPdLciLEVJYzMPBHMDBsayhILEqEO4DxG0txmrERhM29nYGBddr//5/DGRjYNRkY/l7////39v///y4Dmn+LgeHANwDrkl1AuO+pmgAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAwqADAAQAAAABAAAAwwAAAAD9b/HnAAAHlklEQVR4Ae3dP3Ik1RnG4W+FgYxN"
+                        />
+                      );
+                    } else if (record.isWork) {
+                      return (
+                        <div
+                          style={{
+                            width: '24px',
+                            height: '24px',
+                            backgroundColor: '#1890ff',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '10px',
+                            color: 'white',
+                            margin: '0 auto'
+                          }}
+                        >
+                          🔨
+                        </div>
+                      );
+                    } else {
+                      return (
+                        <div
+                          style={{
+                            width: '24px',
+                            height: '24px',
+                            backgroundColor: '#52c41a',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '10px',
+                            color: 'white',
+                            margin: '0 auto'
+                          }}
+                        >
+                          📦
+                        </div>
+                      );
+                    }
+                  }
+                }
+              ]
+            : []),
           {
             title: 'Ед.изм.',
             dataIndex: 'unit',

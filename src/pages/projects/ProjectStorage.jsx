@@ -319,9 +319,23 @@ export default function ProjectStorage() {
     <Box sx={{ width: '100%' }}>
       {/* Заголовок */}
       <Paper sx={{ p: 3, mb: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-          <ProjectOutlined style={{ fontSize: 24, color: '#1976d2' }} />
-          <Typography variant="h4">Хранилище проектов</Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <ProjectOutlined style={{ fontSize: 24, color: '#1976d2' }} />
+            <Typography variant="h4">Хранилище проектов</Typography>
+          </Box>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => navigate('/app/projects/create-wizard')}
+            sx={{
+              minWidth: 140,
+              height: 40,
+              fontWeight: 600
+            }}
+          >
+            Создать проект
+          </Button>
         </Box>
         <Typography variant="body1" color="text.secondary">
           Управляйте всеми строительными проектами в одном месте. Всего проектов: {projects.length}

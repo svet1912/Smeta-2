@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 // material-ui
 import { Button, Grid, Stack, Typography, Box, Card, CardContent, Chip, IconButton, Tabs, Tab, Paper } from '@mui/material';
 import AnalyticEcommerce from 'components/cards/statistics/AnalyticEcommerce';
-import CustomerEstimate from './CustomerEstimate';
+import CustomerEstimate from '../calculations/customerEstimate';
 import ObjectParameters from '../calculations/objectParameters.clean';
 import EstimateCalculation from '../calculations/estimate';
 
@@ -243,7 +243,7 @@ export default function ProjectDashboard() {
             </Typography>
           </Box>
         )}
-        {tabValue === 3 && <CustomerEstimate projectId={projectId} project={project} />}
+        {tabValue === 3 && <CustomerEstimate />}
         {tabValue === 4 && (
           <Box>
             <Typography variant="h6" gutterBottom>
