@@ -1,0 +1,266 @@
+name: 📊 Neon Database Monitoring & Backup
+
+# Автоматический мониторинг и бэкап Neon PostgreSQL для SMETA360-2
+# Запускается ежедневно в 02:00 UTC и при пуше в main
+
+on:
+  schedule:
+    # Ежедневно в 02:00 UTC (05:00 по Москве)
+    - cron: '0 2 * * *'
+  push:
+    branches: [ main ]
+    paths:
+      - 'server/**'
+      - 'src/api/**'
+      - '.github/workflows/neon-monitoring.yml'
+  workflow_dispatch: # Возможность запуска вручную
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  neon-monitoring:
+    name: 🔍 Neon Database Monitoring
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🟢 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: 🐘 Install PostgreSQL client
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y postgresql-client-15
+
+    - name: 📦 Install Vercel CLI
+      run: npm install -g vercel@latest
+
+    - name: 🔑 Setup Vercel authentication
+      run: |
+        echo "${{ secrets.VERCEL_TOKEN }}" > ~/.vercel-token
+        vercel login --token "${{ secrets.VERCEL_TOKEN }}"
+        vercel link --project=${{ secrets.VERCEL_PROJECT_ID }} --yes
+
+    - name: 🔍 Run Neon monitoring
+      id: monitoring
+      run: |
+        chmod +x ./scripts/monitor-neon.sh
+        ./scripts/monitor-neon.sh > monitoring-output.txt 2>&1
+        
+        # Проверяем статус мониторинга
+        if grep -q "СТАТУС: ВСЕ ОТЛИЧНО" monitoring-output.txt; then
+          echo "status=excellent" >> $GITHUB_OUTPUT
+        elif grep -q "СТАТУС: ХОРОШО" monitoring-output.txt; then
+          echo "status=good" >> $GITHUB_OUTPUT
+        else
+          echo "status=needs_attention" >> $GITHUB_OUTPUT
+        fi
+        
+        # Извлекаем ключевые метрики
+        CONNECTION_TIME=$(grep -o "работает ([0-9]*ms)" monitoring-output.txt | grep -o "[0-9]*" | head -1)
+        SIMPLE_AVG=$(grep -o "SELECT [0-9]*ms" monitoring-output.txt | grep -o "[0-9]*" | head -1)
+        COMPLEX_AVG=$(grep -o "JOIN [0-9]*ms" monitoring-output.txt | grep -o "[0-9]*" | head -1)
+        
+        echo "connection_time=${CONNECTION_TIME:-0}" >> $GITHUB_OUTPUT
+        echo "simple_avg=${SIMPLE_AVG:-0}" >> $GITHUB_OUTPUT
+        echo "complex_avg=${COMPLEX_AVG:-0}" >> $GITHUB_OUTPUT
+
+    - name: 📊 Upload monitoring report
+      uses: actions/upload-artifact@v4
+      with:
+        name: neon-monitoring-report-${{ github.run_number }}
+        path: |
+          monitoring-output.txt
+          neon-monitoring-*.txt
+        retention-days: 30
+
+    - name: 🚨 Alert on performance issues
+      if: steps.monitoring.outputs.status == 'needs_attention'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const issue = await github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: '⚠️ Neon Database Performance Alert',
+            body: `## 🚨 Database Performance Issue Detected
+            
+            **Connection Time:** ${{ steps.monitoring.outputs.connection_time }}ms
+            **Simple Query Avg:** ${{ steps.monitoring.outputs.simple_avg }}ms
+            **Complex Query Avg:** ${{ steps.monitoring.outputs.complex_avg }}ms
+            
+            **Status:** NEEDS ATTENTION
+            
+            Please check the monitoring report and consider:
+            - Increasing Neon Compute Units
+            - Optimizing slow queries
+            - Checking connection pooling
+            - Reviewing database indexes
+            
+            **Action Required:** Review Neon console and optimize performance.
+            
+            **Workflow:** ${{ github.workflow }}
+            **Run:** ${{ github.run_id }}`,
+            labels: ['bug', 'database', 'performance', 'urgent']
+          });
+
+  neon-backup:
+    name: 💾 Neon Database Backup
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: neon-monitoring
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🐘 Install PostgreSQL client
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y postgresql-client-15
+
+    - name: 📦 Install Vercel CLI
+      run: npm install -g vercel@latest
+
+    - name: 🔑 Setup Vercel authentication
+      run: |
+        echo "${{ secrets.VERCEL_TOKEN }}" > ~/.vercel-token
+        vercel login --token "${{ secrets.VERCEL_TOKEN }}"
+        vercel link --project=${{ secrets.VERCEL_PROJECT_ID }} --yes
+
+    - name: 💾 Create Neon backup
+      id: backup
+      run: |
+        chmod +x ./scripts/backup-neon.sh
+        ./scripts/backup-neon.sh > backup-output.txt 2>&1
+        
+        # Проверяем успешность бэкапа
+        if grep -q "БЭКАП ЗАВЕРШЕН УСПЕШНО" backup-output.txt; then
+          echo "status=success" >> $GITHUB_OUTPUT
+        else
+          echo "status=failed" >> $GITHUB_OUTPUT
+        fi
+        
+        # Получаем размер бэкапов
+        BACKUP_SIZE=$(grep -o "Общий размер папки: [0-9.]*[KMGT]" backup-output.txt | grep -o "[0-9.]*[KMGT]" | head -1)
+        echo "backup_size=${BACKUP_SIZE:-unknown}" >> $GITHUB_OUTPUT
+
+    - name: 📤 Upload backup files
+      uses: actions/upload-artifact@v4
+      with:
+        name: neon-backup-${{ github.run_number }}
+        path: |
+          backups/neon/
+          backup-output.txt
+        retention-days: 90
+
+    - name: 🚨 Alert on backup failure
+      if: steps.backup.outputs.status == 'failed'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const issue = await github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: '❌ Neon Database Backup Failed',
+            body: `## 🚨 Database Backup Failure
+            
+            **Status:** FAILED
+            **Size:** ${{ steps.backup.outputs.backup_size }}
+            
+            The automated backup of Neon PostgreSQL database has failed.
+            
+            **Immediate Action Required:**
+            1. Check Neon database connectivity
+            2. Verify Vercel environment variables
+            3. Review backup logs in workflow artifacts
+            4. Run manual backup if needed
+            
+            **Workflow:** ${{ github.workflow }}
+            **Run:** ${{ github.run_id }}
+            
+            This is a critical issue that needs immediate attention.`,
+            labels: ['bug', 'database', 'backup', 'critical']
+          });
+
+  health-summary:
+    name: 📋 Health Summary
+    runs-on: ubuntu-latest
+    needs: [neon-monitoring, neon-backup]
+    if: always()
+    
+    steps:
+    - name: 📋 Create health summary
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const monitoring = '${{ needs.neon-monitoring.result }}';
+          const backup = '${{ needs.neon-backup.result }}';
+          const monitoringStatus = '${{ needs.neon-monitoring.outputs.status }}';
+          
+          let summary = '## 🏥 SMETA360-2 Database Health Summary\n\n';
+          
+          // Monitoring status
+          if (monitoring === 'success') {
+            if (monitoringStatus === 'excellent') {
+              summary += '✅ **Monitoring**: EXCELLENT performance\n';
+            } else if (monitoringStatus === 'good') {
+              summary += '✅ **Monitoring**: GOOD performance\n';
+            } else {
+              summary += '⚠️ **Monitoring**: NEEDS ATTENTION\n';
+            }
+          } else {
+            summary += '❌ **Monitoring**: FAILED\n';
+          }
+          
+          // Backup status
+          if (backup === 'success') {
+            summary += '✅ **Backup**: SUCCESS\n';
+          } else if (backup === 'skipped') {
+            summary += '⏭️ **Backup**: SKIPPED (scheduled only)\n';
+          } else if (backup === 'failure') {
+            summary += '❌ **Backup**: FAILED\n';
+          } else {
+            summary += '➖ **Backup**: NOT RUN\n';
+          }
+          
+          // Performance metrics
+          summary += '\n### 📊 Performance Metrics\n';
+          summary += `- **Connection**: ${{ needs.neon-monitoring.outputs.connection_time }}ms\n`;
+          summary += `- **Simple Queries**: ${{ needs.neon-monitoring.outputs.simple_avg }}ms\n`;
+          summary += `- **Complex Queries**: ${{ needs.neon-monitoring.outputs.complex_avg }}ms\n`;
+          
+          // Recommendations
+          summary += '\n### 💡 Recommendations\n';
+          if (monitoringStatus === 'needs_attention') {
+            summary += '- 🔧 Optimize database performance\n';
+            summary += '- 📈 Consider increasing Neon Compute Units\n';
+            summary += '- 🔍 Review slow queries\n';
+          } else {
+            summary += '- ✅ System operating normally\n';
+            summary += '- 📊 Continue regular monitoring\n';
+          }
+          
+          summary += `\n**Report Time**: ${new Date().toISOString()}\n`;
+          summary += `**Workflow**: ${{ github.workflow }}\n`;
+          summary += `**Run**: ${{ github.run_id }}\n`;
+          
+          console.log(summary);
+          
+          // Создаем комментарий к коммиту если это push
+          if (context.eventName === 'push') {
+            await github.rest.repos.createCommitComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+              body: summary
+            });
+          }

@@ -1,17 +1,11 @@
 {
   "version": 2,
-  "name": "smeta360-2",
   "framework": "vite",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "installCommand": "npm install --legacy-peer-deps",
   "devCommand": "npm run dev",
-  "functions": {
-    "api/**/*.js": {
-      "runtime": "nodejs18.x",
-      "maxDuration": 30
-    }
-  },
+
   "rewrites": [
     {
       "source": "/api/(.*)",
@@ -66,7 +60,7 @@
       ]
     },
     {
-      "source": "/(.*\\.(js|css|png|jpg|jpeg|gif|ico|svg))",
+      "source": "/(.*)\\.(js|css|png|jpg|jpeg|gif|ico|svg)",
       "headers": [
         {
           "key": "Cache-Control",

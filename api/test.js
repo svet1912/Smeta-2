@@ -1,6 +1,6 @@
 /**
- * Vercel API Health Check Endpoint
- * GET /api/health
+ * Vercel API Test Endpoint
+ * GET /api/test
  */
 
 import { Pool } from 'pg';
@@ -11,7 +11,7 @@ const pool = new Pool({
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
   max: 5,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 10000,
+  connectionTimeoutMillis: 10000
 });
 
 export default async function handler(req, res) {
@@ -35,53 +35,36 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Проверяем подключение к базе данных
-    let dbStatus = { connected: false };
-    
-    try {
-      const client = await pool.connect();
-      const result = await client.query('SELECT NOW() as current_time');
-      client.release();
-      
-      dbStatus = {
-        connected: true,
-        server_time: result.rows[0].current_time,
-        pool_total: pool.totalCount,
-        pool_idle: pool.idleCount
-      };
-    } catch (dbError) {
-      console.error('Database connection failed:', dbError);
-      dbStatus = {
-        connected: false,
-        error: dbError.message
-      };
-    }
+    // Тестируем подключение к базе данных
+    const client = await pool.connect();
+    const result = await client.query('SELECT NOW() as current_time, version() as db_version');
+    client.release();
 
     return res.status(200).json({
-      status: 'OK',
-      message: 'SMETA360-2 API работает на Vercel',
+      message: 'API работает!',
+      database_time: result.rows[0].current_time,
+      database_version: result.rows[0].db_version.split(' ')[0],
+      status: 'connected',
       timestamp: new Date().toISOString(),
-      database: dbStatus,
-      environment: process.env.NODE_ENV || 'development',
       platform: 'Vercel Serverless',
       region: process.env.VERCEL_REGION || 'unknown',
-      deployment: {
-        id: process.env.VERCEL_DEPLOYMENT_ID,
-        url: process.env.VERCEL_URL,
-        branch: process.env.VERCEL_GIT_COMMIT_REF,
-        commit: process.env.VERCEL_GIT_COMMIT_SHA?.substring(0, 7)
-      },
-      version: '2.0.0'
+      environment: process.env.NODE_ENV || 'development',
+      pool_stats: {
+        total_connections: pool.totalCount,
+        idle_connections: pool.idleCount,
+        waiting_count: pool.waitingCount
+      }
     });
 
   } catch (error) {
-    console.error('Health check failed:', error);
+    console.error('Database test failed:', error);
     
     return res.status(500).json({
-      status: 'ERROR',
-      message: 'Service unavailable',
-      timestamp: new Date().toISOString(),
+      message: 'Database connection failed',
       error: error.message,
+      status: 'disconnected',
+      timestamp: new Date().toISOString(),
+      platform: 'Vercel Serverless',
       environment: process.env.NODE_ENV || 'development'
     });
   }

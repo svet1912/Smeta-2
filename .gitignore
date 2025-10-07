@@ -7,6 +7,7 @@ node_modules/
 .env.local
 .env.development.local
 .env.test.local
+.env.vercel
 # .env.production - коммитим для Vercel
 # .env.preview - коммитим для Vercel
 
@@ -69,3 +70,4 @@ Thumbs.db
 # SSL certificates (keep ca.pem for reference but ignore others)
 *.pem
 !server/ca.pem
+.vercel

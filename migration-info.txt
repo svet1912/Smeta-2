@@ -1,0 +1,6 @@
+SMETA360-2 Migration: Aiven → Neon
+Date: Tue Oct  7 04:50:12 PM UTC 2025
+Neon Connection: postgresql://neondb_owner:npg_CMY89KcTdztl@ep-blue-voice-agwnve0m-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+Migration Duration: 9s
+Performance: 104ms SELECT, 99ms JOIN
+Status: SUCCESS
