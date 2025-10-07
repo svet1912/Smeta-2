@@ -1,0 +1,17 @@
+# Production Environment Variables
+
+# AWS Configuration
+aws_region = "us-east-1"
+
+# Project Configuration
+project_name = "smeta360"
+domain_name  = "smeta360.com"
+
+# Database Configuration (use AWS Secrets Manager or environment variables)
+# database_password = "REPLACE_WITH_SECURE_PASSWORD"
+
+# Application Configuration  
+# jwt_secret = "REPLACE_WITH_SECURE_JWT_SECRET"
+
+# Monitoring Configuration
+# slack_webhook_url = "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK"

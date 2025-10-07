@@ -1,0 +1,969 @@
+nohup: ignoring input
+[dotenv@17.2.3] injecting env (19) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+[dotenv@17.2.3] injecting env (0) from ../.env -- tip: ⚙️  suppress all logs with { quiet: true }
+🔑 DATABASE_URL загружен: postgres:***@azap001-kiy026-3dfc.j.aivencloud.com:11433/defaultdb?sslmode=require
+🔍 DB META: {
+  host: 'azap001-kiy026-3dfc.j.aivencloud.com',
+  port: '11433',
+  user: 'avnadmin',
+  passwordLength: 24,
+  hasPassword: true,
+  database: 'defaultdb'
+}
+🔧 Aiven Cloud: используем sslmode=prefer
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from ../.env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+🚀 Запуск исправленного сервера...
+🔧 Настроена расширенная CORS политика
+🔧 Инициализация сервера...
+📊 Инициализация базы данных...
+(node:84701) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✅ Подключение к PostgreSQL установлено (ssl: off )
+🐌 МЕДЛЕННЫЙ ЗАПРОС: {
+  text: '\n' +
+    '      CREATE TABLE IF NOT EXISTS auth_users (\n' +
+    '        id SERIAL PRIMARY KEY,\n' +
+    '        email VARCHAR(...',
+  duration: '1209ms',
+  rows: null,
+  params: 'нет'
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS auth_users (\n   ...',
+  duration: '1209ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS user_sessions (\n...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE INDEX IF NOT EXISTS idx_auth_users_e...',
+  duration: '166ms',
+  rows: undefined
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS users (\n        ...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS orders (\n       ...',
+  duration: '166ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS statistics (\n   ...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS work_materials (...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS construction_pro...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS user_roles (\n   ...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS user_role_assign...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS object_parameter...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS project_rooms (\n...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS constructive_ele...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS engineering_syst...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS customer_estimat...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS customer_estimat...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS customer_estimat...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS customer_estimat...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS audit_log (\n    ...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS permissions (\n  ...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS role_permissions...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE construction_projects ADD COLUMN IF NO...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE construction_projects ADD COLUMN IF NO...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE construction_projects ADD COLUMN IF NO...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE auth_users ADD COLUMN IF NOT EXISTS ph...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE auth_users ADD COLUMN IF NOT EXISTS po...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE auth_users ADD COLUMN IF NOT EXISTS lo...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE auth_users ADD COLUMN IF NOT EXISTS bi...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '166ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'CREATE INDEX IF NOT EXISTS idx_construction_projec...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'CREATE INDEX IF NOT EXISTS idx_construction_projec...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE INDEX IF NOT EXISTS idx_auth_users_e...',
+  duration: '327ms',
+  rows: undefined
+}
+✅ Выполнен запрос: {
+  text: 'SELECT COUNT(*) FROM permissions...',
+  duration: '165ms',
+  rows: 1
+}
+✅ Разрешения уже инициализированы
+✅ Выполнен запрос: {
+  text: 'SELECT COUNT(*) FROM auth_users...',
+  duration: '165ms',
+  rows: 1
+}
+✅ Выполнен запрос: { text: 'SELECT COUNT(*) FROM orders...', duration: '164ms', rows: 1 }
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS leads (\n        ...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE INDEX IF NOT EXISTS idx_leads_email_...',
+  duration: '163ms',
+  rows: null
+}
+✅ Таблица leads инициализирована
+✅ База данных инициализирована
+✅ Выполнен запрос: { text: 'SELECT NOW() as current_time...', duration: '164ms', rows: 1 }
+✅ Подключение к базе данных проверено: 2025-10-07T11:31:08.454Z
+🎯 Сервер готов к работе!
+🚀 Сервер запущен на http://localhost:3001
+📊 API доступно по адресу: http://localhost:3001/api/test
+🌐 Внешний доступ через порт: 3001
+📨 GET /api/health [sqshdwky6] (1/10)
+{"level":30,"time":1759836684868,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759836684860-eb640ec34505e","method":"GET","url":"/api/health","query":{},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*"},"remoteAddress":"127.0.0.1","remotePort":57720},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"299","ratelimit-reset":"900","content-type":"application/json; charset=utf-8","content-length":"118","etag":"\"76-ukO0PVkcOsGe7jvGmyOdg78rVoE\""}},"responseTime":6,"msg":"request completed"}
+📨 GET /api/materials [j20pwersp] (1/10)
+📨 GET /api/materials - 127.0.0.1
+🚀 Инициализация Redis клиента...
+✅ Redis подключен
+🎯 Redis готов к работе
+❌ Cache MISS для ключа: materials:q=:p=1:l=3
+🔄 Загрузка данных для ключа: materials:q=:p=1:l=3
+🔄 Загрузка материалов из базы данных...
+✅ Подключение к PostgreSQL установлено (ssl: off )
+🐌 МЕДЛЕННЫЙ ЗАПРОС: {
+  text: '\n' +
+    '          SELECT COALESCE(MAX(updated_at), MAX(created_at)) as last_updated \n' +
+    '          FROM materia...',
+  duration: '1199ms',
+  rows: 1,
+  params: 'нет'
+}
+✅ Выполнен запрос: {
+  text: '\n          SELECT COALESCE(MAX(updated_at), MAX(cr...',
+  duration: '1199ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n          SELECT * FROM materials \n          \n   ...',
+  duration: '171ms',
+  rows: 3
+}
+✅ Выполнен запрос: {
+  text: '\n          SELECT COUNT(*) as total FROM materials...',
+  duration: '168ms',
+  rows: 1
+}
+💾 Cache SET для ключа: materials:q=:p=1:l=3, TTL: 600s
+{"level":30,"time":1759836748868,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759836747311-8830b9c9ac2c3","method":"GET","url":"/api/materials?limit=3","query":{"limit":"3"},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*"},"remoteAddress":"127.0.0.1","remotePort":48772},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"298","ratelimit-reset":"838","cache-control":"public, max-age=300, stale-while-revalidate=60","last-modified":"Wed, 01 Oct 2025 08:16:08 GMT","content-type":"application/json; charset=utf-8","content-length":"1318","etag":"\"526-y+BBIik0+7q0yTP6mh0QMIhQdZE\""}},"responseTime":1556,"msg":"request completed"}
+📨 GET /api/materials [b63jlxtaz] (1/10)
+📨 GET /api/materials - 127.0.0.1
+✅ Cache HIT для ключа: materials:q=:p=1:l=3
+{"level":30,"time":1759836748883,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759836748878-8094b08f9258f","method":"GET","url":"/api/materials?limit=3","query":{"limit":"3"},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*"},"remoteAddress":"127.0.0.1","remotePort":38968},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"297","ratelimit-reset":"836","cache-control":"public, max-age=300, stale-while-revalidate=60","last-modified":"Wed, 01 Oct 2025 08:16:08 GMT","content-type":"application/json; charset=utf-8","content-length":"1318","etag":"\"526-y+BBIik0+7q0yTP6mh0QMIhQdZE\""}},"responseTime":4,"msg":"request completed"}
+📨 GET /api/materials [p18wodx06] (1/10)
+📨 GET /api/materials - 127.0.0.1
+❌ Cache MISS для ключа: materials:q=:p=1:l=1
+🔄 Загрузка данных для ключа: materials:q=:p=1:l=1
+🔄 Загрузка материалов из базы данных...
+✅ Подключение к PostgreSQL установлено (ssl: off )
+🐌 МЕДЛЕННЫЙ ЗАПРОС: {
+  text: '\n' +
+    '          SELECT COALESCE(MAX(updated_at), MAX(created_at)) as last_updated \n' +
+    '          FROM materia...',
+  duration: '1184ms',
+  rows: 1,
+  params: 'нет'
+}
+✅ Выполнен запрос: {
+  text: '\n          SELECT COALESCE(MAX(updated_at), MAX(cr...',
+  duration: '1184ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n          SELECT * FROM materials \n          \n   ...',
+  duration: '168ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n          SELECT COUNT(*) as total FROM materials...',
+  duration: '165ms',
+  rows: 1
+}
+💾 Cache SET для ключа: materials:q=:p=1:l=1, TTL: 600s
+{"level":30,"time":1759836885064,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759836883542-282b5635739e4","method":"GET","url":"/api/materials?limit=1","query":{"limit":"1"},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*"},"remoteAddress":"127.0.0.1","remotePort":59102},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"296","ratelimit-reset":"702","cache-control":"public, max-age=300, stale-while-revalidate=60","last-modified":"Wed, 01 Oct 2025 08:16:08 GMT","content-type":"application/json; charset=utf-8","content-length":"567","etag":"\"237-A4c6bu48sWR+N9bo8MQOu1gykzk\""}},"responseTime":1522,"msg":"request completed"}
+📨 GET /api/works [by6cd1m8v] (1/10)
+📨 GET /api/works - 127.0.0.1
+❌ Cache MISS для ключа: works:q=:p=1:l=1
+🔄 Загрузка данных для ключа: works:q=:p=1:l=1
+🔄 Загрузка работ из базы данных...
+✅ Подключение к PostgreSQL установлено (ssl: off )
+🐌 МЕДЛЕННЫЙ ЗАПРОС: {
+  text: '\n' +
+    '          SELECT COALESCE(MAX(updated_at), MAX(created_at)) as last_updated \n' +
+    '          FROM works_r...',
+  duration: '1186ms',
+  rows: 1,
+  params: 'нет'
+}
+✅ Выполнен запрос: {
+  text: '\n          SELECT COALESCE(MAX(updated_at), MAX(cr...',
+  duration: '1186ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n          SELECT \n            w.*,\n            p....',
+  duration: '192ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n          SELECT COUNT(*) as total \n          FRO...',
+  duration: '165ms',
+  rows: 1
+}
+💾 Cache SET для ключа: works:q=:p=1:l=1, TTL: 600s
+{"level":30,"time":1759836941845,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759836940296-01589afb15d25","method":"GET","url":"/api/works?limit=1","query":{"limit":"1"},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*"},"remoteAddress":"127.0.0.1","remotePort":40644},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"295","ratelimit-reset":"645","cache-control":"public, max-age=300, stale-while-revalidate=60","last-modified":"Wed, 24 Sep 2025 20:49:27 GMT","content-type":"application/json; charset=utf-8","content-length":"520","etag":"\"208-Ab/UgboAOB5IEJdat53WTTd4Rrk\""}},"responseTime":1549,"msg":"request completed"}
+📨 GET /api/materials [c8f2kpb4t] (1/10)
+📨 GET /api/materials - 127.0.0.1
+❌ Cache MISS для ключа: materials:q=:p=1:l=10
+🔄 Загрузка данных для ключа: materials:q=:p=1:l=10
+🔄 Загрузка материалов из базы данных...
+✅ Подключение к PostgreSQL установлено (ssl: off )
+🐌 МЕДЛЕННЫЙ ЗАПРОС: {
+  text: '\n' +
+    '          SELECT COALESCE(MAX(updated_at), MAX(created_at)) as last_updated \n' +
+    '          FROM materia...',
+  duration: '1184ms',
+  rows: 1,
+  params: 'нет'
+}
+✅ Выполнен запрос: {
+  text: '\n          SELECT COALESCE(MAX(updated_at), MAX(cr...',
+  duration: '1184ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n          SELECT * FROM materials \n          \n   ...',
+  duration: '166ms',
+  rows: 10
+}
+✅ Выполнен запрос: {
+  text: '\n          SELECT COUNT(*) as total FROM materials...',
+  duration: '164ms',
+  rows: 1
+}
+💾 Cache SET для ключа: materials:q=:p=1:l=10, TTL: 600s
+{"level":30,"time":1759837038808,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759837037284-3cb59cd62443d","method":"GET","url":"/api/materials?limit=10","query":{"limit":"10"},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*"},"remoteAddress":"127.0.0.1","remotePort":54254},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"294","ratelimit-reset":"548","cache-control":"public, max-age=300, stale-while-revalidate=60","last-modified":"Wed, 01 Oct 2025 08:16:08 GMT","content-type":"application/json; charset=utf-8","content-length":"4827","etag":"\"12db-VUm5SBNzKuFk5IcyuXw0IOY6RKM\""}},"responseTime":1524,"msg":"request completed"}
+📨 GET /api/materials [5nq9ndkgq] (1/10)
+📨 GET /api/materials - 127.0.0.1
+✅ Cache HIT для ключа: materials:q=:p=1:l=10
+{"level":30,"time":1759837038821,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759837038818-18615019d5d","method":"GET","url":"/api/materials?limit=10","query":{"limit":"10"},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*"},"remoteAddress":"127.0.0.1","remotePort":52836},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"293","ratelimit-reset":"547","cache-control":"public, max-age=300, stale-while-revalidate=60","last-modified":"Wed, 01 Oct 2025 08:16:08 GMT","content-type":"application/json; charset=utf-8","content-length":"4827","etag":"\"12db-VUm5SBNzKuFk5IcyuXw0IOY6RKM\""}},"responseTime":3,"msg":"request completed"}
+📨 GET /api/materials [9km6fc1fs] (1/10)
+📨 GET /api/materials - 127.0.0.1
+✅ Cache HIT для ключа: materials:q=:p=1:l=10
+{"level":30,"time":1759837038836,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759837038833-04d916b155d4d","method":"GET","url":"/api/materials?limit=10","query":{"limit":"10"},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*"},"remoteAddress":"127.0.0.1","remotePort":52838},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"292","ratelimit-reset":"547","cache-control":"public, max-age=300, stale-while-revalidate=60","last-modified":"Wed, 01 Oct 2025 08:16:08 GMT","content-type":"application/json; charset=utf-8","content-length":"4827","etag":"\"12db-VUm5SBNzKuFk5IcyuXw0IOY6RKM\""}},"responseTime":3,"msg":"request completed"}
+📨 GET /api/works [jlxm8qipn] (1/10)
+📨 GET /api/works - 127.0.0.1
+❌ Cache MISS для ключа: works:q=:p=1:l=10
+🔄 Загрузка данных для ключа: works:q=:p=1:l=10
+🔄 Загрузка работ из базы данных...
+✅ Выполнен запрос: {
+  text: '\n          SELECT COALESCE(MAX(updated_at), MAX(cr...',
+  duration: '166ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n          SELECT \n            w.*,\n            p....',
+  duration: '168ms',
+  rows: 10
+}
+✅ Выполнен запрос: {
+  text: '\n          SELECT COUNT(*) as total \n          FRO...',
+  duration: '163ms',
+  rows: 1
+}
+💾 Cache SET для ключа: works:q=:p=1:l=10, TTL: 600s
+{"level":30,"time":1759837045030,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759837044526-6c1889c7609e2","method":"GET","url":"/api/works?limit=10","query":{"limit":"10"},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*"},"remoteAddress":"127.0.0.1","remotePort":52844},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"291","ratelimit-reset":"541","cache-control":"public, max-age=300, stale-while-revalidate=60","last-modified":"Wed, 24 Sep 2025 20:49:27 GMT","content-type":"application/json; charset=utf-8","content-length":"5376","etag":"\"1500-A0VSLynmH10yoRcxfX0GPfb5tyA\""}},"responseTime":504,"msg":"request completed"}
+📨 GET /api/works [6jx37gvvm] (1/10)
+📨 GET /api/works - 127.0.0.1
+✅ Cache HIT для ключа: works:q=:p=1:l=10
+{"level":30,"time":1759837045044,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759837045042-792d307758eed","method":"GET","url":"/api/works?limit=10","query":{"limit":"10"},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*"},"remoteAddress":"127.0.0.1","remotePort":52852},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"290","ratelimit-reset":"540","cache-control":"public, max-age=300, stale-while-revalidate=60","last-modified":"Wed, 24 Sep 2025 20:49:27 GMT","content-type":"application/json; charset=utf-8","content-length":"5376","etag":"\"1500-A0VSLynmH10yoRcxfX0GPfb5tyA\""}},"responseTime":2,"msg":"request completed"}
+📨 GET /api/works [tslmydhw4] (1/10)
+📨 GET /api/works - 127.0.0.1
+✅ Cache HIT для ключа: works:q=:p=1:l=10
+{"level":30,"time":1759837045057,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759837045054-28a14f04a60a6","method":"GET","url":"/api/works?limit=10","query":{"limit":"10"},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*"},"remoteAddress":"127.0.0.1","remotePort":52864},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"289","ratelimit-reset":"540","cache-control":"public, max-age=300, stale-while-revalidate=60","last-modified":"Wed, 24 Sep 2025 20:49:27 GMT","content-type":"application/json; charset=utf-8","content-length":"5376","etag":"\"1500-A0VSLynmH10yoRcxfX0GPfb5tyA\""}},"responseTime":3,"msg":"request completed"}
+📨 GET /api/statistics [y1zno7fkg] (1/10)
+📨 GET /api/statistics - 127.0.0.1
+✅ Выполнен запрос: {
+  text: 'SELECT * FROM statistics ORDER BY id...',
+  duration: '165ms',
+  rows: 4
+}
+{"level":30,"time":1759837051599,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759837051431-1c56198db9ffc","method":"GET","url":"/api/statistics","query":{},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*"},"remoteAddress":"127.0.0.1","remotePort":58498},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"288","ratelimit-reset":"534","content-type":"application/json; charset=utf-8","content-length":"762","etag":"\"2fa-l5+B4MKAdwFNS2mDv8NFJHmxoRs\""}},"responseTime":167,"msg":"request completed"}
+📨 GET /api/statistics [uu1stzuvk] (1/10)
+📨 GET /api/statistics - 127.0.0.1
+✅ Выполнен запрос: {
+  text: 'SELECT * FROM statistics ORDER BY id...',
+  duration: '163ms',
+  rows: 4
+}
+{"level":30,"time":1759837051775,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759837051610-106725aeeb73e","method":"GET","url":"/api/statistics","query":{},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*"},"remoteAddress":"127.0.0.1","remotePort":58508},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"287","ratelimit-reset":"534","content-type":"application/json; charset=utf-8","content-length":"762","etag":"\"2fa-l5+B4MKAdwFNS2mDv8NFJHmxoRs\""}},"responseTime":165,"msg":"request completed"}
+📨 GET /api/statistics [1z2w95maj] (1/10)
+📨 GET /api/statistics - 127.0.0.1
+✅ Выполнен запрос: {
+  text: 'SELECT * FROM statistics ORDER BY id...',
+  duration: '163ms',
+  rows: 4
+}
+{"level":30,"time":1759837051955,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759837051790-8b05fd2ad1687","method":"GET","url":"/api/statistics","query":{},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*"},"remoteAddress":"127.0.0.1","remotePort":58522},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"286","ratelimit-reset":"534","content-type":"application/json; charset=utf-8","content-length":"762","etag":"\"2fa-l5+B4MKAdwFNS2mDv8NFJHmxoRs\""}},"responseTime":165,"msg":"request completed"}
+📨 OPTIONS /api/auth/login [2dfp796ip] (1/10)
+{"level":30,"time":1759838231122,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759838231120-20d66f766719","method":"OPTIONS","url":"/api/auth/login","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","accept":"*/*","access-control-request-method":"POST","access-control-request-headers":"content-type","origin":"http://localhost:3000","user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.7339.186 Safari/537.36","sec-fetch-mode":"cors","sec-fetch-site":"same-site","sec-fetch-dest":"empty","referer":"http://localhost:3000/","accept-encoding":"gzip, deflate, br, zstd"},"remoteAddress":"127.0.0.1","remotePort":46918},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","access-control-allow-origin":"http://localhost:3000","vary":"Origin","access-control-allow-credentials":"true","access-control-allow-methods":"GET,POST,PUT,DELETE,OPTIONS","access-control-allow-headers":"Content-Type,Authorization","content-length":"0"}},"responseTime":1,"msg":"request completed"}
+📨 POST /api/auth/login [w2aemf9n6] (1/10)
+📨 POST /api/auth/login - 127.0.0.1
+✅ Подключение к PostgreSQL установлено (ssl: off )
+🐌 МЕДЛЕННЫЙ ЗАПРОС: {
+  text: '\n' +
+    '      SELECT id, email, password_hash, firstname, lastname, company, is_active, email_verified, cre...',
+  duration: '1180ms',
+  rows: 1,
+  params: 'да'
+}
+✅ Выполнен запрос: {
+  text: '\n      SELECT id, email, password_hash, firstname,...',
+  duration: '1180ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: 'UPDATE auth_users SET last_login = NOW() WHERE id ...',
+  duration: '166ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n        SELECT ur.name as role_name\n        FROM ...',
+  duration: '166ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n        SELECT tenant_id FROM user_tenants \n     ...',
+  duration: '165ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n        INSERT INTO user_sessions (user_id, token...',
+  duration: '166ms',
+  rows: 1
+}
+{"level":30,"time":1759838233138,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759838231126-35d379e2091ad","method":"POST","url":"/api/auth/login","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","content-length":"52","sec-ch-ua-platform":"\"Windows\"","user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.7339.186 Safari/537.36","sec-ch-ua":"\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"HeadlessChrome\";v=\"140\"","content-type":"application/json","sec-ch-ua-mobile":"?0","accept-language":"en-US","accept":"*/*","origin":"http://localhost:3000","sec-fetch-site":"same-site","sec-fetch-mode":"cors","sec-fetch-dest":"empty","referer":"http://localhost:3000/","accept-encoding":"gzip, deflate, br, zstd"},"remoteAddress":"127.0.0.1","remotePort":46918},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","access-control-allow-origin":"http://localhost:3000","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"299","ratelimit-reset":"900","content-type":"application/json; charset=utf-8","content-length":"601","etag":"\"259-BBmaHZ5oZUheUXM+qKotGQVUH4Y\""}},"responseTime":2012,"msg":"request completed"}
+📨 OPTIONS /api/auth/login [k918i23ih] (1/10)
+{"level":30,"time":1759838355251,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759838355247-86861246a90bd","method":"OPTIONS","url":"/api/auth/login","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","accept":"*/*","access-control-request-method":"POST","access-control-request-headers":"content-type","origin":"http://localhost:3000","user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.7339.186 Safari/537.36","sec-fetch-mode":"cors","sec-fetch-site":"same-site","sec-fetch-dest":"empty","referer":"http://localhost:3000/","accept-encoding":"gzip, deflate, br, zstd"},"remoteAddress":"127.0.0.1","remotePort":56936},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","access-control-allow-origin":"http://localhost:3000","vary":"Origin","access-control-allow-credentials":"true","access-control-allow-methods":"GET,POST,PUT,DELETE,OPTIONS","access-control-allow-headers":"Content-Type,Authorization","content-length":"0"}},"responseTime":4,"msg":"request completed"}
+📨 POST /api/auth/login [xc164924v] (1/10)
+📨 POST /api/auth/login - 127.0.0.1
+✅ Подключение к PostgreSQL установлено (ssl: off )
+🐌 МЕДЛЕННЫЙ ЗАПРОС: {
+  text: '\n' +
+    '      SELECT id, email, password_hash, firstname, lastname, company, is_active, email_verified, cre...',
+  duration: '1205ms',
+  rows: 1,
+  params: 'да'
+}
+✅ Выполнен запрос: {
+  text: '\n      SELECT id, email, password_hash, firstname,...',
+  duration: '1205ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: 'UPDATE auth_users SET last_login = NOW() WHERE id ...',
+  duration: '167ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n        SELECT ur.name as role_name\n        FROM ...',
+  duration: '196ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n        SELECT tenant_id FROM user_tenants \n     ...',
+  duration: '165ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n        INSERT INTO user_sessions (user_id, token...',
+  duration: '167ms',
+  rows: 1
+}
+{"level":30,"time":1759838357282,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759838355255-e20c7713029eb","method":"POST","url":"/api/auth/login","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","content-length":"52","sec-ch-ua-platform":"\"Windows\"","user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.7339.186 Safari/537.36","sec-ch-ua":"\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"HeadlessChrome\";v=\"140\"","content-type":"application/json","sec-ch-ua-mobile":"?0","accept-language":"en-US","accept":"*/*","origin":"http://localhost:3000","sec-fetch-site":"same-site","sec-fetch-mode":"cors","sec-fetch-dest":"empty","referer":"http://localhost:3000/","accept-encoding":"gzip, deflate, br, zstd"},"remoteAddress":"127.0.0.1","remotePort":56936},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","access-control-allow-origin":"http://localhost:3000","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"298","ratelimit-reset":"776","content-type":"application/json; charset=utf-8","content-length":"601","etag":"\"259-GCTe4Tr6VOa7ebuuA7N6VXWv9Ao\""}},"responseTime":2027,"msg":"request completed"}
+📨 POST /api/auth/login [paa4j4se5] (1/10)
+⚠️ CORS blocked origin: https://localhost:3000
+📨 POST /api/auth/login - 127.0.0.1
+✅ Подключение к PostgreSQL установлено (ssl: off )
+🐌 МЕДЛЕННЫЙ ЗАПРОС: {
+  text: '\n' +
+    '      SELECT id, email, password_hash, firstname, lastname, company, is_active, email_verified, cre...',
+  duration: '1191ms',
+  rows: 1,
+  params: 'да'
+}
+✅ Выполнен запрос: {
+  text: '\n      SELECT id, email, password_hash, firstname,...',
+  duration: '1191ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: 'UPDATE auth_users SET last_login = NOW() WHERE id ...',
+  duration: '164ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n        SELECT ur.name as role_name\n        FROM ...',
+  duration: '166ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n        SELECT tenant_id FROM user_tenants \n     ...',
+  duration: '165ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n        INSERT INTO user_sessions (user_id, token...',
+  duration: '168ms',
+  rows: 1
+}
+{"level":30,"time":1759838464160,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759838462176-70aef642db55c","method":"POST","url":"/api/auth/login","query":{},"params":{},"headers":{"accept":"*/*","host":"localhost:3001","user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","accept-encoding":"gzip, deflate, br, zstd","accept-language":"ru-RU, ru; q=0.9, en-US; q=0.8, en; q=0.7","authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImVtYWlsIjoia2l5MDI2QHlhbmRleC5ydSIsImZpcnN0bmFtZSI6ItCY0LvRjNGPIiwibGFzdG5hbWUiOiLQmtGD0LfRjNC80LjQvSIsInJvbGUiOiJzdXBlcl9hZG1pbiIsInRlbmFudElkIjoiY2Q1ZmZiMGYtODYxNi00MjI3LWEwNTYtNGY3MjllZDY5MzNjIiwiaWF0IjoxNzU5ODMzMTg1LCJleHAiOjE3NTk5MTk1ODV9.i-G-s6UBvCrb0Dc8oiZXyioC0WKWL1oCsrCxIeWcQzA","origin":"https://localhost:3000","referer":"https://ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev/login","x-request-id":"98fd6c0238ac29c726cec02c88ad1adc","x-real-ip":"10.241.0.36","x-forwarded-port":"443","x-forwarded-scheme":"https","x-original-uri":"/api-proxy/auth/login","x-scheme":"https","sec-ch-ua-platform":"\"Windows\"","sec-ch-ua":"\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"","dnt":"1","sec-ch-ua-mobile":"?0","sec-fetch-site":"same-origin","sec-fetch-mode":"cors","sec-fetch-dest":"empty","priority":"u=1, i","x-original-proto":"https","x-forwarded-proto":"https","x-forwarded-host":"ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev","x-forwarded-for":"216.227.168.38","proxy-connection":"Keep-Alive","content-type":"application/json","content-length":"52","connection":"close"},"remoteAddress":"127.0.0.1","remotePort":37060},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","access-control-allow-origin":"https://localhost:3000","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"297","ratelimit-reset":"669","content-type":"application/json; charset=utf-8","content-length":"601","etag":"\"259-wSurLY8TAwQaZcglq1dZNiy1QIs\""}},"responseTime":1984,"msg":"request completed"}
+📨 GET /api/statistics [gvks9ca1s] (1/10)
+📨 GET /api/statistics - 127.0.0.1
+📨 GET /api/orders [ltpu9qwvb] (2/10)
+📨 GET /api/orders - 127.0.0.1
+✅ Выполнен запрос: {
+  text: 'SELECT * FROM statistics ORDER BY id...',
+  duration: '164ms',
+  rows: 4
+}
+{"level":30,"time":1759838469244,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759838469075-31e86e728aea1","method":"GET","url":"/api/statistics","query":{},"params":{},"headers":{"accept":"application/json, text/plain, */*","host":"localhost:3001","user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","accept-encoding":"gzip, deflate, br, zstd","accept-language":"ru-RU, ru; q=0.9, en-US; q=0.8, en; q=0.7","if-none-match":"\"2fa-l5+B4MKAdwFNS2mDv8NFJHmxoRs\"","referer":"https://ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev/app/dashboard/default","x-request-id":"055da4a9b90dc4663183c53e4ce81e02","x-real-ip":"10.241.0.36","x-forwarded-port":"443","x-forwarded-scheme":"https","x-original-uri":"/api-proxy/statistics","x-scheme":"https","sec-ch-ua-platform":"\"Windows\"","sec-ch-ua":"\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"","dnt":"1","sec-ch-ua-mobile":"?0","sec-fetch-site":"same-origin","sec-fetch-mode":"cors","sec-fetch-dest":"empty","priority":"u=1, i","x-original-proto":"https","x-forwarded-proto":"https","x-forwarded-host":"ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev","x-forwarded-for":"216.227.168.38","proxy-connection":"Keep-Alive","connection":"close"},"remoteAddress":"127.0.0.1","remotePort":47454},"res":{"statusCode":304,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"296","ratelimit-reset":"663","etag":"\"2fa-l5+B4MKAdwFNS2mDv8NFJHmxoRs\""}},"responseTime":169,"msg":"request completed"}
+✅ Подключение к PostgreSQL установлено (ssl: off )
+🐌 МЕДЛЕННЫЙ ЗАПРОС: {
+  text: '\n' +
+    '      SELECT * FROM orders \n' +
+    '      ORDER BY created_at DESC \n' +
+    '      LIMIT 10\n' +
+    '    ...',
+  duration: '1185ms',
+  rows: 8,
+  params: 'нет'
+}
+✅ Выполнен запрос: {
+  text: '\n      SELECT * FROM orders \n      ORDER BY create...',
+  duration: '1185ms',
+  rows: 8
+}
+{"level":30,"time":1759838470266,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759838469079-2968890769573","method":"GET","url":"/api/orders","query":{},"params":{},"headers":{"accept":"application/json, text/plain, */*","host":"localhost:3001","user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","accept-encoding":"gzip, deflate, br, zstd","accept-language":"ru-RU, ru; q=0.9, en-US; q=0.8, en; q=0.7","if-none-match":"\"57c-522mim8TXSxH6RfrQEQaGZBfPhE\"","referer":"https://ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev/app/dashboard/default","x-request-id":"4921950d4ca7d8633f9cc6cc39f72dc9","x-real-ip":"10.241.0.36","x-forwarded-port":"443","x-forwarded-scheme":"https","x-original-uri":"/api-proxy/orders","x-scheme":"https","sec-ch-ua-platform":"\"Windows\"","sec-ch-ua":"\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"","dnt":"1","sec-ch-ua-mobile":"?0","sec-fetch-site":"same-origin","sec-fetch-mode":"cors","sec-fetch-dest":"empty","priority":"u=1, i","x-original-proto":"https","x-forwarded-proto":"https","x-forwarded-host":"ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev","x-forwarded-for":"216.227.168.38","proxy-connection":"Keep-Alive","connection":"close"},"remoteAddress":"127.0.0.1","remotePort":47464},"res":{"statusCode":304,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"295","ratelimit-reset":"663","etag":"\"57c-522mim8TXSxH6RfrQEQaGZBfPhE\""}},"responseTime":1187,"msg":"request completed"}
+📨 GET /api/orders [uylwjha4a] (1/10)
+📨 GET /api/orders - 127.0.0.1
+✅ Выполнен запрос: {
+  text: '\n      SELECT * FROM orders \n      ORDER BY create...',
+  duration: '163ms',
+  rows: 8
+}
+{"level":30,"time":1759838472344,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759838472177-17436fc401e91","method":"GET","url":"/api/orders","query":{},"params":{},"headers":{"accept":"application/json, text/plain, */*","host":"localhost:3001","user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","accept-encoding":"gzip, deflate, br, zstd","accept-language":"ru-RU, ru; q=0.9, en-US; q=0.8, en; q=0.7","if-none-match":"\"57c-522mim8TXSxH6RfrQEQaGZBfPhE\"","referer":"https://ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev/app/dashboard/default","x-request-id":"bafdd1828887054ffc9f113615cfd020","x-real-ip":"10.241.0.36","x-forwarded-port":"443","x-forwarded-scheme":"https","x-original-uri":"/api-proxy/orders","x-scheme":"https","sec-ch-ua-platform":"\"Windows\"","sec-ch-ua":"\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"","dnt":"1","sec-ch-ua-mobile":"?0","sec-fetch-site":"same-origin","sec-fetch-mode":"cors","sec-fetch-dest":"empty","priority":"u=1, i","x-original-proto":"https","x-forwarded-proto":"https","x-forwarded-host":"ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev","x-forwarded-for":"216.227.168.38","proxy-connection":"Keep-Alive","connection":"close"},"remoteAddress":"127.0.0.1","remotePort":47476},"res":{"statusCode":304,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"294","ratelimit-reset":"659","etag":"\"57c-522mim8TXSxH6RfrQEQaGZBfPhE\""}},"responseTime":166,"msg":"request completed"}
+📨 GET /api/users [o6al0bfu5] (1/10)
+📨 GET /api/users - 127.0.0.1
+📨 GET /api/roles [01d8il66k] (2/10)
+📨 GET /api/roles - 127.0.0.1
+✅ Выполнен запрос: { text: 'SET app.user_id = 6...', duration: '164ms', rows: null }
+✅ Выполнен запрос: { text: 'SET app.user_id = 6...', duration: '163ms', rows: null }
+✅ Выполнен запрос: {
+  text: "SET app.tenant_id = 'cd5ffb0f-8616-4227-a056-4f729...",
+  duration: '164ms',
+  rows: null
+}
+🔐 Auth: user=6, tenant=cd5ffb0f, role=super_admin, path=/api/users
+🔥 USING NEW API ENDPOINT WITH ROLES ARRAY
+✅ Выполнен запрос: {
+  text: "SET app.tenant_id = 'cd5ffb0f-8616-4227-a056-4f729...",
+  duration: '163ms',
+  rows: null
+}
+🔐 Auth: user=6, tenant=cd5ffb0f, role=super_admin, path=/api/roles
+✅ Выполнен запрос: {
+  text: '\n      SELECT \n        au.id,\n        au.email,\n  ...',
+  duration: '165ms',
+  rows: 11
+}
+✅ Выполнен запрос: {
+  text: '\n      SELECT ur.*, \n             COUNT(ura.user_i...',
+  duration: '165ms',
+  rows: 5
+}
+{"level":30,"time":1759838488796,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759838488294-0dd2ae679f7e8","method":"GET","url":"/api/roles","query":{},"params":{},"headers":{"accept":"*/*","host":"localhost:3001","user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","accept-encoding":"gzip, deflate, br, zstd","accept-language":"ru-RU, ru; q=0.9, en-US; q=0.8, en; q=0.7","authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImVtYWlsIjoia2l5MDI2QHlhbmRleC5ydSIsImZpcnN0bmFtZSI6ItCY0LvRjNGPIiwibGFzdG5hbWUiOiLQmtGD0LfRjNC80LjQvSIsInJvbGUiOiJzdXBlcl9hZG1pbiIsInRlbmFudElkIjoiY2Q1ZmZiMGYtODYxNi00MjI3LWEwNTYtNGY3MjllZDY5MzNjIiwiaWF0IjoxNzU5ODM4NDYzLCJleHAiOjE3NTk5MjQ4NjN9.whRyK2GRfI78efyW9ieBQok3V9b9nsaBLBUsvClYAto","referer":"https://ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev/app/admin/users","x-request-id":"b0decc4926d9ebf86e9703b34535ca4e","x-real-ip":"10.241.0.36","x-forwarded-port":"443","x-forwarded-scheme":"https","x-original-uri":"/api-proxy/roles","x-scheme":"https","sec-ch-ua-platform":"\"Windows\"","sec-ch-ua":"\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"","dnt":"1","sec-ch-ua-mobile":"?0","sec-fetch-site":"same-origin","sec-fetch-mode":"cors","sec-fetch-dest":"empty","priority":"u=1, i","x-original-proto":"https","x-forwarded-proto":"https","x-forwarded-host":"ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev","x-forwarded-for":"216.227.168.38","proxy-connection":"Keep-Alive","connection":"close"},"remoteAddress":"127.0.0.1","remotePort":45248},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"292","ratelimit-reset":"643","content-type":"application/json; charset=utf-8","etag":"\"533-V7I4vbdG2nZdbE7LSD7nQL7Ncus\"","content-encoding":"br"}},"responseTime":502,"msg":"request completed"}
+✅ Выполнен запрос: {
+  text: '\n        SELECT ur.id, ur.name, ur.description, ur...',
+  duration: '165ms',
+  rows: 0
+}
+✅ Выполнен запрос: {
+  text: '\n        SELECT ur.id, ur.name, ur.description, ur...',
+  duration: '164ms',
+  rows: 0
+}
+✅ Выполнен запрос: {
+  text: '\n        SELECT ur.id, ur.name, ur.description, ur...',
+  duration: '164ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n        SELECT ur.id, ur.name, ur.description, ur...',
+  duration: '163ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n        SELECT ur.id, ur.name, ur.description, ur...',
+  duration: '164ms',
+  rows: 0
+}
+✅ Выполнен запрос: {
+  text: '\n        SELECT ur.id, ur.name, ur.description, ur...',
+  duration: '164ms',
+  rows: 0
+}
+✅ Выполнен запрос: {
+  text: '\n        SELECT ur.id, ur.name, ur.description, ur...',
+  duration: '164ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n        SELECT ur.id, ur.name, ur.description, ur...',
+  duration: '164ms',
+  rows: 0
+}
+✅ Выполнен запрос: {
+  text: '\n        SELECT ur.id, ur.name, ur.description, ur...',
+  duration: '165ms',
+  rows: 0
+}
+✅ Выполнен запрос: {
+  text: '\n        SELECT ur.id, ur.name, ur.description, ur...',
+  duration: '164ms',
+  rows: 0
+}
+✅ Выполнен запрос: {
+  text: '\n        SELECT ur.id, ur.name, ur.description, ur...',
+  duration: '164ms',
+  rows: 0
+}
+{"level":30,"time":1759838490588,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759838488275-3e582705e7ccf","method":"GET","url":"/api/users","query":{},"params":{},"headers":{"accept":"*/*","host":"localhost:3001","user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","accept-encoding":"gzip, deflate, br, zstd","accept-language":"ru-RU, ru; q=0.9, en-US; q=0.8, en; q=0.7","authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImVtYWlsIjoia2l5MDI2QHlhbmRleC5ydSIsImZpcnN0bmFtZSI6ItCY0LvRjNGPIiwibGFzdG5hbWUiOiLQmtGD0LfRjNC80LjQvSIsInJvbGUiOiJzdXBlcl9hZG1pbiIsInRlbmFudElkIjoiY2Q1ZmZiMGYtODYxNi00MjI3LWEwNTYtNGY3MjllZDY5MzNjIiwiaWF0IjoxNzU5ODM4NDYzLCJleHAiOjE3NTk5MjQ4NjN9.whRyK2GRfI78efyW9ieBQok3V9b9nsaBLBUsvClYAto","referer":"https://ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev/app/admin/users","x-request-id":"11732cd9b74d304cd22dd7b9fc2f5ed1","x-real-ip":"10.241.0.36","x-forwarded-port":"443","x-forwarded-scheme":"https","x-original-uri":"/api-proxy/users","x-scheme":"https","sec-ch-ua-platform":"\"Windows\"","sec-ch-ua":"\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"","dnt":"1","sec-ch-ua-mobile":"?0","sec-fetch-site":"same-origin","sec-fetch-mode":"cors","sec-fetch-dest":"empty","priority":"u=1, i","x-original-proto":"https","x-forwarded-proto":"https","x-forwarded-host":"ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev","x-forwarded-for":"216.227.168.38","proxy-connection":"Keep-Alive","connection":"close"},"remoteAddress":"127.0.0.1","remotePort":45236},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"293","ratelimit-reset":"643","content-type":"application/json; charset=utf-8","etag":"\"eba-1DYsqQnw79Xfcu6GBCVmLMayQzo\"","content-encoding":"br"}},"responseTime":2313,"msg":"request completed"}
+📨 GET /api/phases [211ze16ed] (1/10)
+📨 GET /api/phases - 127.0.0.1
+📨 GET /api/materials [yy97uobbp] (2/10)
+📨 GET /api/materials - 127.0.0.1
+❌ Cache MISS для ключа: materials:q=:p=1:l=2000
+🔄 Загрузка данных для ключа: materials:q=:p=1:l=2000
+🔄 Загрузка материалов из базы данных...
+📨 GET /api/works [8y3lgpliu] (3/10)
+📨 GET /api/works - 127.0.0.1
+❌ Cache MISS для ключа: works:q=:p=1:l=2000
+🔄 Загрузка данных для ключа: works:q=:p=1:l=2000
+🔄 Загрузка работ из базы данных...
+✅ Выполнен запрос: {
+  text: '\n          SELECT COALESCE(MAX(updated_at), MAX(cr...',
+  duration: '172ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: 'SELECT * FROM phases ORDER BY sort_order, id...',
+  duration: '491ms',
+  rows: 540
+}
+{"level":30,"time":1759838495598,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759838495091-e8eab9d6ac50d","method":"GET","url":"/api/phases?limit=2000&offset=0","query":{"limit":"2000","offset":"0"},"params":{},"headers":{"accept":"*/*","host":"localhost:3001","user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","accept-encoding":"gzip, deflate, br, zstd","accept-language":"ru-RU, ru; q=0.9, en-US; q=0.8, en; q=0.7","referer":"https://ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev/app/directories/works","x-request-id":"5b37d5cc8864705ddb78049de17a5b0e","x-real-ip":"10.241.0.36","x-forwarded-port":"443","x-forwarded-scheme":"https","x-original-uri":"/api-proxy/phases?limit=2000&offset=0","x-scheme":"https","sec-ch-ua-platform":"\"Windows\"","sec-ch-ua":"\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"","dnt":"1","sec-ch-ua-mobile":"?0","sec-fetch-site":"same-origin","sec-fetch-mode":"cors","sec-fetch-dest":"empty","priority":"u=1, i","x-original-proto":"https","x-forwarded-proto":"https","x-forwarded-host":"ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev","x-forwarded-for":"216.227.168.38","proxy-connection":"Keep-Alive","connection":"close"},"remoteAddress":"127.0.0.1","remotePort":36946},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"291","ratelimit-reset":"637","content-type":"application/json; charset=utf-8","etag":"\"10231-uDSz6o+7aPnNrY2ngpvhV8Fm5/o\"","content-encoding":"br"}},"responseTime":507,"msg":"request completed"}
+✅ Подключение к PostgreSQL установлено (ssl: off )
+🐌 МЕДЛЕННЫЙ ЗАПРОС: {
+  text: '\n' +
+    '          SELECT * FROM materials \n' +
+    '          \n' +
+    '          ORDER BY name \n' +
+    '          LIMIT $1 OFFSET $2...',
+  duration: '989ms',
+  rows: 1448,
+  params: 'да'
+}
+✅ Выполнен запрос: {
+  text: '\n          SELECT * FROM materials \n          \n   ...',
+  duration: '989ms',
+  rows: 1448
+}
+🐌 МЕДЛЕННЫЙ ЗАПРОС: {
+  text: '\n' +
+    '          SELECT COALESCE(MAX(updated_at), MAX(created_at)) as last_updated \n' +
+    '          FROM works_r...',
+  duration: '1186ms',
+  rows: 1,
+  params: 'нет'
+}
+✅ Выполнен запрос: {
+  text: '\n          SELECT COALESCE(MAX(updated_at), MAX(cr...',
+  duration: '1186ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n          SELECT COUNT(*) as total FROM materials...',
+  duration: '164ms',
+  rows: 1
+}
+💾 Cache SET для ключа: materials:q=:p=1:l=2000, TTL: 600s
+{"level":30,"time":1759838496475,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759838495101-f25effc47e204","method":"GET","url":"/api/materials?limit=2000&offset=0","query":{"limit":"2000","offset":"0"},"params":{},"headers":{"accept":"*/*","host":"localhost:3001","user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","accept-encoding":"gzip, deflate, br, zstd","accept-language":"ru-RU, ru; q=0.9, en-US; q=0.8, en; q=0.7","referer":"https://ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev/app/directories/works","x-request-id":"7a03c98c760246f5ff14f7c85d7772ab","x-real-ip":"10.241.0.36","x-forwarded-port":"443","x-forwarded-scheme":"https","x-original-uri":"/api-proxy/materials?limit=2000&offset=0","x-scheme":"https","sec-ch-ua-platform":"\"Windows\"","sec-ch-ua":"\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"","dnt":"1","sec-ch-ua-mobile":"?0","sec-fetch-site":"same-origin","sec-fetch-mode":"cors","sec-fetch-dest":"empty","priority":"u=1, i","x-original-proto":"https","x-forwarded-proto":"https","x-forwarded-host":"ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev","x-forwarded-for":"216.227.168.38","proxy-connection":"Keep-Alive","connection":"close"},"remoteAddress":"127.0.0.1","remotePort":36950},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"290","ratelimit-reset":"637","cache-control":"public, max-age=300, stale-while-revalidate=60","last-modified":"Wed, 01 Oct 2025 08:16:08 GMT","content-type":"application/json; charset=utf-8","etag":"\"a4e61-+mjin7V9MqHnanMwQrQ5eh/Mmr0\"","content-encoding":"br"}},"responseTime":1374,"msg":"request completed"}
+🐌 МЕДЛЕННЫЙ ЗАПРОС: {
+  text: '\n' +
+    '          SELECT \n' +
+    '            w.*,\n' +
+    '            p.name as phase_name,\n' +
+    '            s.name as stage_na...',
+  duration: '673ms',
+  rows: 540,
+  params: 'да'
+}
+✅ Выполнен запрос: {
+  text: '\n          SELECT \n            w.*,\n            p....',
+  duration: '673ms',
+  rows: 540
+}
+✅ Выполнен запрос: {
+  text: '\n          SELECT COUNT(*) as total \n          FRO...',
+  duration: '165ms',
+  rows: 1
+}
+💾 Cache SET для ключа: works:q=:p=1:l=2000, TTL: 600s
+{"level":30,"time":1759838497150,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759838495110-8f7a808577e78","method":"GET","url":"/api/works?limit=2000&offset=0","query":{"limit":"2000","offset":"0"},"params":{},"headers":{"accept":"*/*","host":"localhost:3001","user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","accept-encoding":"gzip, deflate, br, zstd","accept-language":"ru-RU, ru; q=0.9, en-US; q=0.8, en; q=0.7","referer":"https://ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev/app/directories/works","x-request-id":"9d3245d21dabdbcccd425136a6132b32","x-real-ip":"10.241.0.36","x-forwarded-port":"443","x-forwarded-scheme":"https","x-original-uri":"/api-proxy/works?limit=2000&offset=0","x-scheme":"https","sec-ch-ua-platform":"\"Windows\"","sec-ch-ua":"\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"","dnt":"1","sec-ch-ua-mobile":"?0","sec-fetch-site":"same-origin","sec-fetch-mode":"cors","sec-fetch-dest":"empty","priority":"u=1, i","x-original-proto":"https","x-forwarded-proto":"https","x-forwarded-host":"ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev","x-forwarded-for":"216.227.168.38","proxy-connection":"Keep-Alive","connection":"close"},"remoteAddress":"127.0.0.1","remotePort":36966},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"289","ratelimit-reset":"637","cache-control":"public, max-age=300, stale-while-revalidate=60","last-modified":"Wed, 24 Sep 2025 20:49:27 GMT","content-type":"application/json; charset=utf-8","etag":"\"3ec78-29k6pzwHxu2KmiTc464vr5vAaoU\"","content-encoding":"br"}},"responseTime":2040,"msg":"request completed"}
+📨 GET /api/phases [p7mupv3wx] (1/10)
+📨 GET /api/phases - 127.0.0.1
+✅ Выполнен запрос: {
+  text: 'SELECT * FROM phases ORDER BY sort_order, id...',
+  duration: '491ms',
+  rows: 540
+}
+{"level":30,"time":1759838501012,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759838500516-3c12140043756","method":"GET","url":"/api/phases?limit=2000&offset=0","query":{"limit":"2000","offset":"0"},"params":{},"headers":{"accept":"*/*","host":"localhost:3001","user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","accept-encoding":"gzip, deflate, br, zstd","accept-language":"ru-RU, ru; q=0.9, en-US; q=0.8, en; q=0.7","if-none-match":"\"10231-uDSz6o+7aPnNrY2ngpvhV8Fm5/o\"","referer":"https://ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev/app/directories/works","x-request-id":"950e0a410df2ce1730a404e0d963b01c","x-real-ip":"10.241.0.36","x-forwarded-port":"443","x-forwarded-scheme":"https","x-original-uri":"/api-proxy/phases?limit=2000&offset=0","x-scheme":"https","sec-ch-ua-platform":"\"Windows\"","sec-ch-ua":"\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"","dnt":"1","sec-ch-ua-mobile":"?0","sec-fetch-site":"same-origin","sec-fetch-mode":"cors","sec-fetch-dest":"empty","priority":"u=1, i","x-original-proto":"https","x-forwarded-proto":"https","x-forwarded-host":"ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev","x-forwarded-for":"216.227.168.38","proxy-connection":"Keep-Alive","connection":"close"},"remoteAddress":"127.0.0.1","remotePort":34096},"res":{"statusCode":304,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"288","ratelimit-reset":"631","etag":"\"10231-uDSz6o+7aPnNrY2ngpvhV8Fm5/o\""}},"responseTime":496,"msg":"request completed"}
+📨 GET /api/phases [om25lr06x] (1/10)
+📨 GET /api/phases - 127.0.0.1
+✅ Выполнен запрос: {
+  text: 'SELECT * FROM phases ORDER BY sort_order, id...',
+  duration: '492ms',
+  rows: 540
+}
+{"level":30,"time":1759838503638,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759838503138-ef73faf8cf2e3","method":"GET","url":"/api/phases?limit=2000&offset=0","query":{"limit":"2000","offset":"0"},"params":{},"headers":{"accept":"*/*","host":"localhost:3001","user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","accept-encoding":"gzip, deflate, br, zstd","accept-language":"ru-RU, ru; q=0.9, en-US; q=0.8, en; q=0.7","if-none-match":"\"10231-uDSz6o+7aPnNrY2ngpvhV8Fm5/o\"","referer":"https://ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev/app/directories/works","x-request-id":"b7dfc924af33d6cc35b1a6c2fd1d0fe7","x-real-ip":"10.241.0.36","x-forwarded-port":"443","x-forwarded-scheme":"https","x-original-uri":"/api-proxy/phases?limit=2000&offset=0","x-scheme":"https","sec-ch-ua-platform":"\"Windows\"","sec-ch-ua":"\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"","dnt":"1","sec-ch-ua-mobile":"?0","sec-fetch-site":"same-origin","sec-fetch-mode":"cors","sec-fetch-dest":"empty","priority":"u=1, i","x-original-proto":"https","x-forwarded-proto":"https","x-forwarded-host":"ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev","x-forwarded-for":"216.227.168.38","proxy-connection":"Keep-Alive","connection":"close"},"remoteAddress":"127.0.0.1","remotePort":34104},"res":{"statusCode":304,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"287","ratelimit-reset":"629","etag":"\"10231-uDSz6o+7aPnNrY2ngpvhV8Fm5/o\""}},"responseTime":500,"msg":"request completed"}
+📨 GET /api/projects [wg17a05a2] (1/10)
+📨 GET /api/projects - 127.0.0.1
+✅ Выполнен запрос: { text: 'SET app.user_id = 6...', duration: '167ms', rows: null }
+✅ Выполнен запрос: {
+  text: "SET app.tenant_id = 'cd5ffb0f-8616-4227-a056-4f729...",
+  duration: '164ms',
+  rows: null
+}
+🔐 Auth: user=6, tenant=cd5ffb0f, role=super_admin, path=/api/projects
+📋 Запрос проектов для тенанта: cd5ffb0f...
+✅ Выполнен запрос: {
+  text: '\n      SELECT COUNT(*) as total\n      FROM constru...',
+  duration: '166ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n      SELECT \n        cp.id,\n        cp.customer_...',
+  duration: '167ms',
+  rows: 2
+}
+📊 Найдено проектов: 2/2 (offset: 0, limit: 20)
+{"level":30,"time":1759838507286,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759838506616-df919176facd1","method":"GET","url":"/api/projects","query":{},"params":{},"headers":{"accept":"*/*","host":"localhost:3001","user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","accept-encoding":"gzip, deflate, br, zstd","accept-language":"ru-RU, ru; q=0.9, en-US; q=0.8, en; q=0.7","authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImVtYWlsIjoia2l5MDI2QHlhbmRleC5ydSIsImZpcnN0bmFtZSI6ItCY0LvRjNGPIiwibGFzdG5hbWUiOiLQmtGD0LfRjNC80LjQvSIsInJvbGUiOiJzdXBlcl9hZG1pbiIsInRlbmFudElkIjoiY2Q1ZmZiMGYtODYxNi00MjI3LWEwNTYtNGY3MjllZDY5MzNjIiwiaWF0IjoxNzU5ODM4NDYzLCJleHAiOjE3NTk5MjQ4NjN9.whRyK2GRfI78efyW9ieBQok3V9b9nsaBLBUsvClYAto","referer":"https://ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev/app/projects/storage","x-request-id":"e4e812b8901af8b18433cbc61b2fa767","x-real-ip":"10.241.0.36","x-forwarded-port":"443","x-forwarded-scheme":"https","x-original-uri":"/api-proxy/projects","x-scheme":"https","sec-ch-ua-platform":"\"Windows\"","sec-ch-ua":"\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"","dnt":"1","sec-ch-ua-mobile":"?0","sec-fetch-site":"same-origin","sec-fetch-mode":"cors","sec-fetch-dest":"empty","priority":"u=1, i","x-original-proto":"https","x-forwarded-proto":"https","x-forwarded-host":"ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev","x-forwarded-for":"216.227.168.38","proxy-connection":"Keep-Alive","content-type":"application/json","content-length":"0","connection":"close"},"remoteAddress":"127.0.0.1","remotePort":34108},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"286","ratelimit-reset":"625","content-type":"application/json; charset=utf-8","content-length":"896","etag":"\"380-Cka2xF7t3fZWt+JJ/Ea9vrrrsZo\""}},"responseTime":670,"msg":"request completed"}
+📨 GET /api/projects/56 [qiv8xxjzb] (1/10)
+📨 GET /api/projects/56 - 127.0.0.1
+✅ Выполнен запрос: { text: 'SET app.user_id = 6...', duration: '165ms', rows: null }
+✅ Выполнен запрос: {
+  text: "SET app.tenant_id = 'cd5ffb0f-8616-4227-a056-4f729...",
+  duration: '163ms',
+  rows: null
+}
+🔐 Auth: user=6, tenant=cd5ffb0f, role=super_admin, path=/api/projects/56
+✅ Выполнен запрос: {
+  text: '\n      SELECT \n        cp.id,\n        cp.customer_...',
+  duration: '165ms',
+  rows: 1
+}
+{"level":30,"time":1759838510458,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759838509959-703d6e2662ca4","method":"GET","url":"/api/projects/56","query":{},"params":{},"headers":{"accept":"*/*","host":"localhost:3001","user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","accept-encoding":"gzip, deflate, br, zstd","accept-language":"ru-RU, ru; q=0.9, en-US; q=0.8, en; q=0.7","authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImVtYWlsIjoia2l5MDI2QHlhbmRleC5ydSIsImZpcnN0bmFtZSI6ItCY0LvRjNGPIiwibGFzdG5hbWUiOiLQmtGD0LfRjNC80LjQvSIsInJvbGUiOiJzdXBlcl9hZG1pbiIsInRlbmFudElkIjoiY2Q1ZmZiMGYtODYxNi00MjI3LWEwNTYtNGY3MjllZDY5MzNjIiwiaWF0IjoxNzU5ODM4NDYzLCJleHAiOjE3NTk5MjQ4NjN9.whRyK2GRfI78efyW9ieBQok3V9b9nsaBLBUsvClYAto","referer":"https://ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev/app/projects/56","x-request-id":"3dbeebcabe50d2acb975b25d0359efa5","x-real-ip":"10.241.0.36","x-forwarded-port":"443","x-forwarded-scheme":"https","x-original-uri":"/api-proxy/projects/56","x-scheme":"https","sec-ch-ua-platform":"\"Windows\"","sec-ch-ua":"\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"","dnt":"1","sec-ch-ua-mobile":"?0","sec-fetch-site":"same-origin","sec-fetch-mode":"cors","sec-fetch-dest":"empty","priority":"u=1, i","x-original-proto":"https","x-forwarded-proto":"https","x-forwarded-host":"ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev","x-forwarded-for":"216.227.168.38","proxy-connection":"Keep-Alive","content-type":"application/json","content-length":"0","connection":"close"},"remoteAddress":"127.0.0.1","remotePort":42926},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"285","ratelimit-reset":"622","content-type":"application/json; charset=utf-8","content-length":"413","etag":"\"19d-G25coTfHRmQcRbn/Ad0mhdPmUjw\""}},"responseTime":498,"msg":"request completed"}
+📨 GET /api/projects/56/object-parameters [p73a0qgj7] (1/10)
+📨 GET /api/projects/56/object-parameters - 127.0.0.1
+✅ Выполнен запрос: { text: 'SET app.user_id = 6...', duration: '163ms', rows: null }
+✅ Выполнен запрос: {
+  text: "SET app.tenant_id = 'cd5ffb0f-8616-4227-a056-4f729...",
+  duration: '164ms',
+  rows: null
+}
+🔐 Auth: user=6, tenant=cd5ffb0f, role=super_admin, path=/api/projects/56/object-parameters
+📋 GET /api/projects/56/object-parameters [user=6]
+❌ Cache MISS для ключа: object-parameters:project:56:tenant:cd5ffb0f-8616-4227-a056-4f729ed6933c
+🔄 Загрузка данных для ключа: object-parameters:project:56:tenant:cd5ffb0f-8616-4227-a056-4f729ed6933c
+🔄 Загрузка параметров объекта проекта 56 из базы данных...
+✅ Выполнен запрос: {
+  text: '\n            SELECT id, tenant_id FROM constructio...',
+  duration: '164ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n            SELECT \n              op.*,\n         ...',
+  duration: '166ms',
+  rows: 1
+}
+✅ Найдены параметры объекта для проекта 56
+💾 Cache SET для ключа: object-parameters:project:56:tenant:cd5ffb0f-8616-4227-a056-4f729ed6933c, TTL: 300s
+{"level":30,"time":1759838511601,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759838510933-f9dea0759c3e1","method":"GET","url":"/api/projects/56/object-parameters","query":{},"params":{},"headers":{"accept":"*/*","host":"localhost:3001","user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","accept-encoding":"gzip, deflate, br, zstd","accept-language":"ru-RU, ru; q=0.9, en-US; q=0.8, en; q=0.7","authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImVtYWlsIjoia2l5MDI2QHlhbmRleC5ydSIsImZpcnN0bmFtZSI6ItCY0LvRjNGPIiwibGFzdG5hbWUiOiLQmtGD0LfRjNC80LjQvSIsInJvbGUiOiJzdXBlcl9hZG1pbiIsInRlbmFudElkIjoiY2Q1ZmZiMGYtODYxNi00MjI3LWEwNTYtNGY3MjllZDY5MzNjIiwiaWF0IjoxNzU5ODM4NDYzLCJleHAiOjE3NTk5MjQ4NjN9.whRyK2GRfI78efyW9ieBQok3V9b9nsaBLBUsvClYAto","if-none-match":"\"283-3wbZ32qfPJ4mO9ZcJ5G1WcleCCU\"","referer":"https://ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev/app/projects/56","x-request-id":"b0cfae82fd13d1c777dc90505619ce86","x-real-ip":"10.241.0.36","x-forwarded-port":"443","x-forwarded-scheme":"https","x-original-uri":"/api-proxy/projects/56/object-parameters","x-scheme":"https","sec-ch-ua-platform":"\"Windows\"","sec-ch-ua":"\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"","dnt":"1","sec-ch-ua-mobile":"?0","sec-fetch-site":"same-origin","sec-fetch-mode":"cors","sec-fetch-dest":"empty","priority":"u=1, i","x-original-proto":"https","x-forwarded-proto":"https","x-forwarded-host":"ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev","x-forwarded-for":"216.227.168.38","proxy-connection":"Keep-Alive","content-type":"application/json","content-length":"0","connection":"close"},"remoteAddress":"127.0.0.1","remotePort":42938},"res":{"statusCode":304,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"284","ratelimit-reset":"621","cache-control":"public, max-age=300, stale-while-revalidate=60","etag":"\"283-3wbZ32qfPJ4mO9ZcJ5G1WcleCCU\""}},"responseTime":668,"msg":"request completed"}
+📨 GET /api/object-parameters/29/rooms [54pjhbz2t] (1/10)
+📨 GET /api/object-parameters/29/rooms - 127.0.0.1
+✅ Выполнен запрос: { text: 'SET app.user_id = 6...', duration: '164ms', rows: null }
+✅ Выполнен запрос: {
+  text: "SET app.tenant_id = 'cd5ffb0f-8616-4227-a056-4f729...",
+  duration: '168ms',
+  rows: null
+}
+🔐 Auth: user=6, tenant=cd5ffb0f, role=super_admin, path=/api/object-parameters/29/rooms
+❌ Cache MISS для ключа: rooms:object-params:29:tenant:cd5ffb0f-8616-4227-a056-4f729ed6933c
+🔄 Загрузка данных для ключа: rooms:object-params:29:tenant:cd5ffb0f-8616-4227-a056-4f729ed6933c
+🔄 Загрузка помещений для объекта 29 из базы данных...
+✅ Выполнен запрос: {
+  text: '\n            SELECT * FROM project_rooms \n        ...',
+  duration: '166ms',
+  rows: 1
+}
+💾 Cache SET для ключа: rooms:object-params:29:tenant:cd5ffb0f-8616-4227-a056-4f729ed6933c, TTL: 300s
+{"level":30,"time":1759838512485,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759838511980-1ea3b3860247e","method":"GET","url":"/api/object-parameters/29/rooms","query":{},"params":{},"headers":{"accept":"*/*","host":"localhost:3001","user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","accept-encoding":"gzip, deflate, br, zstd","accept-language":"ru-RU, ru; q=0.9, en-US; q=0.8, en; q=0.7","authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImVtYWlsIjoia2l5MDI2QHlhbmRleC5ydSIsImZpcnN0bmFtZSI6ItCY0LvRjNGPIiwibGFzdG5hbWUiOiLQmtGD0LfRjNC80LjQvSIsInJvbGUiOiJzdXBlcl9hZG1pbiIsInRlbmFudElkIjoiY2Q1ZmZiMGYtODYxNi00MjI3LWEwNTYtNGY3MjllZDY5MzNjIiwiaWF0IjoxNzU5ODM4NDYzLCJleHAiOjE3NTk5MjQ4NjN9.whRyK2GRfI78efyW9ieBQok3V9b9nsaBLBUsvClYAto","if-none-match":"\"291-WgrdapvhfAH2QpPkERbUwgIuN40\"","referer":"https://ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev/app/projects/56","x-request-id":"7961f5c0d2381842cd497b26cd14427a","x-real-ip":"10.241.0.36","x-forwarded-port":"443","x-forwarded-scheme":"https","x-original-uri":"/api-proxy/object-parameters/29/rooms","x-scheme":"https","sec-ch-ua-platform":"\"Windows\"","sec-ch-ua":"\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"","dnt":"1","sec-ch-ua-mobile":"?0","sec-fetch-site":"same-origin","sec-fetch-mode":"cors","sec-fetch-dest":"empty","priority":"u=1, i","x-original-proto":"https","x-forwarded-proto":"https","x-forwarded-host":"ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev","x-forwarded-for":"216.227.168.38","proxy-connection":"Keep-Alive","content-type":"application/json","content-length":"0","connection":"close"},"remoteAddress":"127.0.0.1","remotePort":42944},"res":{"statusCode":304,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"283","ratelimit-reset":"620","cache-control":"public, max-age=300, stale-while-revalidate=60","etag":"\"291-WgrdapvhfAH2QpPkERbUwgIuN40\""}},"responseTime":505,"msg":"request completed"}
+📨 GET /api/test [08xyx3f83] (1/10)
+📨 GET /api/test - 127.0.0.1
+✅ Выполнен запрос: { text: 'SELECT NOW() as current_time...', duration: '164ms', rows: 1 }
+{"level":30,"time":1759838539878,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759838539711-b76d375015922","method":"GET","url":"/api/test","query":{},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*"},"remoteAddress":"127.0.0.1","remotePort":41270},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"282","ratelimit-reset":"592","content-type":"application/json; charset=utf-8","content-length":"99","etag":"\"63-9inPhGLR8hCucYGhICMH6E2uyxY\""}},"responseTime":166,"msg":"request completed"}
+📨 GET /api/health [nzxo26ict] (1/10)
+{"level":30,"time":1759838829412,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759838829411-c6235bb7d20c2","method":"GET","url":"/api/health","query":{},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*"},"remoteAddress":"127.0.0.1","remotePort":44186},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"281","ratelimit-reset":"302","content-type":"application/json; charset=utf-8","content-length":"118","etag":"\"76-WLts+MGq88CSuNQgx2snzWtA9F8\""}},"responseTime":1,"msg":"request completed"}
+📨 POST /api/auth/login [lo4ixa8yf] (1/10)
+📨 POST /api/auth/login - 127.0.0.1
+{"level":30,"time":1759838836457,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759838836455-5d5ec802c9d8c","method":"POST","url":"/api/auth/login","query":{},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*","content-type":"application/json","content-length":"39"},"remoteAddress":"127.0.0.1","remotePort":44200},"res":{"statusCode":400,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"280","ratelimit-reset":"295","content-type":"application/json; charset=utf-8","content-length":"102","etag":"\"66-/m1NM6tZkdMFi+lWY+obV4sJIv4\""}},"responseTime":2,"msg":"request completed"}
+📨 POST /api/auth/login [7ynqf1ki6] (1/10)
+📨 POST /api/auth/login - 127.0.0.1
+✅ Подключение к PostgreSQL установлено (ssl: off )
+🐌 МЕДЛЕННЫЙ ЗАПРОС: {
+  text: '\n' +
+    '      SELECT id, email, password_hash, firstname, lastname, company, is_active, email_verified, cre...',
+  duration: '1179ms',
+  rows: 0,
+  params: 'да'
+}
+✅ Выполнен запрос: {
+  text: '\n      SELECT id, email, password_hash, firstname,...',
+  duration: '1179ms',
+  rows: 0
+}
+{"level":30,"time":1759838844134,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759838842950-680f501b9cd61","method":"POST","url":"/api/auth/login","query":{},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*","content-type":"application/json","content-length":"39"},"remoteAddress":"127.0.0.1","remotePort":51996},"res":{"statusCode":401,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"279","ratelimit-reset":"289","content-type":"application/json; charset=utf-8","content-length":"72","etag":"\"48-S1XS9eu0aQL+VIyK9A6suv0Ulyk\""}},"responseTime":1184,"msg":"request completed"}
+📨 GET /api/health [2kcrndsql] (1/10)
+{"level":30,"time":1759838860814,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759838860813-135ddad2d932a","method":"GET","url":"/api/health","query":{},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*","authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImVtYWlsIjoia2l5MDI2QHlhbmRleC5ydSIsImZpcnN0bmFtZSI6ItCY0LvRjNGPIiwibGFzdG5hbWUiOiLQmtGD0LfRjNC80LjQvSIsInJvbGUiOiJzdXBlcl9hZG1pbiIsInRlbmFudElkIjoiY2Q1ZmZiMGYtODYxNi00MjI3LWEwNTYtNGY3MjllZDY5MzNjIiwiaWF0IjoxNzU5ODMzMTg1LCJleHAiOjE3NTk5MTk1ODV9.i-G-s6UBvCrb0Dc8oiZXyioC0WKWL1oCsrCxIeWcQzA"},"remoteAddress":"127.0.0.1","remotePort":41062},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"278","ratelimit-reset":"271","content-type":"application/json; charset=utf-8","content-length":"118","etag":"\"76-9sJEJv5KfBEutp+FBVfrvA+qLUk\""}},"responseTime":1,"msg":"request completed"}
+📨 GET /api/test [q45meazwu] (1/10)
+📨 GET /api/test - 127.0.0.1
+✅ Подключение к PostgreSQL установлено (ssl: off )
+🐌 МЕДЛЕННЫЙ ЗАПРОС: {
+  text: 'SELECT NOW() as current_time...',
+  duration: '1187ms',
+  rows: 1,
+  params: 'нет'
+}
+✅ Выполнен запрос: {
+  text: 'SELECT NOW() as current_time...',
+  duration: '1187ms',
+  rows: 1
+}
+{"level":30,"time":1759838892003,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759838890813-009deb54ebbb5","method":"GET","url":"/api/test","query":{},"params":{},"headers":{"content-type":"application/json","host":"localhost:3001","connection":"keep-alive"},"remoteAddress":"127.0.0.1","remotePort":50328},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"277","ratelimit-reset":"241","content-type":"application/json; charset=utf-8","content-length":"99","etag":"\"63-m+V8RJ44r/HXzgjL1Rzw31B5/0M\""}},"responseTime":1190,"msg":"request completed"}
+📨 GET /api/test [eiruiyme1] (1/10)
+📨 GET /api/test - 127.0.0.1
+✅ Выполнен запрос: { text: 'SELECT NOW() as current_time...', duration: '164ms', rows: 1 }
+{"level":30,"time":1759838892175,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759838892010-9ba67df8f055c","method":"GET","url":"/api/test","query":{},"params":{},"headers":{"content-type":"application/json","authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImVtYWlsIjoia2l5MDI2QHlhbmRleC5ydSIsImZpcnN0bmFtZSI6ItCY0LvRjNGPIiwibGFzdG5hbWUiOiLQmtGD0LfRjNC80LjQvSIsInJvbGUiOiJzdXBlcl9hZG1pbiIsInRlbmFudElkIjoiY2Q1ZmZiMGYtODYxNi00MjI3LWEwNTYtNGY3MjllZDY5MzNjIiwiaWF0IjoxNzU5ODMzMTg1LCJleHAiOjE3NTk5MTk1ODV9.i-G-s6UBvCrb0Dc8oiZXyioC0WKWL1oCsrCxIeWcQzA","host":"localhost:3001","connection":"keep-alive"},"remoteAddress":"127.0.0.1","remotePort":50328},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"276","ratelimit-reset":"240","content-type":"application/json; charset=utf-8","content-length":"99","etag":"\"63-guHSMKn6qg1gTq58GOMZU8u0wb0\""}},"responseTime":165,"msg":"request completed"}
+📨 GET /api/health [vgiq9iy4r] (1/10)
+{"level":30,"time":1759838892179,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759838892178-18877cb9281e7","method":"GET","url":"/api/health","query":{},"params":{},"headers":{"content-type":"application/json","authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImVtYWlsIjoia2l5MDI2QHlhbmRleC5ydSIsImZpcnN0bmFtZSI6ItCY0LvRjNGPIiwibGFzdG5hbWUiOiLQmtGD0LfRjNC80LjQvSIsInJvbGUiOiJzdXBlcl9hZG1pbiIsInRlbmFudElkIjoiY2Q1ZmZiMGYtODYxNi00MjI3LWEwNTYtNGY3MjllZDY5MzNjIiwiaWF0IjoxNzU5ODMzMTg1LCJleHAiOjE3NTk5MTk1ODV9.i-G-s6UBvCrb0Dc8oiZXyioC0WKWL1oCsrCxIeWcQzA","host":"localhost:3001","connection":"keep-alive"},"remoteAddress":"127.0.0.1","remotePort":50328},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"275","ratelimit-reset":"239","content-type":"application/json; charset=utf-8","content-length":"118","etag":"\"76-EXhibPYJK5Ef+pZG3wlXB1xG9o8\""}},"responseTime":1,"msg":"request completed"}
+📨 GET /api/projects [43dazg93t] (1/10)
+📨 GET /api/projects - 127.0.0.1
+✅ Подключение к PostgreSQL установлено (ssl: off )
+🐌 МЕДЛЕННЫЙ ЗАПРОС: {
+  text: 'SET app.user_id = 6...',
+  duration: '1174ms',
+  rows: null,
+  params: 'нет'
+}
+✅ Выполнен запрос: { text: 'SET app.user_id = 6...', duration: '1174ms', rows: null }
+✅ Выполнен запрос: {
+  text: "SET app.tenant_id = 'cd5ffb0f-8616-4227-a056-4f729...",
+  duration: '163ms',
+  rows: null
+}
+🔐 Auth: user=6, tenant=cd5ffb0f, role=super_admin, path=/api/projects
+📋 Запрос проектов для тенанта: cd5ffb0f...
+✅ Выполнен запрос: {
+  text: '\n      SELECT COUNT(*) as total\n      FROM constru...',
+  duration: '166ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n      SELECT \n        cp.id,\n        cp.customer_...',
+  duration: '166ms',
+  rows: 1
+}
+📊 Найдено проектов: 1/2 (offset: 0, limit: 1)
+{"level":30,"time":1759838925334,"pid":84701,"hostname":"codespaces-1e7a1f","req":{"id":"1759838923658-58caf6baa346f","method":"GET","url":"/api/projects?limit=1","query":{"limit":"1"},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*","authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImVtYWlsIjoia2l5MDI2QHlhbmRleC5ydSIsImZpcnN0bmFtZSI6ItCY0LvRjNGPIiwibGFzdG5hbWUiOiLQmtGD0LfRjNC80LjQvSIsInJvbGUiOiJzdXBlcl9hZG1pbiIsInRlbmFudElkIjoiY2Q1ZmZiMGYtODYxNi00MjI3LWEwNTYtNGY3MjllZDY5MzNjIiwiaWF0IjoxNzU5ODMzMTg1LCJleHAiOjE3NTk5MTk1ODV9.i-G-s6UBvCrb0Dc8oiZXyioC0WKWL1oCsrCxIeWcQzA"},"remoteAddress":"127.0.0.1","remotePort":41902},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"274","ratelimit-reset":"208","content-type":"application/json; charset=utf-8","content-length":"480","etag":"\"1e0-wHi+e+QWZAFzyYAxLFvYiqb7oVk\""}},"responseTime":1676,"msg":"request completed"}
+🛑 Получен сигнал SIGTERM, завершаем сервер...
+✅ Сервер остановлен

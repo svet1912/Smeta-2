@@ -1,13 +1,10 @@
-import { describe, it, expect, beforeAll } from 'vitest';
-import { api, waitForServer } from './utils/test-server.js';
+import { describe, it, expect } from 'vitest';
+import request from 'supertest';
+import app from '../../server/index.js';
 
 describe('Cache Headers Tests', () => {
-  beforeAll(async () => {
-    await waitForServer();
-  });
-
   it('should include cache headers in materials API response', async () => {
-    const response = await api
+    const response = await request(app)
       .get('/api/materials?limit=5')
       .expect(200);
 
@@ -17,7 +14,7 @@ describe('Cache Headers Tests', () => {
   });
 
   it('should include cache headers in works API response', async () => {
-    const response = await api
+    const response = await request(app)
       .get('/api/works?limit=5')
       .expect(200);
 
@@ -28,14 +25,14 @@ describe('Cache Headers Tests', () => {
 
   it('should include etag headers in responses', async () => {
     // Health endpoint должен иметь ETag
-    const healthResponse = await api
+    const healthResponse = await request(app)
       .get('/api/health')
       .expect(200);
     
     expect(healthResponse.headers.etag).toBeDefined();
 
     // Materials endpoint должен иметь ETag  
-    const materialsResponse = await api
+    const materialsResponse = await request(app)
       .get('/api/materials?limit=1')
       .expect(200);
     
@@ -44,7 +41,7 @@ describe('Cache Headers Tests', () => {
 
   it('should handle basic cache scenarios', async () => {
     // Проверяем что ответы имеют необходимые заголовки для кэширования
-    const response = await api
+    const response = await request(app)
       .get('/api/materials?limit=1')
       .expect(200);
     
@@ -56,7 +53,7 @@ describe('Cache Headers Tests', () => {
   });
 
   it('should include vary header for content negotiation', async () => {
-    const response = await api
+    const response = await request(app)
       .get('/api/materials?limit=1')
       .expect(200);
 

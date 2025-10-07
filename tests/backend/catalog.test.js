@@ -1,16 +1,12 @@
-import { describe, it, expect, beforeAll } from 'vitest';
-import { api, waitForServer } from './utils/test-server.js';
+import { describe, it, expect } from 'vitest';
+import request from 'supertest';
+import app from '../../server/index.js';
 
 describe('Catalog endpoints', () => {
-  beforeAll(async () => {
-    // Ждем готовности сервера перед тестами
-    console.log('⏳ Ожидание готовности сервера...');
-    await waitForServer();
-  });
   it('GET /api/materials search+pagination returns <= limit and cache headers', async () => {
     // Материалы доступны без токена, проверим сначала без него
     const limit = 20;
-    const res = await api.get('/api/materials?search=бетон&limit=' + limit).expect(200);
+    const res = await request(app).get('/api/materials?search=бетон&limit=' + limit).expect(200);
 
     expect(res.body).toBeTypeOf('object');
     expect(res.body.data).toBeDefined();
@@ -25,7 +21,7 @@ describe('Catalog endpoints', () => {
 
   it('GET /api/works search+pagination returns <= limit', async () => {
     // Работы также доступны без токена
-    const res = await api.get('/api/works?search=штукатурка&limit=10').expect(200);
+    const res = await request(app).get('/api/works?search=штукатурка&limit=10').expect(200);
 
     expect(res.body).toBeTypeOf('object');
     expect(res.body.data).toBeDefined();
@@ -34,7 +30,7 @@ describe('Catalog endpoints', () => {
   });
 
   it('GET /api/materials without search returns paginated results', async () => {
-    const res = await api.get('/api/materials?limit=5').expect(200);
+    const res = await request(app).get('/api/materials?limit=5').expect(200);
 
     expect(res.body.data).toBeDefined();
     expect(Array.isArray(res.body.data)).toBe(true);
@@ -43,7 +39,7 @@ describe('Catalog endpoints', () => {
   });
 
   it('GET /api/works without search returns paginated results', async () => {
-    const res = await api.get('/api/works?limit=5').expect(200);
+    const res = await request(app).get('/api/works?limit=5').expect(200);
 
     expect(res.body.data).toBeDefined();
     expect(Array.isArray(res.body.data)).toBe(true);

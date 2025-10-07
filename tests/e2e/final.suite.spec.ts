@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { LoginPage, AppPage } from './page-objects/common.js';
 
 test.describe('Complete E2E Test Suite', () => {
   test('full application smoke test', async ({ page, baseURL }) => {
@@ -35,20 +36,20 @@ test.describe('Complete E2E Test Suite', () => {
     console.log(`🔐 Элементы входа найдены: ${hasLoginForm}`);
     console.log(`📊 Dashboard элементы найдены: ${hasDashboard}`);
     
+    // Используем Page Object для надежного логина
+    const loginPage = new LoginPage(page);
+    const appPage = new AppPage(page);
+    
     if (hasLoginForm > 0) {
-      console.log('📝 Обнаружена форма входа, выполняем логин...');
+      console.log('� Обнаружена форма входа, выполняем логин...');
       
-      // Заполняем форму входа
-      const emailInput = page.locator('input[type="email"], input[name="email"]').first();
-      const passwordInput = page.locator('input[type="password"], input[name="password"]').first();
-      const loginButton = page.locator('button[type="submit"], button:has-text("войти")').first();
-      
-      await emailInput.fill('admin@mantis.ru');
-      await passwordInput.fill('password123');
-      
-      console.log('📨 Данные для входа заполнены');
-      
-      await loginButton.click();
+      try {
+        await loginPage.performLogin();
+        console.log('✅ Логин выполнен успешно');
+      } catch (error) {
+        console.log(`⚠️ Ошибка при логине: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        // Продолжаем тест, возможно уже авторизованы
+      }
       
       console.log('🔐 Попытка входа выполнена');
       

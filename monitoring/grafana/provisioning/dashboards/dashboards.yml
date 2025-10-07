@@ -1,0 +1,14 @@
+# Phase 3 Step 3: Grafana Dashboard Provisioning
+
+apiVersion: 1
+
+providers:
+  - name: 'SMETA360 Dashboards'
+    orgId: 1
+    folder: ''
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUidChange: false
+    options:
+      path: /var/lib/grafana/dashboards

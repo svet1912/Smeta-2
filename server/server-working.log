@@ -1,0 +1,401 @@
+nohup: ignoring input
+[dotenv@17.2.3] injecting env (19) from .env -- tip: ⚙️  override existing env vars with { override: true }
+[dotenv@17.2.3] injecting env (0) from ../.env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+🔑 DATABASE_URL загружен: postgres:***@azap001-kiy026-3dfc.j.aivencloud.com:11433/defaultdb?sslmode=require
+🔍 DB META: {
+  host: 'azap001-kiy026-3dfc.j.aivencloud.com',
+  port: '11433',
+  user: 'avnadmin',
+  passwordLength: 24,
+  hasPassword: true,
+  database: 'defaultdb'
+}
+🔧 Aiven Cloud: используем sslmode=prefer
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from ../.env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+🚀 Запуск исправленного сервера...
+🔧 Настроена расширенная CORS политика
+🔧 Инициализация сервера...
+📊 Инициализация базы данных...
+(node:112585) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✅ Подключение к PostgreSQL установлено (ssl: off )
+🐌 МЕДЛЕННЫЙ ЗАПРОС: {
+  text: '\n' +
+    '      CREATE TABLE IF NOT EXISTS auth_users (\n' +
+    '        id SERIAL PRIMARY KEY,\n' +
+    '        email VARCHAR(...',
+  duration: '1228ms',
+  rows: null,
+  params: 'нет'
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS auth_users (\n   ...',
+  duration: '1228ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS user_sessions (\n...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE INDEX IF NOT EXISTS idx_auth_users_e...',
+  duration: '165ms',
+  rows: undefined
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS users (\n        ...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS orders (\n       ...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS statistics (\n   ...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS work_materials (...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS construction_pro...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS user_roles (\n   ...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS user_role_assign...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS object_parameter...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS project_rooms (\n...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS constructive_ele...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS engineering_syst...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS customer_estimat...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS customer_estimat...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS customer_estimat...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS customer_estimat...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS audit_log (\n    ...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS permissions (\n  ...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS role_permissions...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE construction_projects ADD COLUMN IF NO...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE construction_projects ADD COLUMN IF NO...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE construction_projects ADD COLUMN IF NO...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE auth_users ADD COLUMN IF NOT EXISTS ph...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE auth_users ADD COLUMN IF NOT EXISTS po...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE auth_users ADD COLUMN IF NOT EXISTS lo...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE auth_users ADD COLUMN IF NOT EXISTS bi...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'CREATE INDEX IF NOT EXISTS idx_construction_projec...',
+  duration: '165ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'CREATE INDEX IF NOT EXISTS idx_construction_projec...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE INDEX IF NOT EXISTS idx_auth_users_e...',
+  duration: '327ms',
+  rows: undefined
+}
+✅ Выполнен запрос: {
+  text: 'SELECT COUNT(*) FROM permissions...',
+  duration: '165ms',
+  rows: 1
+}
+✅ Разрешения уже инициализированы
+✅ Выполнен запрос: {
+  text: 'SELECT COUNT(*) FROM auth_users...',
+  duration: '165ms',
+  rows: 1
+}
+✅ Выполнен запрос: { text: 'SELECT COUNT(*) FROM orders...', duration: '164ms', rows: 1 }
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS leads (\n        ...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE INDEX IF NOT EXISTS idx_leads_email_...',
+  duration: '163ms',
+  rows: null
+}
+✅ Таблица leads инициализирована
+✅ База данных инициализирована
+✅ Выполнен запрос: { text: 'SELECT NOW() as current_time...', duration: '163ms', rows: 1 }
+✅ Подключение к базе данных проверено: 2025-10-07T12:29:02.194Z
+🎯 Сервер готов к работе!
+🚀 Сервер запущен на http://localhost:3001
+📊 API доступно по адресу: http://localhost:3001/api/test
+🌐 Внешний доступ через порт: 3001
+📨 GET /api/materials [p73lefozb] (1/10)
+🔍 Извлечен userId 6, tenantId cd5ffb0f-8616-4227-a056-4f729ed6933c из JWT токена
+✅ Выполнен запрос: {
+  text: 'SELECT set_tenant_context($1)...',
+  duration: '174ms',
+  rows: 1
+}
+🏢 Tenant контекст установлен: cd5ffb0f-8616-4227-a056-4f729ed6933c для пользователя 6
+📨 GET /api/materials - 127.0.0.1
+🚀 Инициализация Redis клиента...
+✅ Redis подключен
+🎯 Redis готов к работе
+✅ Cache HIT для ключа: materials:q=:p=1:l=1
+{"level":30,"time":1759840164933,"pid":112585,"hostname":"codespaces-1e7a1f","req":{"id":"1759840164739-09b0a62a838fc","method":"GET","url":"/api/materials?limit=1","query":{"limit":"1"},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*","authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImVtYWlsIjoia2l5MDI2QHlhbmRleC5ydSIsImZpcnN0bmFtZSI6ItCY0LvRjNGPIiwibGFzdG5hbWUiOiLQmtGD0LfRjNC80LjQvSIsInJvbGUiOiJzdXBlcl9hZG1pbiIsInRlbmFudElkIjoiY2Q1ZmZiMGYtODYxNi00MjI3LWEwNTYtNGY3MjllZDY5MzNjIiwiaWF0IjoxNzU5ODMzMTg1LCJleHAiOjE3NTk5MTk1ODV9.i-G-s6UBvCrb0Dc8oiZXyioC0WKWL1oCsrCxIeWcQzA"},"remoteAddress":"127.0.0.1","remotePort":59914},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"299","ratelimit-reset":"900","cache-control":"public, max-age=300, stale-while-revalidate=60","last-modified":"Wed, 01 Oct 2025 08:16:08 GMT","content-type":"application/json; charset=utf-8","content-length":"567","etag":"\"237-A4c6bu48sWR+N9bo8MQOu1gykzk\""}},"responseTime":192,"msg":"request completed"}
+📨 GET /api/auth/me [k5qj9t6ze] (1/10)
+🔍 Извлечен userId 6, tenantId cd5ffb0f-8616-4227-a056-4f729ed6933c из JWT токена
+✅ Подключение к PostgreSQL установлено (ssl: off )
+🐌 МЕДЛЕННЫЙ ЗАПРОС: {
+  text: 'SELECT set_tenant_context($1)...',
+  duration: '1200ms',
+  rows: 1,
+  params: 'да'
+}
+✅ Выполнен запрос: {
+  text: 'SELECT set_tenant_context($1)...',
+  duration: '1200ms',
+  rows: 1
+}
+🏢 Tenant контекст установлен: cd5ffb0f-8616-4227-a056-4f729ed6933c для пользователя 6
+📨 GET /api/auth/me - 127.0.0.1
+✅ Выполнен запрос: {
+  text: '\n      SELECT id, email, firstname, lastname, comp...',
+  duration: '166ms',
+  rows: 1
+}
+{"level":30,"time":1759840496432,"pid":112585,"hostname":"codespaces-1e7a1f","req":{"id":"1759840495044-cd57de977877","method":"GET","url":"/api/auth/me","query":{},"params":{},"headers":{"accept":"*/*","host":"localhost:3001","user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","accept-encoding":"gzip, deflate, br, zstd","accept-language":"ru-RU, ru; q=0.9, en-US; q=0.8, en; q=0.7","authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImVtYWlsIjoia2l5MDI2QHlhbmRleC5ydSIsImZpcnN0bmFtZSI6ItCY0LvRjNGPIiwibGFzdG5hbWUiOiLQmtGD0LfRjNC80LjQvSIsInJvbGUiOiJzdXBlcl9hZG1pbiIsInRlbmFudElkIjoiY2Q1ZmZiMGYtODYxNi00MjI3LWEwNTYtNGY3MjllZDY5MzNjIiwiaWF0IjoxNzU5ODM4NDYzLCJleHAiOjE3NTk5MjQ4NjN9.whRyK2GRfI78efyW9ieBQok3V9b9nsaBLBUsvClYAto","referer":"https://ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev/app/projects/56","x-request-id":"510f147bb55e90e6ffdac1854c447724","x-real-ip":"10.241.0.36","x-forwarded-port":"443","x-forwarded-scheme":"https","x-original-uri":"/api-proxy/auth/me","x-scheme":"https","sec-ch-ua-platform":"\"Windows\"","sec-ch-ua":"\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"","dnt":"1","sec-ch-ua-mobile":"?0","sec-fetch-site":"same-origin","sec-fetch-mode":"cors","sec-fetch-dest":"empty","priority":"u=1, i","x-original-proto":"https","x-forwarded-proto":"https","x-forwarded-host":"ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev","x-forwarded-for":"216.227.168.38","proxy-connection":"Keep-Alive","content-type":"application/json","content-length":"0","connection":"close"},"remoteAddress":"127.0.0.1","remotePort":56868},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"298","ratelimit-reset":"570","content-type":"application/json; charset=utf-8","content-length":"271","etag":"\"10f-P0B4wBXni9NlKYoxgMmDsDArstg\""}},"responseTime":1388,"msg":"request completed"}
+📨 GET /api/projects/56 [e66q6noue] (1/10)
+🔍 Извлечен userId 6, tenantId cd5ffb0f-8616-4227-a056-4f729ed6933c из JWT токена
+✅ Выполнен запрос: {
+  text: 'SELECT set_tenant_context($1)...',
+  duration: '166ms',
+  rows: 1
+}
+🏢 Tenant контекст установлен: cd5ffb0f-8616-4227-a056-4f729ed6933c для пользователя 6
+📨 GET /api/projects/56 - 127.0.0.1
+✅ Выполнен запрос: { text: 'SET app.user_id = 6...', duration: '163ms', rows: null }
+✅ Выполнен запрос: {
+  text: "SET app.tenant_id = 'cd5ffb0f-8616-4227-a056-4f729...",
+  duration: '168ms',
+  rows: null
+}
+🔐 Auth: user=6, tenant=cd5ffb0f, role=super_admin, path=/api/projects/56
+✅ Выполнен запрос: {
+  text: '\n      SELECT \n        cp.id,\n        cp.customer_...',
+  duration: '170ms',
+  rows: 1
+}
+{"level":30,"time":1759840498186,"pid":112585,"hostname":"codespaces-1e7a1f","req":{"id":"1759840497507-98a06e6261e0d","method":"GET","url":"/api/projects/56","query":{},"params":{},"headers":{"accept":"*/*","host":"localhost:3001","user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","accept-encoding":"gzip, deflate, br, zstd","accept-language":"ru-RU, ru; q=0.9, en-US; q=0.8, en; q=0.7","authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImVtYWlsIjoia2l5MDI2QHlhbmRleC5ydSIsImZpcnN0bmFtZSI6ItCY0LvRjNGPIiwibGFzdG5hbWUiOiLQmtGD0LfRjNC80LjQvSIsInJvbGUiOiJzdXBlcl9hZG1pbiIsInRlbmFudElkIjoiY2Q1ZmZiMGYtODYxNi00MjI3LWEwNTYtNGY3MjllZDY5MzNjIiwiaWF0IjoxNzU5ODM4NDYzLCJleHAiOjE3NTk5MjQ4NjN9.whRyK2GRfI78efyW9ieBQok3V9b9nsaBLBUsvClYAto","if-none-match":"\"19d-G25coTfHRmQcRbn/Ad0mhdPmUjw\"","referer":"https://ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev/app/projects/56","x-request-id":"4d744028dd3813e1c74ada1d0b0d7ff6","x-real-ip":"10.241.0.36","x-forwarded-port":"443","x-forwarded-scheme":"https","x-original-uri":"/api-proxy/projects/56","x-scheme":"https","sec-ch-ua-platform":"\"Windows\"","sec-ch-ua":"\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"","dnt":"1","sec-ch-ua-mobile":"?0","sec-fetch-site":"same-origin","sec-fetch-mode":"cors","sec-fetch-dest":"empty","priority":"u=1, i","x-original-proto":"https","x-forwarded-proto":"https","x-forwarded-host":"ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev","x-forwarded-for":"216.227.168.38","proxy-connection":"Keep-Alive","content-type":"application/json","content-length":"0","connection":"close"},"remoteAddress":"127.0.0.1","remotePort":56882},"res":{"statusCode":304,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"297","ratelimit-reset":"568","etag":"\"19d-G25coTfHRmQcRbn/Ad0mhdPmUjw\""}},"responseTime":678,"msg":"request completed"}
+📨 GET /api/projects/56/object-parameters [q6p785bci] (1/10)
+🔍 Извлечен userId 6, tenantId cd5ffb0f-8616-4227-a056-4f729ed6933c из JWT токена
+✅ Выполнен запрос: {
+  text: 'SELECT set_tenant_context($1)...',
+  duration: '164ms',
+  rows: 1
+}
+🏢 Tenant контекст установлен: cd5ffb0f-8616-4227-a056-4f729ed6933c для пользователя 6
+📨 GET /api/projects/56/object-parameters - 127.0.0.1
+✅ Выполнен запрос: { text: 'SET app.user_id = 6...', duration: '168ms', rows: null }
+✅ Выполнен запрос: {
+  text: "SET app.tenant_id = 'cd5ffb0f-8616-4227-a056-4f729...",
+  duration: '163ms',
+  rows: null
+}
+🔐 Auth: user=6, tenant=cd5ffb0f, role=super_admin, path=/api/projects/56/object-parameters
+📋 GET /api/projects/56/object-parameters [user=6]
+❌ Cache MISS для ключа: object-parameters:project:56:tenant:cd5ffb0f-8616-4227-a056-4f729ed6933c
+🔄 Загрузка данных для ключа: object-parameters:project:56:tenant:cd5ffb0f-8616-4227-a056-4f729ed6933c
+🔄 Загрузка параметров объекта проекта 56 из базы данных...
+✅ Выполнен запрос: {
+  text: '\n            SELECT id, tenant_id FROM constructio...',
+  duration: '163ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n            SELECT \n              op.*,\n         ...',
+  duration: '166ms',
+  rows: 1
+}
+✅ Найдены параметры объекта для проекта 56
+💾 Cache SET для ключа: object-parameters:project:56:tenant:cd5ffb0f-8616-4227-a056-4f729ed6933c, TTL: 300s
+{"level":30,"time":1759840499737,"pid":112585,"hostname":"codespaces-1e7a1f","req":{"id":"1759840498902-2b94e21205833","method":"GET","url":"/api/projects/56/object-parameters","query":{},"params":{},"headers":{"accept":"*/*","host":"localhost:3001","user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","accept-encoding":"gzip, deflate, br, zstd","accept-language":"ru-RU, ru; q=0.9, en-US; q=0.8, en; q=0.7","authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImVtYWlsIjoia2l5MDI2QHlhbmRleC5ydSIsImZpcnN0bmFtZSI6ItCY0LvRjNGPIiwibGFzdG5hbWUiOiLQmtGD0LfRjNC80LjQvSIsInJvbGUiOiJzdXBlcl9hZG1pbiIsInRlbmFudElkIjoiY2Q1ZmZiMGYtODYxNi00MjI3LWEwNTYtNGY3MjllZDY5MzNjIiwiaWF0IjoxNzU5ODM4NDYzLCJleHAiOjE3NTk5MjQ4NjN9.whRyK2GRfI78efyW9ieBQok3V9b9nsaBLBUsvClYAto","if-none-match":"\"283-3wbZ32qfPJ4mO9ZcJ5G1WcleCCU\"","referer":"https://ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev/app/projects/56","x-request-id":"fc9ead9cc1c46f33b75c1660a77052f5","x-real-ip":"10.241.0.36","x-forwarded-port":"443","x-forwarded-scheme":"https","x-original-uri":"/api-proxy/projects/56/object-parameters","x-scheme":"https","sec-ch-ua-platform":"\"Windows\"","sec-ch-ua":"\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"","dnt":"1","sec-ch-ua-mobile":"?0","sec-fetch-site":"same-origin","sec-fetch-mode":"cors","sec-fetch-dest":"empty","priority":"u=1, i","x-original-proto":"https","x-forwarded-proto":"https","x-forwarded-host":"ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev","x-forwarded-for":"216.227.168.38","proxy-connection":"Keep-Alive","content-type":"application/json","content-length":"0","connection":"close"},"remoteAddress":"127.0.0.1","remotePort":57484},"res":{"statusCode":304,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"296","ratelimit-reset":"566","cache-control":"public, max-age=300, stale-while-revalidate=60","etag":"\"283-3wbZ32qfPJ4mO9ZcJ5G1WcleCCU\""}},"responseTime":835,"msg":"request completed"}
+📨 GET /api/object-parameters/29/rooms [mwqgz8xmi] (1/10)
+🔍 Извлечен userId 6, tenantId cd5ffb0f-8616-4227-a056-4f729ed6933c из JWT токена
+✅ Выполнен запрос: {
+  text: 'SELECT set_tenant_context($1)...',
+  duration: '164ms',
+  rows: 1
+}
+🏢 Tenant контекст установлен: cd5ffb0f-8616-4227-a056-4f729ed6933c для пользователя 6
+📨 GET /api/object-parameters/29/rooms - 127.0.0.1
+✅ Выполнен запрос: { text: 'SET app.user_id = 6...', duration: '163ms', rows: null }
+✅ Выполнен запрос: {
+  text: "SET app.tenant_id = 'cd5ffb0f-8616-4227-a056-4f729...",
+  duration: '163ms',
+  rows: null
+}
+🔐 Auth: user=6, tenant=cd5ffb0f, role=super_admin, path=/api/object-parameters/29/rooms
+❌ Cache MISS для ключа: rooms:object-params:29:tenant:cd5ffb0f-8616-4227-a056-4f729ed6933c
+🔄 Загрузка данных для ключа: rooms:object-params:29:tenant:cd5ffb0f-8616-4227-a056-4f729ed6933c
+🔄 Загрузка помещений для объекта 29 из базы данных...
+✅ Выполнен запрос: {
+  text: '\n            SELECT * FROM project_rooms \n        ...',
+  duration: '165ms',
+  rows: 1
+}
+💾 Cache SET для ключа: rooms:object-params:29:tenant:cd5ffb0f-8616-4227-a056-4f729ed6933c, TTL: 300s
+{"level":30,"time":1759840501712,"pid":112585,"hostname":"codespaces-1e7a1f","req":{"id":"1759840501048-5e598dae48129","method":"GET","url":"/api/object-parameters/29/rooms","query":{},"params":{},"headers":{"accept":"*/*","host":"localhost:3001","user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","accept-encoding":"gzip, deflate, br, zstd","accept-language":"ru-RU, ru; q=0.9, en-US; q=0.8, en; q=0.7","authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImVtYWlsIjoia2l5MDI2QHlhbmRleC5ydSIsImZpcnN0bmFtZSI6ItCY0LvRjNGPIiwibGFzdG5hbWUiOiLQmtGD0LfRjNC80LjQvSIsInJvbGUiOiJzdXBlcl9hZG1pbiIsInRlbmFudElkIjoiY2Q1ZmZiMGYtODYxNi00MjI3LWEwNTYtNGY3MjllZDY5MzNjIiwiaWF0IjoxNzU5ODM4NDYzLCJleHAiOjE3NTk5MjQ4NjN9.whRyK2GRfI78efyW9ieBQok3V9b9nsaBLBUsvClYAto","if-none-match":"\"291-WgrdapvhfAH2QpPkERbUwgIuN40\"","referer":"https://ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev/app/projects/56","x-request-id":"04937dac60bf4450d2540f122496b63b","x-real-ip":"10.241.0.36","x-forwarded-port":"443","x-forwarded-scheme":"https","x-original-uri":"/api-proxy/object-parameters/29/rooms","x-scheme":"https","sec-ch-ua-platform":"\"Windows\"","sec-ch-ua":"\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"","dnt":"1","sec-ch-ua-mobile":"?0","sec-fetch-site":"same-origin","sec-fetch-mode":"cors","sec-fetch-dest":"empty","priority":"u=1, i","x-original-proto":"https","x-forwarded-proto":"https","x-forwarded-host":"ubiquitous-invention-4jpg6r5vr5qgh5rqx-3000.app.github.dev","x-forwarded-for":"216.227.168.38","proxy-connection":"Keep-Alive","content-type":"application/json","content-length":"0","connection":"close"},"remoteAddress":"127.0.0.1","remotePort":57486},"res":{"statusCode":304,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"295","ratelimit-reset":"564","cache-control":"public, max-age=300, stale-while-revalidate=60","etag":"\"291-WgrdapvhfAH2QpPkERbUwgIuN40\""}},"responseTime":664,"msg":"request completed"}
+🛑 Получен сигнал SIGTERM, завершаем сервер...
+✅ Сервер остановлен

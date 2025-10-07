@@ -1,16 +1,12 @@
-import { describe, it, expect, beforeAll } from 'vitest';
-import { api, waitForServer } from './utils/test-server.js';
+import { describe, it, expect } from 'vitest';
+import request from 'supertest';
+import app from '../../server/index.js';
 
 describe('Performance smoke tests', () => {
-  beforeAll(async () => {
-    // Ждем готовности сервера перед тестами
-    console.log('⏳ Ожидание готовности сервера...');
-    await waitForServer();
-  });
   it('GET /api/health responds within 300ms', async () => {
     const start = Date.now();
 
-    const res = await api.get('/api/health').expect(200);
+    const res = await request(app).get('/api/health').expect(200);
 
     const duration = Date.now() - start;
 
@@ -22,7 +18,7 @@ describe('Performance smoke tests', () => {
   it('GET /api/health/db responds within 300ms', async () => {
     const start = Date.now();
 
-    const res = await api.get('/api/health/db').expect(200);
+    const res = await request(app).get('/api/health/db').expect(200);
 
     const duration = Date.now() - start;
 
@@ -34,7 +30,7 @@ describe('Performance smoke tests', () => {
   it('GET /api/materials (catalog) responds within 1000ms', async () => {
     const start = Date.now();
 
-    const res = await api.get('/api/materials?limit=20').expect(200);
+    const res = await request(app).get('/api/materials?limit=20').expect(200);
 
     const duration = Date.now() - start;
 
@@ -47,7 +43,7 @@ describe('Performance smoke tests', () => {
   it('GET /api/works (catalog) responds within 500ms', async () => {
     const start = Date.now();
 
-    const res = await api.get('/api/works?limit=20').expect(200);
+    const res = await request(app).get('/api/works?limit=20').expect(200);
 
     const duration = Date.now() - start;
 

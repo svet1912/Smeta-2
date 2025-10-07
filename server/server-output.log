@@ -1,0 +1,353 @@
+nohup: ignoring input
+[dotenv@17.2.3] injecting env (19) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+[dotenv@17.2.3] injecting env (0) from ../.env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+🔑 DATABASE_URL загружен: postgres:***@azap001-kiy026-3dfc.j.aivencloud.com:11433/defaultdb?sslmode=require
+🔍 DB META: {
+  host: 'azap001-kiy026-3dfc.j.aivencloud.com',
+  port: '11433',
+  user: 'avnadmin',
+  passwordLength: 24,
+  hasPassword: true,
+  database: 'defaultdb'
+}
+🔧 Aiven Cloud: используем sslmode=prefer
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  override existing env vars with { override: true }
+[dotenv@17.2.3] injecting env (0) from ../.env -- tip: ⚙️  suppress all logs with { quiet: true }
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+🚀 Запуск исправленного сервера...
+🔧 Настроена расширенная CORS политика
+🔧 Инициализация сервера...
+📊 Инициализация базы данных...
+(node:109920) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✅ Подключение к PostgreSQL установлено (ssl: off )
+🐌 МЕДЛЕННЫЙ ЗАПРОС: {
+  text: '\n' +
+    '      CREATE TABLE IF NOT EXISTS auth_users (\n' +
+    '        id SERIAL PRIMARY KEY,\n' +
+    '        email VARCHAR(...',
+  duration: '1224ms',
+  rows: null,
+  params: 'нет'
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS auth_users (\n   ...',
+  duration: '1224ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS user_sessions (\n...',
+  duration: '167ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE INDEX IF NOT EXISTS idx_auth_users_e...',
+  duration: '165ms',
+  rows: undefined
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS users (\n        ...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS orders (\n       ...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS statistics (\n   ...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS work_materials (...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS construction_pro...',
+  duration: '166ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS user_roles (\n   ...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS user_role_assign...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS object_parameter...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS project_rooms (\n...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS constructive_ele...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS engineering_syst...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS customer_estimat...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS customer_estimat...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS customer_estimat...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS customer_estimat...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS audit_log (\n    ...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS permissions (\n  ...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS role_permissions...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE construction_projects ADD COLUMN IF NO...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE construction_projects ADD COLUMN IF NO...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE construction_projects ADD COLUMN IF NO...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE auth_users ADD COLUMN IF NOT EXISTS ph...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE auth_users ADD COLUMN IF NOT EXISTS po...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE auth_users ADD COLUMN IF NOT EXISTS lo...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE auth_users ADD COLUMN IF NOT EXISTS bi...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '168ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'CREATE INDEX IF NOT EXISTS idx_construction_projec...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'CREATE INDEX IF NOT EXISTS idx_construction_projec...',
+  duration: '165ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE INDEX IF NOT EXISTS idx_auth_users_e...',
+  duration: '327ms',
+  rows: undefined
+}
+✅ Выполнен запрос: {
+  text: 'SELECT COUNT(*) FROM permissions...',
+  duration: '166ms',
+  rows: 1
+}
+✅ Разрешения уже инициализированы
+✅ Выполнен запрос: {
+  text: 'SELECT COUNT(*) FROM auth_users...',
+  duration: '166ms',
+  rows: 1
+}
+✅ Выполнен запрос: { text: 'SELECT COUNT(*) FROM orders...', duration: '164ms', rows: 1 }
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS leads (\n        ...',
+  duration: '167ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE INDEX IF NOT EXISTS idx_leads_email_...',
+  duration: '166ms',
+  rows: null
+}
+✅ Таблица leads инициализирована
+✅ База данных инициализирована
+✅ Выполнен запрос: { text: 'SELECT NOW() as current_time...', duration: '164ms', rows: 1 }
+✅ Подключение к базе данных проверено: 2025-10-07T12:24:26.377Z
+🎯 Сервер готов к работе!
+🚀 Сервер запущен на http://localhost:3001
+📊 API доступно по адресу: http://localhost:3001/api/test
+🌐 Внешний доступ через порт: 3001
+📨 GET /api/projects [ky6hjv545] (1/10)
+📨 GET /api/projects - 127.0.0.1
+✅ Выполнен запрос: { text: 'SET app.user_id = 6...', duration: '164ms', rows: null }
+✅ Выполнен запрос: {
+  text: "SET app.tenant_id = 'cd5ffb0f-8616-4227-a056-4f729...",
+  duration: '164ms',
+  rows: null
+}
+🔐 Auth: user=6, tenant=cd5ffb0f, role=super_admin, path=/api/projects
+📋 Запрос проектов для тенанта: cd5ffb0f...
+✅ Выполнен запрос: {
+  text: '\n      SELECT COUNT(*) as total\n      FROM constru...',
+  duration: '167ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n      SELECT \n        cp.id,\n        cp.customer_...',
+  duration: '165ms',
+  rows: 1
+}
+📊 Найдено проектов: 1/2 (offset: 0, limit: 1)
+{"level":30,"time":1759839890157,"pid":109920,"hostname":"codespaces-1e7a1f","req":{"id":"1759839889485-76a3b23aea9ab","method":"GET","url":"/api/projects?limit=1","query":{"limit":"1"},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*","authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImVtYWlsIjoia2l5MDI2QHlhbmRleC5ydSIsImZpcnN0bmFtZSI6ItCY0LvRjNGPIiwibGFzdG5hbWUiOiLQmtGD0LfRjNC80LjQvSIsInJvbGUiOiJzdXBlcl9hZG1pbiIsInRlbmFudElkIjoiY2Q1ZmZiMGYtODYxNi00MjI3LWEwNTYtNGY3MjllZDY5MzNjIiwiaWF0IjoxNzU5ODMzMTg1LCJleHAiOjE3NTk5MTk1ODV9.i-G-s6UBvCrb0Dc8oiZXyioC0WKWL1oCsrCxIeWcQzA"},"remoteAddress":"127.0.0.1","remotePort":56636},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"299","ratelimit-reset":"900","content-type":"application/json; charset=utf-8","content-length":"480","etag":"\"1e0-wHi+e+QWZAFzyYAxLFvYiqb7oVk\""}},"responseTime":672,"msg":"request completed"}
+📨 GET /api/works [yxpt9ef59] (1/10)
+📨 GET /api/works - 127.0.0.1
+🚀 Инициализация Redis клиента...
+✅ Redis подключен
+🎯 Redis готов к работе
+❌ Cache MISS для ключа: works:q=:p=1:l=1
+🔄 Загрузка данных для ключа: works:q=:p=1:l=1
+🔄 Загрузка работ из базы данных...
+✅ Выполнен запрос: {
+  text: '\n          SELECT COALESCE(MAX(updated_at), MAX(cr...',
+  duration: '172ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n          SELECT \n            w.*,\n            p....',
+  duration: '170ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n          SELECT COUNT(*) as total \n          FRO...',
+  duration: '164ms',
+  rows: 1
+}
+💾 Cache SET для ключа: works:q=:p=1:l=1, TTL: 600s
+{"level":30,"time":1759839907018,"pid":109920,"hostname":"codespaces-1e7a1f","req":{"id":"1759839906498-419b219e91918","method":"GET","url":"/api/works?limit=1","query":{"limit":"1"},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*","authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImVtYWlsIjoia2l5MDI2QHlhbmRleC5ydSIsImZpcnN0bmFtZSI6ItCY0LvRjNGPIiwibGFzdG5hbWUiOiLQmtGD0LfRjNC80LjQvSIsInJvbGUiOiJzdXBlcl9hZG1pbiIsInRlbmVudElkIjoiY2Q1ZmZiMGYtODYxNi00MjI3LWEwNTYtNGY3MjllZDY5MzNjIiwiaWF0IjoxNzU5ODMzMTg1LCJleHAiOjE3NTk5MTk1ODV9.i-G-s6UBvCrb0Dc8oiZXyioC0WKWL1oCsrCxIeWcQzA"},"remoteAddress":"127.0.0.1","remotePort":38368},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"298","ratelimit-reset":"883","cache-control":"public, max-age=300, stale-while-revalidate=60","last-modified":"Wed, 24 Sep 2025 20:49:27 GMT","content-type":"application/json; charset=utf-8","content-length":"520","etag":"\"208-Ab/UgboAOB5IEJdat53WTTd4Rrk\""}},"responseTime":520,"msg":"request completed"}
+📨 GET /api/materials [mm3l0fmwj] (1/10)
+📨 GET /api/materials - 127.0.0.1
+❌ Cache MISS для ключа: materials:q=:p=1:l=1
+🔄 Загрузка данных для ключа: materials:q=:p=1:l=1
+🔄 Загрузка материалов из базы данных...
+✅ Выполнен запрос: {
+  text: '\n          SELECT COALESCE(MAX(updated_at), MAX(cr...',
+  duration: '168ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n          SELECT * FROM materials \n          \n   ...',
+  duration: '165ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n          SELECT COUNT(*) as total FROM materials...',
+  duration: '164ms',
+  rows: 1
+}
+💾 Cache SET для ключа: materials:q=:p=1:l=1, TTL: 600s
+{"level":30,"time":1759839929903,"pid":109920,"hostname":"codespaces-1e7a1f","req":{"id":"1759839929398-94fd1aeb520b8","method":"GET","url":"/api/materials?limit=1","query":{"limit":"1"},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*","authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImVtYWlsIjoia2l5MDI2QHlhbmRleC5ydSIsImZpcnN0bmFtZSI6ItCY0LvRjNGPIiwibGFzdG5hbWUiOiLQmtGD0LfRjNC80LjQvSIsInJvbGUiOiJzdXBlcl9hZG1pbiIsInRlbmFudElkIjoiY2Q1ZmZiMGYtODYxNi00MjI3LWEwNTYtNGY3MjllZDY5MzNjIiwiaWF0IjoxNzU5ODMzMTg1LCJleHAiOjE3NTk5MTk1ODV9.i-G-s6UBvCrb0Dc8oiZXyioC0WKWL1oCsrCxIeWcQzA"},"remoteAddress":"127.0.0.1","remotePort":42132},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"297","ratelimit-reset":"861","cache-control":"public, max-age=300, stale-while-revalidate=60","last-modified":"Wed, 01 Oct 2025 08:16:08 GMT","content-type":"application/json; charset=utf-8","content-length":"567","etag":"\"237-A4c6bu48sWR+N9bo8MQOu1gykzk\""}},"responseTime":505,"msg":"request completed"}
+🛑 Получен сигнал SIGTERM, завершаем сервер...
+✅ Сервер остановлен

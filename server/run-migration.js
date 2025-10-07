@@ -8,37 +8,37 @@ const pool = new Pool({
   ssl: config.databaseUrl.includes('aiven') ? { rejectUnauthorized: false } : false
 });
 
-async function runMigration() {
+async function runMigration(migrationFile = 'add_ceiling_fields_to_rooms.sql') {
   const client = await pool.connect();
   
   try {
-    console.log('🔄 Применяем миграцию: добавление полей потолка...');
+    console.log(`🔄 Применяем миграцию: ${migrationFile}...`);
     
     // Читаем SQL миграцию
-    const migrationSQL = fs.readFileSync('./migrations/add_ceiling_fields_to_rooms.sql', 'utf8');
+    const migrationSQL = fs.readFileSync(`./migrations/${migrationFile}`, 'utf8');
     
     // Выполняем миграцию
     await client.query(migrationSQL);
     
     console.log('✅ Миграция успешно применена!');
     
-    // Проверяем что поля добавились
-    const result = await client.query(`
-      SELECT column_name, data_type, column_default 
-      FROM information_schema.columns 
-      WHERE table_name = 'project_rooms' 
-      AND column_name IN ('ceiling_area', 'ceiling_slopes')
-      ORDER BY column_name;
+    // Проверяем созданные индексы
+    const indexResult = await client.query(`
+      SELECT schemaname, tablename, indexname, indexdef 
+      FROM pg_indexes 
+      WHERE indexname LIKE 'idx_%'
+      AND schemaname = 'public'
+      ORDER BY tablename, indexname;
     `);
     
-    console.log('📋 Добавленные поля:');
-    result.rows.forEach((row) => {
-      console.log(`  - ${row.column_name}: ${row.data_type} (default: ${row.column_default})`);
-    });
-    
-    // Проверяем сколько записей обновилось
-    const countResult = await client.query('SELECT COUNT(*) as count FROM project_rooms WHERE ceiling_area > 0');
-    console.log(`🔢 Обновлено записей с ceiling_area: ${countResult.rows[0].count}`);
+    if (indexResult.rows.length > 0) {
+      console.log('📋 Созданные индексы:');
+      indexResult.rows.forEach((row) => {
+        console.log(`  - ${row.indexname} на ${row.tablename}`);
+      });
+    } else {
+      console.log('� Миграция выполнена успешно');
+    }
   } catch (error) {
     console.error('❌ Ошибка при применении миграции:', error);
     throw error;
@@ -49,4 +49,5 @@ async function runMigration() {
 }
 
 // Запускаем миграцию
-runMigration().catch(console.error);
+const migrationFile = process.argv[2];
+runMigration(migrationFile).catch(console.error);

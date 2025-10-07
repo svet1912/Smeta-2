@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect } from 'vitest';
+import request from 'supertest';
+import app from '../../server/index.js';
 import { z } from 'zod';
-import { api, waitForServer } from './utils/test-server.js';
 import {
   Material, MaterialsResponse,
   Work, WorksResponse,
@@ -12,13 +13,10 @@ import {
 } from '../contracts/schemas.js';
 
 describe('API Contract Tests', () => {
-  beforeAll(async () => {
-    await waitForServer();
-  });
 
   describe('Health endpoint contract', () => {
     it('should match HealthCheck schema', async () => {
-      const response = await api.get('/api/health').expect(200);
+      const response = await request(app).get('/api/health').expect(200);
       
       const result = HealthCheck.safeParse(response.body);
       if (!result.success) {
@@ -32,68 +30,55 @@ describe('API Contract Tests', () => {
 
   describe('Materials API contract', () => {
     it('should validate materials response structure', async () => {
-      const response = await api.get('/api/materials?limit=5').expect(200);
+      const response = await request(app).get('/api/materials?limit=5').expect(200);
       
-      // Проверяем полную структуру ответа с пагинацией
       const result = MaterialsResponse.safeParse(response.body);
       if (!result.success) {
         console.log('Materials response validation errors:', result.error.issues);
-        console.log('Actual response structure:', Object.keys(response.body));
+        console.log('Actual response:', JSON.stringify(response.body, null, 2));
       }
       
       expect(result.success).toBe(true);
-      expect(response.body).toHaveProperty('data');
-      expect(response.body).toHaveProperty('pagination');
-      expect(Array.isArray(response.body.data)).toBe(true);
     });
 
     it('should validate individual material schema', async () => {
-      const response = await api.get('/api/materials?limit=1').expect(200);
+      const response = await request(app).get('/api/materials?limit=1').expect(200);
       
-      if (response.body.data && response.body.data.length > 0) {
-        const material = response.body.data[0];
-        const result = Material.safeParse(material);
-        
-        if (!result.success) {
-          console.log('Material validation errors:', result.error.issues);
-          console.log('Actual material:', JSON.stringify(material, null, 2));
-        }
-        
-        expect(result.success).toBe(true);
+      const material = response.body.data[0];
+      const result = Material.safeParse(material);
+      if (!result.success) {
+        console.log('Material validation errors:', result.error.issues);
+        console.log('Actual material:', JSON.stringify(material, null, 2));
       }
+      
+      expect(result.success).toBe(true);
     });
   });
 
   describe('Works API contract', () => {
     it('should validate works response structure', async () => {
-      const response = await api.get('/api/works?limit=5').expect(200);
+      const response = await request(app).get('/api/works?limit=5').expect(200);
       
       const result = WorksResponse.safeParse(response.body);
       if (!result.success) {
         console.log('Works response validation errors:', result.error.issues);
-        console.log('Actual response structure:', Object.keys(response.body));
+        console.log('Actual response:', JSON.stringify(response.body, null, 2));
       }
       
       expect(result.success).toBe(true);
-      expect(response.body).toHaveProperty('data');
-      expect(response.body).toHaveProperty('pagination');
-      expect(Array.isArray(response.body.data)).toBe(true);
     });
 
     it('should validate individual work schema', async () => {
-      const response = await api.get('/api/works?limit=1').expect(200);
+      const response = await request(app).get('/api/works?limit=1').expect(200);
       
-      if (response.body.data && response.body.data.length > 0) {
-        const work = response.body.data[0];
-        const result = Work.safeParse(work);
-        
-        if (!result.success) {
-          console.log('Work validation errors:', result.error.issues);
-          console.log('Actual work:', JSON.stringify(work, null, 2));
-        }
-        
-        expect(result.success).toBe(true);
+      const work = response.body.data[0];
+      const result = Work.safeParse(work);
+      if (!result.success) {
+        console.log('Work validation errors:', result.error.issues);
+        console.log('Actual work:', JSON.stringify(work, null, 2));
       }
+      
+      expect(result.success).toBe(true);
     });
   });
 
@@ -101,8 +86,8 @@ describe('API Contract Tests', () => {
     it('should validate data types consistency', async () => {
       // Проверяем что ID всегда string в формате "m.XXX" или "w.XXX"
       const [materials, works] = await Promise.all([
-        api.get('/api/materials?limit=3').expect(200),
-        api.get('/api/works?limit=3').expect(200)
+        request(app).get('/api/materials?limit=3').expect(200),
+        request(app).get('/api/works?limit=3').expect(200)
       ]);
 
       // Все ID материалов должны быть строками
@@ -118,7 +103,7 @@ describe('API Contract Tests', () => {
     });
 
     it('should validate required fields presence', async () => {
-      const materials = await api.get('/api/materials?limit=5').expect(200);
+      const materials = await request(app).get('/api/materials?limit=5').expect(200);
       
       materials.body.data.forEach((material: any, index: number) => {
         expect(material).toHaveProperty('id');
@@ -166,7 +151,7 @@ describe('API Contract Tests', () => {
 
   describe('Real API pagination validation', () => {
     it('should validate materials pagination structure', async () => {
-      const response = await api.get('/api/materials?limit=2').expect(200);
+      const response = await request(app).get('/api/materials?limit=2').expect(200);
       
       expect(response.body).toHaveProperty('data');
       expect(response.body).toHaveProperty('pagination');
@@ -177,7 +162,7 @@ describe('API Contract Tests', () => {
     });
 
     it('should validate works pagination structure', async () => {
-      const response = await api.get('/api/works?limit=2').expect(200);
+      const response = await request(app).get('/api/works?limit=2').expect(200);
       
       expect(response.body).toHaveProperty('data');
       expect(response.body).toHaveProperty('pagination'); 
@@ -226,7 +211,7 @@ describe('API Contract Tests', () => {
 
   describe('Real API data validation', () => {
     it('should validate actual material fields from API', async () => {
-      const response = await api.get('/api/materials?limit=1').expect(200);
+      const response = await request(app).get('/api/materials?limit=1').expect(200);
       
       if (response.body.data && response.body.data.length > 0) {
         const material = response.body.data[0];
@@ -243,7 +228,7 @@ describe('API Contract Tests', () => {
     });
 
     it('should validate actual work fields from API', async () => {
-      const response = await api.get('/api/works?limit=1').expect(200);
+      const response = await request(app).get('/api/works?limit=1').expect(200);
       
       if (response.body.data && response.body.data.length > 0) {
         const work = response.body.data[0];

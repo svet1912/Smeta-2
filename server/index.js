@@ -9,10 +9,28 @@ import pino from 'pino-http';
 import { query } from './database.js';
 import { config } from './config.js';
 import { authMiddleware } from './middleware/auth.js';
+import { tenantIsolation } from './middleware/tenantIsolation.js';
 import { observeRequestDuration, metricsEndpoint, activeConnections as activeConnectionsGauge } from './metrics.js';
 import { cacheGetOrSet, cacheInvalidateByPrefix, getCacheStats } from './cache/cache.js';
 import { isRedisAvailable, getRedisStats } from './cache/redisClient.js';
+import { smartCacheGetOrSet, smartCacheInvalidate, getSmartCacheAnalytics } from './cache/smartCache.js';
+import { initCacheWarming, getCacheWarmingService } from './cache/cacheWarming.js';
+import cacheAnalyticsRouter from './routes/cacheAnalytics.js';
+import databaseMonitoringRouter from './routes/databaseMonitoring.js';
+import apiPerformanceRouter from './routes/apiPerformance.js';
 import { createLead, getLeadsStats, leadRateLimit, initializeLeadsTable } from './controllers/leadController.js';
+
+// Phase 3 Step 3: Comprehensive Monitoring
+import { getMonitoringService } from './services/monitoringService.js';
+import monitoringRouter from './routes/monitoring.js';
+import {
+  requestMonitoringMiddleware,
+  errorMonitoringMiddleware,
+  healthCheckMiddleware,
+  businessMetricsMiddleware,
+  securityMonitoringMiddleware,
+  performanceMonitoringMiddleware
+} from './middleware/monitoring.js';
 
 dotenv.config();
 
@@ -67,6 +85,14 @@ app.use(
 
 // Сжатие ответов (gzip/br) — экономия трафика и TTFB
 app.use(compression());
+
+// Phase 3 Step 3: Comprehensive Monitoring Middleware
+console.log('🔧 Подключение системы мониторинга...');
+app.use(requestMonitoringMiddleware());
+app.use(performanceMonitoringMiddleware());
+app.use(healthCheckMiddleware());
+app.use(businessMetricsMiddleware());
+app.use(securityMonitoringMiddleware());
 
 // Эффективные ETag (силён на справочниках, неизменяемых ресурсах)
 app.set('etag', 'strong');
@@ -136,6 +162,27 @@ app.use('/api', apiLimiter);
 
 // Prometheus метрики
 app.use(observeRequestDuration);
+
+// Database connection middleware
+app.use((req, res, next) => {
+  req.db = { query };
+  next();
+});
+
+// Tenant isolation middleware (после database, но до API endpoints)
+app.use(tenantIsolation);
+
+// Cache Analytics routes
+app.use('/api/admin/cache', cacheAnalyticsRouter);
+
+// Database Monitoring routes
+app.use('/api/admin/database', databaseMonitoringRouter);
+
+// API Performance Optimization routes (Phase 3 Step 2)
+app.use('/api/performance', apiPerformanceRouter);
+
+// Comprehensive Monitoring routes (Phase 3 Step 3)
+app.use('/api/monitoring', monitoringRouter);
 
 // ============ УТИЛИТАРНЫЕ ФУНКЦИИ КЕШИРОВАНИЯ ============
 
@@ -642,9 +689,28 @@ async function initializeTables() {
 
     // Инициализация таблицы лид-формы
     await initializeLeadsTable();
+
+    // Phase 3 Step 3: Инициализация системы мониторинга
+    console.log('🔍 Инициализация системы мониторинга...');
+    const monitoringService = getMonitoringService();
+    await monitoringService.initialize();
+    
+    // Запуск периодического сбора бизнес-метрик
+    monitoringService.startBusinessMetricsCollection();
+    console.log('✅ Система мониторинга инициализирована');
+
   } catch (error) {
     console.error('❌ Ошибка при инициализации таблиц (БД недоступна):', error.message);
     console.log('⚠️ Работаем без базы данных - используем локальное хранилище');
+    
+    // Попытаемся хотя бы инициализировать мониторинг
+    try {
+      const monitoringService = getMonitoringService();
+      await monitoringService.initialize();
+      console.log('✅ Система мониторинга инициализирована (без БД)');
+    } catch (monitoringError) {
+      console.error('❌ Ошибка инициализации мониторинга:', monitoringError.message);
+    }
   }
 }
 
@@ -1199,45 +1265,58 @@ app.post('/api/auth/login', async (req, res) => {
       console.log('⚠️ Не удалось получить tenant_id пользователя:', error.message);
     }
 
-    // Генерация JWT токена с ролью и tenantId
-    const token = jwt.sign(
-      {
-        userId: user.id,
-        email: user.email,
-        firstname: user.firstname,
-        lastname: user.lastname,
-        role: userRole, // Добавляем роль в токен
-        tenantId: userTenantId // Реальный tenant_id из user_tenants
-      },
-      config.jwtSecret,
-      { expiresIn: '24h' }
-    );
+    // Создаем токены через новый сервис
+    const { createTokenPair } = await import('./services/authService.js');
+    
+    const deviceInfo = {
+      userAgent: req.headers['user-agent'] || '',
+      ipAddress: req.ip || req.connection.remoteAddress || '',
+      deviceId: req.headers['x-device-id'] || null
+    };
 
-    // Сохранение сессии
+    const tokens = await createTokenPair({
+      id: user.id,
+      email: user.email,
+      firstname: user.firstname,
+      lastname: user.lastname,
+      role: userRole,
+      tenant_id: userTenantId
+    }, deviceInfo);
+
+    // Обратная совместимость - сохраняем старую сессию
     try {
-      const tokenHash = await bcrypt.hash(token, 10);
+      const tokenHash = await bcrypt.hash(tokens.accessToken, 10);
       await query(
         `
-        INSERT INTO user_sessions (user_id, token_hash, expires_at, user_agent, ip_address)
-        VALUES ($1, $2, NOW() + INTERVAL '24 hours', $3, $4)
+        INSERT INTO user_sessions (user_id, token_hash, expires_at, user_agent, ip_address, session_type)
+        VALUES ($1, $2, NOW() + INTERVAL '15 minutes', $3, $4, 'access_token')
       `,
-        [user.id, tokenHash, req.headers['user-agent'] || '', req.ip || req.connection.remoteAddress]
+        [user.id, tokenHash, deviceInfo.userAgent, deviceInfo.ipAddress]
       );
     } catch {
-      console.log('⚠️ БД недоступна, пропускаем сохранение сессии');
+      console.log('⚠️ БД недоступна, пропускаем сохранение legacy сессии');
     }
+
+    console.log(`✅ Пользователь ${user.email} вошел в систему с refresh token`);
 
     res.json({
       success: true,
       message: 'Успешный вход в систему',
       data: {
-        token,
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        accessTokenExpiry: tokens.accessTokenExpiry,
+        refreshTokenExpiry: tokens.refreshTokenExpiry,
+        // Обратная совместимость
+        token: tokens.accessToken,
         user: {
           id: user.id,
           email: user.email,
           firstname: user.firstname,
           lastname: user.lastname,
           company: user.company,
+          role: userRole,
+          tenantId: userTenantId,
           emailVerified: user.email_verified,
           createdAt: user.created_at
         }
@@ -1252,43 +1331,201 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-// Выход пользователя (удаление сессии)
+// Выход пользователя (удаление всех сессий)
 app.post('/api/auth/logout', async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
+    const { refreshToken } = req.body;
 
-    // Если нет токена, все равно возвращаем успех (пользователь хочет выйти)
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.log('⚠️ Logout без токена - возвращаем успех');
+    // Если нет ни access токена, ни refresh токена
+    if ((!authHeader || !authHeader.startsWith('Bearer ')) && !refreshToken) {
+      console.log('⚠️ Logout без токенов - возвращаем успех');
       return res.json({
         success: true,
         message: 'Успешный выход из системы'
       });
     }
 
-    const token = authHeader.substring(7);
+    let userId = null;
 
-    try {
-      const decoded = jwt.verify(token, config.jwtSecret);
+    // Пытаемся получить userId из access token
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7);
+      try {
+        const decoded = jwt.verify(token, config.jwtSecret);
+        userId = decoded.userId;
+      } catch (tokenError) {
+        console.log('⚠️ Невалидный access token при logout:', tokenError.message);
+      }
+    }
 
-      // Удаление активных сессий пользователя
-      await query('DELETE FROM user_sessions WHERE user_id = $1', [decoded.userId]);
-      console.log(`🔐 Logout пользователя: ${decoded.email || decoded.userId}`);
-    } catch (tokenError) {
-      // Если токен невалиден или истек, все равно возвращаем успех
-      console.log('⚠️ Невалидный токен при logout, но возвращаем успех:', tokenError.message);
+    // Если есть refresh token, отзываем его и получаем userId
+    if (refreshToken) {
+      try {
+        const { revokeRefreshToken, validateRefreshToken } = await import('./services/authService.js');
+        
+        // Сначала получаем пользователя из refresh token
+        const tokenData = await validateRefreshToken(refreshToken);
+        if (tokenData) {
+          userId = tokenData.user_id;
+        }
+        
+        // Отзываем refresh token
+        await revokeRefreshToken(refreshToken);
+        console.log(`♻️ Refresh token отозван при logout`);
+      } catch (refreshError) {
+        console.log('⚠️ Ошибка отзыва refresh token:', refreshError.message);
+      }
+    }
+
+    // Если удалось получить userId, отзываем все его токены
+    if (userId) {
+      try {
+        const { revokeAllUserTokens } = await import('./services/authService.js');
+        await revokeAllUserTokens(userId);
+        
+        // Удаляем и legacy сессии
+        await query('DELETE FROM user_sessions WHERE user_id = $1', [userId]);
+        
+        console.log(`🔐 Logout пользователя ${userId}: все токены отозваны`);
+      } catch (revokeError) {
+        console.log('⚠️ Ошибка отзыва токенов при logout:', revokeError.message);
+      }
     }
 
     res.json({
       success: true,
       message: 'Успешный выход из системы'
     });
+    
   } catch (error) {
     console.error('❌ Ошибка выхода:', error);
     // Даже при ошибке возвращаем успех - важно чтобы frontend мог выйти
     res.json({
       success: true,
       message: 'Успешный выход из системы'
+    });
+  }
+});
+
+// ============ ENHANCED AUTHENTICATION ENDPOINTS ============
+
+// Обновление access token через refresh token
+app.post('/api/auth/refresh', async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(400).json({
+        success: false,
+        message: 'Refresh token обязателен',
+        code: 'MISSING_REFRESH_TOKEN'
+      });
+    }
+
+    const { refreshAccessToken } = await import('./services/authService.js');
+    const result = await refreshAccessToken(refreshToken);
+
+    console.log(`🔄 Access token обновлен для пользователя ${result.user.id}`);
+
+    res.json({
+      success: true,
+      message: 'Токен успешно обновлен',
+      data: {
+        accessToken: result.accessToken,
+        accessTokenExpiry: result.accessTokenExpiry,
+        // Обратная совместимость
+        token: result.accessToken,
+        user: result.user
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Ошибка обновления токена:', error);
+    
+    let statusCode = 401;
+    let errorCode = 'REFRESH_TOKEN_ERROR';
+    
+    if (error.message.includes('Недействительный') || error.message.includes('истекший')) {
+      statusCode = 401;
+      errorCode = 'INVALID_REFRESH_TOKEN';
+    }
+
+    res.status(statusCode).json({
+      success: false,
+      message: error.message,
+      code: errorCode
+    });
+  }
+});
+
+// Получение информации о сессиях пользователя
+app.get('/api/auth/sessions', authMiddleware, async (req, res) => {
+  try {
+    const { getUserSessions } = await import('./services/authService.js');
+    const sessions = await getUserSessions(req.user.id);
+
+    res.json({
+      success: true,
+      message: 'Сессии получены',
+      data: {
+        sessions,
+        total: sessions.length
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Ошибка получения сессий:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Не удалось получить сессии'
+    });
+  }
+});
+
+// Отзыв конкретной сессии
+app.delete('/api/auth/sessions/:sessionId', authMiddleware, async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const { revokeSession } = await import('./services/authService.js');
+
+    await revokeSession(req.user.id, sessionId);
+
+    console.log(`🔄 Сессия ${sessionId} отозвана пользователем ${req.user.id}`);
+
+    res.json({
+      success: true,
+      message: 'Сессия успешно отозвана'
+    });
+
+  } catch (error) {
+    console.error('❌ Ошибка отзыва сессии:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Не удалось отозвать сессию'
+    });
+  }
+});
+
+// Отзыв всех сессий пользователя (кроме текущей)
+app.post('/api/auth/revoke-all-sessions', authMiddleware, async (req, res) => {
+  try {
+    const { revokeAllUserTokens } = await import('./services/authService.js');
+    
+    await revokeAllUserTokens(req.user.id);
+
+    console.log(`🔄 Все сессии пользователя ${req.user.id} отозваны`);
+
+    res.json({
+      success: true,
+      message: 'Все сессии успешно отозваны'
+    });
+
+  } catch (error) {
+    console.error('❌ Ошибка отзыва всех сессий:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Не удалось отозвать сессии'
     });
   }
 });
@@ -5483,6 +5720,9 @@ app.delete('/api/cache', async (req, res) => {
     res.status(500).json({ error: 'Ошибка очистки кэша' });
   }
 });
+
+// Error monitoring middleware (должен быть в конце)
+app.use(errorMonitoringMiddleware());
 
 // Для запуска сервера используйте start.js
 

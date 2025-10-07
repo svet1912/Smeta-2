@@ -1,0 +1,25 @@
+nohup: ignoring input
+
+> mantis-material-free-react@1.6.0 client
+> vite
+
+10:47:02 AM [vite] (client) Forced re-optimization of dependencies
+
+  VITE v7.0.4  ready in 368 ms
+
+  ➜  Local:   http://localhost:3000/
+  ➜  Network: http://10.0.11.68:3000/
+10:56:05 AM [vite] http proxy error: /api/projects
+Error: socket hang up
+    at Socket.socketOnEnd (node:_http_client:542:25)
+    at Socket.emit (node:events:531:35)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+11:06:29 AM [vite] http proxy error: /api/auth/me
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+11:29:48 AM [vite] http proxy error: /api/auth/me
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)

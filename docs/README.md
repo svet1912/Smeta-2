@@ -11,24 +11,8 @@
 
 ### 📊 Отчеты и анализ (`/reports/`)
 - [`REPORT_SMETA360_20250928.md`](./reports/REPORT_SMETA360_20250928.md) - Главный технический отчет
-- [`PROJECT_ANALYSIS_REPORT_2025_09_30.md`](./reports/PROJECT_ANALYSIS_REPORT_2025_09_30.md) - Анализ проекта
-- [`CUSTOMER_ESTIMATES_IMPLEMENTATION_REPORT.md`](./reports/CUSTOMER_ESTIMATES_IMPLEMENTATION_REPORT.md) - Отчет по реализации смет заказчика
-- [`DATABASE_INTEGRATION_REPORT.md`](./reports/DATABASE_INTEGRATION_REPORT.md) - Отчет по интеграции БД
-- [`FINAL_OPTIMIZATION_REPORT.md`](./reports/FINAL_OPTIMIZATION_REPORT.md) - Финальная оптимизация
+- [`FINAL_OPTIMIZATION_REPORT.md`](./reports/FINAL_OPTIMIZATION_REPORT.md) - Финальная оптимизация системы
 - [`FINAL_TESTING_REPORT.md`](./reports/FINAL_TESTING_REPORT.md) - Финальное тестирование
-
-#### Пошаговые отчеты по оптимизации:
-- [`STEP1_METRICS_BASELINE_REPORT.md`](./reports/STEP1_METRICS_BASELINE_REPORT.md) - Базовые метрики
-- [`STEP2_DATABASE_OPTIMIZATION_REPORT.md`](./reports/STEP2_DATABASE_OPTIMIZATION_REPORT.md) - Оптимизация БД
-- [`STEP3_BACKEND_ACCELERATION_REPORT.md`](./reports/STEP3_BACKEND_ACCELERATION_REPORT.md) - Ускорение бэкенда
-- [`STEP4_ADVANCED_CACHING_REPORT.md`](./reports/STEP4_ADVANCED_CACHING_REPORT.md) - Продвинутое кэширование
-- [`STEP5_FRONTEND_OPTIMIZATION_REPORT.md`](./reports/STEP5_FRONTEND_OPTIMIZATION_REPORT.md) - Оптимизация фронтенда
-
-#### Отчеты по тестированию:
-- [`STEP_T1_TESTING_SETUP_REPORT.md`](./reports/STEP_T1_TESTING_SETUP_REPORT.md) - Настройка тестирования
-- [`TESTING_T3_REPORT.md`](./reports/TESTING_T3_REPORT.md) - T3 тестирование
-- [`T4_E2E_REPORT.md`](./reports/T4_E2E_REPORT.md) - E2E тестирование
-- [`T4_FIX_REPORT.md`](./reports/T4_FIX_REPORT.md) - Исправления T4
 
 ### 📖 Общая документация
 - [`DEPLOYMENT.md`](./DEPLOYMENT.md) - Руководство по развертыванию
@@ -37,8 +21,7 @@
 - [`SECRETS_SETUP.md`](./SECRETS_SETUP.md) - Настройка секретов
 - [`SERVER_COMMANDS.md`](./SERVER_COMMANDS.md) - Серверные команды
 - [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md) - Кодекс поведения
-- [`MATERIAL_PREVIEW_UPDATE.md`](./MATERIAL_PREVIEW_UPDATE.md) - Обновление превью материалов
-- [`REORGANIZATION_REPORT.md`](./REORGANIZATION_REPORT.md) - 📁 Отчет о реорганизации структуры проекта
+- [`CUSTOMER_ESTIMATE_TENANCY.md`](./CUSTOMER_ESTIMATE_TENANCY.md) - Мультитенантность смет заказчика
 
 ---
 
@@ -56,9 +39,9 @@
 
 ### Для аналитиков:
 1. [Main Report](./reports/REPORT_SMETA360_20250928.md) - Основной технический отчет
-2. [Performance Reports](./reports/) - Отчеты по производительности
-3. [Testing Reports](./reports/) - Отчеты по тестированию
+2. [Optimization Report](./reports/FINAL_OPTIMIZATION_REPORT.md) - Отчет по оптимизации
+3. [Testing Report](./reports/FINAL_TESTING_REPORT.md) - Отчет по тестированию
 
 ---
 
-*Последнее обновление: 1 октября 2025*
+*Последнее обновление: 7 октября 2025*

@@ -1,0 +1,842 @@
+nohup: ignoring input
+[dotenv@17.2.3] injecting env (19) from .env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from ../.env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+🔑 DATABASE_URL загружен: postgres:***@azap001-kiy026-3dfc.j.aivencloud.com:11433/defaultdb?sslmode=require
+🔍 DB META: {
+  host: 'azap001-kiy026-3dfc.j.aivencloud.com',
+  port: '11433',
+  user: 'avnadmin',
+  passwordLength: 24,
+  hasPassword: true,
+  database: 'defaultdb'
+}
+🔧 Aiven Cloud: используем sslmode=prefer
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+[dotenv@17.2.3] injecting env (0) from ../.env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+🚀 Запуск исправленного сервера...
+🔧 Настроена расширенная CORS политика
+🔧 Инициализация сервера...
+📊 Инициализация базы данных...
+(node:117109) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✅ Подключение к PostgreSQL установлено (ssl: off )
+🐌 МЕДЛЕННЫЙ ЗАПРОС: {
+  text: '\n' +
+    '      CREATE TABLE IF NOT EXISTS auth_users (\n' +
+    '        id SERIAL PRIMARY KEY,\n' +
+    '        email VARCHAR(...',
+  duration: '1237ms',
+  rows: null,
+  params: 'нет'
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS auth_users (\n   ...',
+  duration: '1237ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS user_sessions (\n...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE INDEX IF NOT EXISTS idx_auth_users_e...',
+  duration: '165ms',
+  rows: undefined
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS users (\n        ...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS orders (\n       ...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS statistics (\n   ...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS work_materials (...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS construction_pro...',
+  duration: '166ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS user_roles (\n   ...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS user_role_assign...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS object_parameter...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS project_rooms (\n...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS constructive_ele...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS engineering_syst...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS customer_estimat...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS customer_estimat...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS customer_estimat...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS customer_estimat...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS audit_log (\n    ...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS permissions (\n  ...',
+  duration: '166ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS role_permissions...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE construction_projects ADD COLUMN IF NO...',
+  duration: '165ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE construction_projects ADD COLUMN IF NO...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE construction_projects ADD COLUMN IF NO...',
+  duration: '166ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE auth_users ADD COLUMN IF NOT EXISTS ph...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE auth_users ADD COLUMN IF NOT EXISTS po...',
+  duration: '165ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE auth_users ADD COLUMN IF NOT EXISTS lo...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE auth_users ADD COLUMN IF NOT EXISTS bi...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '166ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'ALTER TABLE project_rooms ADD COLUMN IF NOT EXISTS...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'CREATE INDEX IF NOT EXISTS idx_construction_projec...',
+  duration: '170ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: 'CREATE INDEX IF NOT EXISTS idx_construction_projec...',
+  duration: '164ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE INDEX IF NOT EXISTS idx_auth_users_e...',
+  duration: '327ms',
+  rows: undefined
+}
+✅ Выполнен запрос: {
+  text: 'SELECT COUNT(*) FROM permissions...',
+  duration: '165ms',
+  rows: 1
+}
+✅ Разрешения уже инициализированы
+✅ Выполнен запрос: {
+  text: 'SELECT COUNT(*) FROM auth_users...',
+  duration: '165ms',
+  rows: 1
+}
+✅ Выполнен запрос: { text: 'SELECT COUNT(*) FROM orders...', duration: '164ms', rows: 1 }
+✅ Выполнен запрос: {
+  text: '\n      CREATE TABLE IF NOT EXISTS leads (\n        ...',
+  duration: '163ms',
+  rows: null
+}
+✅ Выполнен запрос: {
+  text: '\n      CREATE INDEX IF NOT EXISTS idx_leads_email_...',
+  duration: '165ms',
+  rows: null
+}
+✅ Таблица leads инициализирована
+✅ База данных инициализирована
+✅ Выполнен запрос: { text: 'SELECT NOW() as current_time...', duration: '163ms', rows: 1 }
+✅ Подключение к базе данных проверено: 2025-10-07T12:41:01.822Z
+🕒 Запуск планировщика очистки токенов (каждые 6 часов)
+✅ Планировщик очистки токенов запущен
+🎯 Сервер готов к работе!
+🚀 Сервер запущен на http://localhost:3001
+📊 API доступно по адресу: http://localhost:3001/api/test
+🌐 Внешний доступ через порт: 3001
+✅ Выполнен запрос: {
+  text: 'SELECT * FROM get_refresh_token_stats()...',
+  duration: '168ms',
+  rows: 1
+}
+📊 Статистика refresh tokens: {
+  total: '0',
+  active: '0',
+  expired: '0',
+  revoked: '0',
+  uniqueUsers: '0',
+  avgLifetime: null
+}
+📨 POST /api/auth/login [2hb7d8qcz] (1/10)
+📨 POST /api/auth/login - 127.0.0.1
+✅ Выполнен запрос: {
+  text: '\n      SELECT id, email, password_hash, firstname,...',
+  duration: '165ms',
+  rows: 1
+}
+{"level":30,"time":1759840887733,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759840887493-ca9852450de7b","method":"POST","url":"/api/auth/login","query":{},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*","content-type":"application/json","content-length":"56"},"remoteAddress":"127.0.0.1","remotePort":46746},"res":{"statusCode":401,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"299","ratelimit-reset":"900","content-type":"application/json; charset=utf-8","content-length":"72","etag":"\"48-S1XS9eu0aQL+VIyK9A6suv0Ulyk\""}},"responseTime":239,"msg":"request completed"}
+📨 POST /api/auth/register [y1w3ybb2z] (1/10)
+📨 POST /api/auth/register - 127.0.0.1
+🔍 POST /api/auth/register - получен запрос: {
+  email: 'auth-test@smeta360.com',
+  password: 'testpass123',
+  firstname: 'Auth',
+  lastname: 'Tester',
+  company: 'Test Company'
+}
+✅ Выполнен запрос: {
+  text: '\n      SELECT id, email, password_hash, firstname,...',
+  duration: '164ms',
+  rows: 0
+}
+✅ Выполнен запрос: {
+  text: '\n      INSERT INTO auth_users (email, password_has...',
+  duration: '165ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n        INSERT INTO user_sessions (user_id, token...',
+  duration: '203ms',
+  rows: 1
+}
+✅ Регистрация успешна для: auth-test@smeta360.com
+{"level":30,"time":1759840908453,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759840907621-30d88e10cc10c","method":"POST","url":"/api/auth/register","query":{},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*","content-type":"application/json","content-length":"156"},"remoteAddress":"127.0.0.1","remotePort":43384},"res":{"statusCode":201,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"298","ratelimit-reset":"880","content-type":"application/json; charset=utf-8","content-length":"559","etag":"\"22f-W+W9qsjgLFrc3OBlT2AW4EwEZzk\""}},"responseTime":831,"msg":"request completed"}
+📨 POST /api/auth/login [gr3zq5f78] (1/10)
+📨 POST /api/auth/login - 127.0.0.1
+✅ Выполнен запрос: {
+  text: '\n      SELECT id, email, password_hash, firstname,...',
+  duration: '164ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: 'UPDATE auth_users SET last_login = NOW() WHERE id ...',
+  duration: '164ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n        SELECT ur.name as role_name\n        FROM ...',
+  duration: '167ms',
+  rows: 0
+}
+✅ Выполнен запрос: {
+  text: '\n        SELECT tenant_id FROM user_tenants \n     ...',
+  duration: '164ms',
+  rows: 0
+}
+✅ Выполнен запрос: {
+  text: '\n      INSERT INTO refresh_tokens (\n        user_i...',
+  duration: '168ms',
+  rows: 1
+}
+🔄 Создан refresh token для пользователя 16
+✅ Выполнен запрос: {
+  text: '\n        INSERT INTO user_sessions (user_id, token...',
+  duration: '165ms',
+  rows: 1
+}
+✅ Пользователь auth-test@smeta360.com вошел в систему с refresh token
+{"level":30,"time":1759840917671,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759840916378-be0b65f3e38ad","method":"POST","url":"/api/auth/login","query":{},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*","content-type":"application/json","content-length":"74"},"remoteAddress":"127.0.0.1","remotePort":34112},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"297","ratelimit-reset":"872","content-type":"application/json; charset=utf-8","content-length":"1148","etag":"\"47c-68A/zLSvUZVXHdRi56Yd9WwGMhY\""}},"responseTime":1293,"msg":"request completed"}
+✅ Выполнен запрос: {
+  text: '\n      DELETE FROM refresh_tokens \n      WHERE exp...',
+  duration: '163ms',
+  rows: 0
+}
+📨 POST /api/auth/login [giindcsh6] (1/10)
+📨 POST /api/auth/login - 127.0.0.1
+✅ Выполнен запрос: {
+  text: '\n      SELECT id, email, password_hash, firstname,...',
+  duration: '164ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: 'UPDATE auth_users SET last_login = NOW() WHERE id ...',
+  duration: '164ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n        SELECT ur.name as role_name\n        FROM ...',
+  duration: '164ms',
+  rows: 0
+}
+✅ Выполнен запрос: {
+  text: '\n        SELECT tenant_id FROM user_tenants \n     ...',
+  duration: '164ms',
+  rows: 0
+}
+✅ Выполнен запрос: {
+  text: '\n      INSERT INTO refresh_tokens (\n        user_i...',
+  duration: '165ms',
+  rows: 1
+}
+🔄 Создан refresh token для пользователя 16
+✅ Выполнен запрос: {
+  text: '\n        INSERT INTO user_sessions (user_id, token...',
+  duration: '164ms',
+  rows: 1
+}
+✅ Пользователь auth-test@smeta360.com вошел в систему с refresh token
+{"level":30,"time":1759840929668,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759840928376-b9e470e501ef8","method":"POST","url":"/api/auth/login","query":{},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*","content-type":"application/json","content-length":"75"},"remoteAddress":"127.0.0.1","remotePort":36036},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"296","ratelimit-reset":"860","content-type":"application/json; charset=utf-8","content-length":"1148","etag":"\"47c-uZ7vvZEajD79n3140YhETJ3V+EE\""}},"responseTime":1291,"msg":"request completed"}
+📨 POST /api/auth/refresh [p7817owbp] (1/10)
+📨 POST /api/auth/refresh - 127.0.0.1
+✅ Выполнен запрос: {
+  text: '\n      SELECT rt.*, au.id as user_id, au.email, au...',
+  duration: '165ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n      UPDATE refresh_tokens \n      SET last_used_...',
+  duration: '164ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n      SELECT ur.name as role_name\n      FROM user...',
+  duration: '164ms',
+  rows: 0
+}
+🔄 Access token обновлен для пользователя 16
+🔄 Access token обновлен для пользователя 16
+{"level":30,"time":1759840930252,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759840929754-fab74fe0cec97","method":"POST","url":"/api/auth/refresh","query":{},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*","content-type":"application/json","content-length":"148"},"remoteAddress":"127.0.0.1","remotePort":46424},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"295","ratelimit-reset":"858","content-type":"application/json; charset=utf-8","content-length":"888","etag":"\"378-QoQkqLq5CkbJ/1U2SXyUK6uQ7fs\""}},"responseTime":498,"msg":"request completed"}
+📨 POST /api/auth/login [jrqjiqnjn] (1/10)
+📨 POST /api/auth/login - 127.0.0.1
+✅ Выполнен запрос: {
+  text: '\n      SELECT id, email, password_hash, firstname,...',
+  duration: '164ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: 'UPDATE auth_users SET last_login = NOW() WHERE id ...',
+  duration: '164ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n        SELECT ur.name as role_name\n        FROM ...',
+  duration: '164ms',
+  rows: 0
+}
+✅ Выполнен запрос: {
+  text: '\n        SELECT tenant_id FROM user_tenants \n     ...',
+  duration: '164ms',
+  rows: 0
+}
+✅ Выполнен запрос: {
+  text: '\n      INSERT INTO refresh_tokens (\n        user_i...',
+  duration: '164ms',
+  rows: 1
+}
+🔄 Создан refresh token для пользователя 16
+✅ Выполнен запрос: {
+  text: '\n        INSERT INTO user_sessions (user_id, token...',
+  duration: '163ms',
+  rows: 1
+}
+✅ Пользователь auth-test@smeta360.com вошел в систему с refresh token
+{"level":30,"time":1759840939052,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759840937771-77c4d203c952b","method":"POST","url":"/api/auth/login","query":{},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*","content-type":"application/json","content-length":"62"},"remoteAddress":"127.0.0.1","remotePort":46434},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"294","ratelimit-reset":"850","content-type":"application/json; charset=utf-8","content-length":"1148","etag":"\"47c-+X8Fmx6/cQVvlmQj1Tsvoi+zhyw\""}},"responseTime":1281,"msg":"request completed"}
+📨 POST /api/auth/refresh [wb5n8r8ke] (1/10)
+📨 POST /api/auth/refresh - 127.0.0.1
+✅ Выполнен запрос: {
+  text: '\n      SELECT rt.*, au.id as user_id, au.email, au...',
+  duration: '166ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n      UPDATE refresh_tokens \n      SET last_used_...',
+  duration: '163ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n      SELECT ur.name as role_name\n      FROM user...',
+  duration: '168ms',
+  rows: 0
+}
+🔄 Access token обновлен для пользователя 16
+🔄 Access token обновлен для пользователя 16
+{"level":30,"time":1759840939631,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759840939128-42541fa0a5c54","method":"POST","url":"/api/auth/refresh","query":{},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*","content-type":"application/json","content-length":"148"},"remoteAddress":"127.0.0.1","remotePort":43366},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"293","ratelimit-reset":"849","content-type":"application/json; charset=utf-8","content-length":"888","etag":"\"378-tTp3aMnJYUMpYOrDB8HF8Gd0azQ\""}},"responseTime":503,"msg":"request completed"}
+📨 POST /api/auth/login [x6tkka8d0] (1/10)
+📨 POST /api/auth/login - 127.0.0.1
+✅ Выполнен запрос: {
+  text: '\n      SELECT id, email, password_hash, firstname,...',
+  duration: '166ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: 'UPDATE auth_users SET last_login = NOW() WHERE id ...',
+  duration: '163ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n        SELECT ur.name as role_name\n        FROM ...',
+  duration: '163ms',
+  rows: 0
+}
+✅ Выполнен запрос: {
+  text: '\n        SELECT tenant_id FROM user_tenants \n     ...',
+  duration: '163ms',
+  rows: 0
+}
+✅ Выполнен запрос: {
+  text: '\n      INSERT INTO refresh_tokens (\n        user_i...',
+  duration: '164ms',
+  rows: 1
+}
+🔄 Создан refresh token для пользователя 16
+✅ Выполнен запрос: {
+  text: '\n        INSERT INTO user_sessions (user_id, token...',
+  duration: '164ms',
+  rows: 1
+}
+✅ Пользователь auth-test@smeta360.com вошел в систему с refresh token
+{"level":30,"time":1759840949207,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759840947813-a2aafa19fa5c7","method":"POST","url":"/api/auth/login","query":{},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*","content-type":"application/json","content-length":"62"},"remoteAddress":"127.0.0.1","remotePort":43376},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"292","ratelimit-reset":"840","content-type":"application/json; charset=utf-8","content-length":"1148","etag":"\"47c-1VOPCTVn0nE9eDFmZtwFkGFeOI0\""}},"responseTime":1394,"msg":"request completed"}
+📨 POST /api/auth/refresh [8aaobhw8c] (1/10)
+📨 POST /api/auth/refresh - 127.0.0.1
+✅ Выполнен запрос: {
+  text: '\n      SELECT rt.*, au.id as user_id, au.email, au...',
+  duration: '165ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n      UPDATE refresh_tokens \n      SET last_used_...',
+  duration: '164ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n      SELECT ur.name as role_name\n      FROM user...',
+  duration: '164ms',
+  rows: 0
+}
+🔄 Access token обновлен для пользователя 16
+🔄 Access token обновлен для пользователя 16
+{"level":30,"time":1759840949772,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759840949274-5b56698621cab","method":"POST","url":"/api/auth/refresh","query":{},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*","content-type":"application/json","content-length":"148"},"remoteAddress":"127.0.0.1","remotePort":34496},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"291","ratelimit-reset":"839","content-type":"application/json; charset=utf-8","content-length":"888","etag":"\"378-EpzdH+sDVqqAApSfyRUhm/fzI7w\""}},"responseTime":498,"msg":"request completed"}
+📨 POST /api/auth/login [mwv2ofdqp] (1/10)
+📨 POST /api/auth/login - 127.0.0.1
+✅ Подключение к PostgreSQL установлено (ssl: off )
+🐌 МЕДЛЕННЫЙ ЗАПРОС: {
+  text: '\n' +
+    '      SELECT id, email, password_hash, firstname, lastname, company, is_active, email_verified, cre...',
+  duration: '1205ms',
+  rows: 1,
+  params: 'да'
+}
+✅ Выполнен запрос: {
+  text: '\n      SELECT id, email, password_hash, firstname,...',
+  duration: '1205ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: 'UPDATE auth_users SET last_login = NOW() WHERE id ...',
+  duration: '166ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n        SELECT ur.name as role_name\n        FROM ...',
+  duration: '172ms',
+  rows: 0
+}
+✅ Выполнен запрос: {
+  text: '\n        SELECT tenant_id FROM user_tenants \n     ...',
+  duration: '166ms',
+  rows: 0
+}
+✅ Выполнен запрос: {
+  text: '\n      INSERT INTO refresh_tokens (\n        user_i...',
+  duration: '167ms',
+  rows: 1
+}
+🔄 Создан refresh token для пользователя 16
+✅ Выполнен запрос: {
+  text: '\n        INSERT INTO user_sessions (user_id, token...',
+  duration: '165ms',
+  rows: 1
+}
+✅ Пользователь auth-test@smeta360.com вошел в систему с refresh token
+{"level":30,"time":1759841003098,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759841000753-39f8dd8082a2e","method":"POST","url":"/api/auth/login","query":{},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*","content-type":"application/json","content-length":"74"},"remoteAddress":"127.0.0.1","remotePort":37848},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"290","ratelimit-reset":"787","content-type":"application/json; charset=utf-8","content-length":"1148","etag":"\"47c-BLtdYNo464RQ50Ny463W9pnujvQ\""}},"responseTime":2344,"msg":"request completed"}
+📨 POST /api/auth/refresh [bpni3jmtz] (1/10)
+📨 POST /api/auth/refresh - 127.0.0.1
+✅ Выполнен запрос: {
+  text: '\n      SELECT rt.*, au.id as user_id, au.email, au...',
+  duration: '165ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n      UPDATE refresh_tokens \n      SET last_used_...',
+  duration: '165ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n      SELECT ur.name as role_name\n      FROM user...',
+  duration: '164ms',
+  rows: 0
+}
+🔄 Access token обновлен для пользователя 16
+🔄 Access token обновлен для пользователя 16
+{"level":30,"time":1759841003619,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759841003120-5cab246c33aa6","method":"POST","url":"/api/auth/refresh","query":{},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*","content-type":"application/json","content-length":"148"},"remoteAddress":"127.0.0.1","remotePort":37858},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"289","ratelimit-reset":"785","content-type":"application/json; charset=utf-8","content-length":"888","etag":"\"378-S7HeCCZuOQqSmqafpz/rctmdNQQ\""}},"responseTime":499,"msg":"request completed"}
+📨 GET /api/auth/me [p1gbttypi] (1/10)
+🔍 Извлечен userId 16, tenantId null из JWT токена
+⚠️ tenantId не найден в JWT токене
+📨 GET /api/auth/me - 127.0.0.1
+✅ Выполнен запрос: {
+  text: '\n      SELECT id, email, firstname, lastname, comp...',
+  duration: '164ms',
+  rows: 1
+}
+{"level":30,"time":1759841003808,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759841003638-f49c36344ff0a","method":"GET","url":"/api/auth/me","query":{},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*","authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE2LCJlbWFpbCI6ImF1dGgtdGVzdEBzbWV0YTM2MC5jb20iLCJmaXJzdG5hbWUiOiJBdXRoIiwibGFzdG5hbWUiOiJUZXN0ZXIiLCJyb2xlIjoiZXN0aW1hdG9yIiwidGVuYW50SWQiOm51bGwsInRva2VuVHlwZSI6ImFjY2VzcyIsImlhdCI6MTc1OTg0MTAwMywiZXhwIjoxNzU5ODQxOTAzfQ.n7xkXzTJvVxSWDmMhLk520AR14kbj6ATheJm22YS6gM"},"remoteAddress":"127.0.0.1","remotePort":37868},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"288","ratelimit-reset":"784","content-type":"application/json; charset=utf-8","content-length":"286","etag":"\"11e-ORNPK5QWvZT0zfIl/TUFCmQxxac\""}},"responseTime":170,"msg":"request completed"}
+📨 GET /api/auth/sessions [8weifqyjm] (1/10)
+🔍 Извлечен userId 16, tenantId null из JWT токена
+⚠️ tenantId не найден в JWT токене
+📨 GET /api/auth/sessions - 127.0.0.1
+{"level":30,"time":1759841003826,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759841003823-b953e8e50b4f8","method":"GET","url":"/api/auth/sessions","query":{},"params":{},"headers":{"host":"localhost:3001","user-agent":"curl/8.14.1","accept":"*/*","authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE2LCJlbWFpbCI6ImF1dGgtdGVzdEBzbWV0YTM2MC5jb20iLCJmaXJzdG5hbWUiOiJBdXRoIiwibGFzdG5hbWUiOiJUZXN0ZXIiLCJyb2xlIjoiZXN0aW1hdG9yIiwidGVuYW50SWQiOm51bGwsInRva2VuVHlwZSI6ImFjY2VzcyIsImlhdCI6MTc1OTg0MTAwMywiZXhwIjoxNzU5ODQxOTAzfQ.n7xkXzTJvVxSWDmMhLk520AR14kbj6ATheJm22YS6gM"},"remoteAddress":"127.0.0.1","remotePort":37876},"res":{"statusCode":401,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"287","ratelimit-reset":"784","content-type":"application/json; charset=utf-8","content-length":"101","etag":"\"65-UH58Yhle2PQdGdIyjTK69NVGoMo\""}},"responseTime":3,"msg":"request completed"}
+📨 POST /api/auth/login [ksckp7skd] (1/10)
+📨 POST /api/auth/login - 127.0.0.1
+✅ Подключение к PostgreSQL установлено (ssl: off )
+🐌 МЕДЛЕННЫЙ ЗАПРОС: {
+  text: '\n' +
+    '      SELECT id, email, password_hash, firstname, lastname, company, is_active, email_verified, cre...',
+  duration: '1198ms',
+  rows: 1,
+  params: 'да'
+}
+✅ Выполнен запрос: {
+  text: '\n      SELECT id, email, password_hash, firstname,...',
+  duration: '1198ms',
+  rows: 1
+}
+{"level":30,"time":1759843525607,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843524348-842f895d5c01e","method":"POST","url":"/api/auth/login","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","content-type":"application/json","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node","accept-encoding":"gzip, deflate","content-length":"53"},"remoteAddress":"127.0.0.1","remotePort":38514},"res":{"statusCode":401,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"299","ratelimit-reset":"900","content-type":"application/json; charset=utf-8","content-length":"72","etag":"\"48-S1XS9eu0aQL+VIyK9A6suv0Ulyk\""}},"responseTime":1259,"msg":"request completed"}
+📨 GET /api/performance/dashboard [0tu1togii] (1/10)
+🔍 Извлечен userId undefined, tenantId undefined из JWT токена
+⚠️ tenantId не найден в JWT токене
+📨 GET /api/performance/dashboard - 127.0.0.1
+{"level":30,"time":1759843525626,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843525616-24ac4d4ace55a","method":"GET","url":"/api/performance/dashboard","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","authorization":"Bearer mock-jwt-token","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node","accept-encoding":"gzip, deflate"},"remoteAddress":"127.0.0.1","remotePort":38524},"res":{"statusCode":404,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"298","ratelimit-reset":"899","content-security-policy":"default-src 'none'","x-content-type-options":"nosniff","content-type":"text/html; charset=utf-8","content-length":164}},"responseTime":10,"msg":"request completed"}
+📨 GET /api/performance/stats [asjufwtnh] (1/10)
+🔍 Извлечен userId undefined, tenantId undefined из JWT токена
+⚠️ tenantId не найден в JWT токене
+📨 GET /api/performance/stats - 127.0.0.1
+{"level":30,"time":1759843525633,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843525628-41b2ca53bd17c","method":"GET","url":"/api/performance/stats","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","authorization":"Bearer mock-jwt-token","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node","accept-encoding":"gzip, deflate"},"remoteAddress":"127.0.0.1","remotePort":38514},"res":{"statusCode":404,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"297","ratelimit-reset":"899","content-security-policy":"default-src 'none'","x-content-type-options":"nosniff","content-type":"text/html; charset=utf-8","content-length":160}},"responseTime":5,"msg":"request completed"}
+📨 GET /api/performance/health [xs2wkshvo] (1/10)
+📨 GET /api/performance/health - 127.0.0.1
+{"level":30,"time":1759843525636,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843525635-bfebec1cdfb69","method":"GET","url":"/api/performance/health","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","content-type":"application/json","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node","accept-encoding":"gzip, deflate"},"remoteAddress":"127.0.0.1","remotePort":38524},"res":{"statusCode":404,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"296","ratelimit-reset":"899","content-security-policy":"default-src 'none'","x-content-type-options":"nosniff","content-type":"text/html; charset=utf-8","content-length":161}},"responseTime":1,"msg":"request completed"}
+📨 GET /api/performance/version [7on0gsdqv] (1/10)
+📨 GET /api/performance/version - 127.0.0.1
+{"level":30,"time":1759843525641,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843525639-f0422ef2192d6","method":"GET","url":"/api/performance/version","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","content-type":"application/json","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node","accept-encoding":"gzip, deflate"},"remoteAddress":"127.0.0.1","remotePort":38514},"res":{"statusCode":404,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"295","ratelimit-reset":"899","content-security-policy":"default-src 'none'","x-content-type-options":"nosniff","content-type":"text/html; charset=utf-8","content-length":162}},"responseTime":2,"msg":"request completed"}
+📨 GET /api/performance/docs [byfmajncz] (1/10)
+📨 GET /api/performance/docs - 127.0.0.1
+{"level":30,"time":1759843525650,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843525649-1ff4ab7561e82","method":"GET","url":"/api/performance/docs","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","content-type":"application/json","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node","accept-encoding":"gzip, deflate"},"remoteAddress":"127.0.0.1","remotePort":38524},"res":{"statusCode":404,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"294","ratelimit-reset":"899","content-security-policy":"default-src 'none'","x-content-type-options":"nosniff","content-type":"text/html; charset=utf-8","content-length":159}},"responseTime":1,"msg":"request completed"}
+📨 POST /api/performance/clear-cache [tyqjcfykh] (1/10)
+🔍 Извлечен userId undefined, tenantId undefined из JWT токена
+⚠️ tenantId не найден в JWT токене
+📨 POST /api/performance/clear-cache - 127.0.0.1
+{"level":30,"time":1759843525662,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843525661-3a9fbbe0fc19d","method":"POST","url":"/api/performance/clear-cache","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","authorization":"Bearer mock-jwt-token","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node","accept-encoding":"gzip, deflate","content-length":"0"},"remoteAddress":"127.0.0.1","remotePort":38514},"res":{"statusCode":404,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"293","ratelimit-reset":"899","content-security-policy":"default-src 'none'","x-content-type-options":"nosniff","content-type":"text/html; charset=utf-8","content-length":167}},"responseTime":1,"msg":"request completed"}
+📨 POST /api/performance/test [8gyoxtkph] (1/10)
+🔍 Извлечен userId undefined, tenantId undefined из JWT токена
+⚠️ tenantId не найден в JWT токене
+📨 POST /api/performance/test - 127.0.0.1
+{"level":30,"time":1759843525677,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843525670-63f7accaaa97a","method":"POST","url":"/api/performance/test","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","authorization":"Bearer mock-jwt-token","content-type":"text/plain;charset=UTF-8","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node","accept-encoding":"gzip, deflate","content-length":"31"},"remoteAddress":"127.0.0.1","remotePort":38524},"res":{"statusCode":404,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"292","ratelimit-reset":"899","content-security-policy":"default-src 'none'","x-content-type-options":"nosniff","content-type":"text/html; charset=utf-8","content-length":160}},"responseTime":7,"msg":"request completed"}
+📨 POST /api/performance/graphql [drlkvoy9e] (1/10)
+🔍 Извлечен userId undefined, tenantId undefined из JWT токена
+⚠️ tenantId не найден в JWT токене
+📨 POST /api/performance/graphql - 127.0.0.1
+{"level":30,"time":1759843525691,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843525687-7408feec347e9","method":"POST","url":"/api/performance/graphql","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","authorization":"Bearer mock-jwt-token","content-type":"application/json","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node","accept-encoding":"gzip, deflate","content-length":"22"},"remoteAddress":"127.0.0.1","remotePort":38514},"res":{"statusCode":404,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"291","ratelimit-reset":"899","content-security-policy":"default-src 'none'","x-content-type-options":"nosniff","content-type":"text/html; charset=utf-8","content-length":163}},"responseTime":4,"msg":"request completed"}
+📨 POST /api/performance/batch [dqoldssqc] (1/10)
+🔍 Извлечен userId undefined, tenantId undefined из JWT токена
+⚠️ tenantId не найден в JWT токене
+📨 POST /api/performance/batch - 127.0.0.1
+{"level":30,"time":1759843525700,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843525699-95668101b2c78","method":"POST","url":"/api/performance/batch","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","authorization":"Bearer mock-jwt-token","content-type":"text/plain;charset=UTF-8","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node","accept-encoding":"gzip, deflate","content-length":"158"},"remoteAddress":"127.0.0.1","remotePort":38524},"res":{"statusCode":404,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"290","ratelimit-reset":"899","content-security-policy":"default-src 'none'","x-content-type-options":"nosniff","content-type":"text/html; charset=utf-8","content-length":161}},"responseTime":1,"msg":"request completed"}
+📨 GET /api/materials [1lcpmu1xs] (1/10)
+📨 GET /api/materials - 127.0.0.1
+🚀 Инициализация Redis клиента...
+✅ Redis подключен
+🎯 Redis готов к работе
+❌ Cache MISS для ключа: materials:q=:p=1:l=50
+🔄 Загрузка данных для ключа: materials:q=:p=1:l=50
+🔄 Загрузка материалов из базы данных...
+✅ Выполнен запрос: {
+  text: '\n          SELECT COALESCE(MAX(updated_at), MAX(cr...',
+  duration: '170ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n          SELECT * FROM materials \n          \n   ...',
+  duration: '354ms',
+  rows: 50
+}
+✅ Выполнен запрос: {
+  text: '\n          SELECT COUNT(*) as total FROM materials...',
+  duration: '165ms',
+  rows: 1
+}
+💾 Cache SET для ключа: materials:q=:p=1:l=50, TTL: 600s
+{"level":30,"time":1759843526422,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843525708-9d3dfe061e13c","method":"GET","url":"/api/materials","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","api-version":"1","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node","accept-encoding":"gzip, deflate"},"remoteAddress":"127.0.0.1","remotePort":38514},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"289","ratelimit-reset":"899","cache-control":"public, max-age=300, stale-while-revalidate=60","last-modified":"Wed, 01 Oct 2025 08:16:08 GMT","content-type":"application/json; charset=utf-8","etag":"\"5ef0-OQ2JXFHsANgr8JJpnOfoyxCKvUw\"","content-encoding":"gzip"}},"responseTime":714,"msg":"request completed"}
+📨 GET /api/materials [jrdx2papg] (1/10)
+📨 GET /api/materials - 127.0.0.1
+✅ Cache HIT для ключа: materials:q=:p=1:l=50
+{"level":30,"time":1759843526433,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843526427-3c6aaa5ba4112","method":"GET","url":"/api/materials","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","api-version":"2","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node","accept-encoding":"gzip, deflate"},"remoteAddress":"127.0.0.1","remotePort":38514},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"288","ratelimit-reset":"898","cache-control":"public, max-age=300, stale-while-revalidate=60","last-modified":"Wed, 01 Oct 2025 08:16:08 GMT","content-type":"application/json; charset=utf-8","etag":"\"5ef0-OQ2JXFHsANgr8JJpnOfoyxCKvUw\"","content-encoding":"gzip"}},"responseTime":6,"msg":"request completed"}
+📨 GET /api/materials [xa07txozq] (1/10)
+📨 GET /api/materials - 127.0.0.1
+✅ Cache HIT для ключа: materials:q=:p=1:l=50
+{"level":30,"time":1759843526441,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843526436-1d67979b53e64","method":"GET","url":"/api/materials","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","accept-encoding":"gzip, deflate, br","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node"},"remoteAddress":"127.0.0.1","remotePort":38514},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"287","ratelimit-reset":"898","cache-control":"public, max-age=300, stale-while-revalidate=60","last-modified":"Wed, 01 Oct 2025 08:16:08 GMT","content-type":"application/json; charset=utf-8","etag":"\"5ef0-OQ2JXFHsANgr8JJpnOfoyxCKvUw\"","content-encoding":"br"}},"responseTime":5,"msg":"request completed"}
+📨 GET /api/materials [18tjb5okg] (1/10)
+📨 GET /api/materials - 127.0.0.1
+✅ Cache HIT для ключа: materials:q=:p=1:l=50
+{"level":30,"time":1759843526449,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843526445-ed5c05f1c3c28","method":"GET","url":"/api/materials","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","content-type":"application/json","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node","accept-encoding":"gzip, deflate"},"remoteAddress":"127.0.0.1","remotePort":38514},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"286","ratelimit-reset":"898","cache-control":"public, max-age=300, stale-while-revalidate=60","last-modified":"Wed, 01 Oct 2025 08:16:08 GMT","content-type":"application/json; charset=utf-8","etag":"\"5ef0-OQ2JXFHsANgr8JJpnOfoyxCKvUw\"","content-encoding":"gzip"}},"responseTime":4,"msg":"request completed"}
+📨 GET /api/materials [1ik9jju7j] (1/10)
+📨 GET /api/materials - 127.0.0.1
+✅ Cache HIT для ключа: materials:q=:p=1:l=50
+{"level":30,"time":1759843526456,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843526451-318885ac27a49","method":"GET","url":"/api/materials","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","content-type":"application/json","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node","accept-encoding":"gzip, deflate"},"remoteAddress":"127.0.0.1","remotePort":38514},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"285","ratelimit-reset":"898","cache-control":"public, max-age=300, stale-while-revalidate=60","last-modified":"Wed, 01 Oct 2025 08:16:08 GMT","content-type":"application/json; charset=utf-8","etag":"\"5ef0-OQ2JXFHsANgr8JJpnOfoyxCKvUw\"","content-encoding":"gzip"}},"responseTime":5,"msg":"request completed"}
+📨 GET /api/materials [3rlv8wore] (1/10)
+📨 GET /api/works [4h12kbkcc] (2/10)
+📨 GET /api/materials - 127.0.0.1
+📨 GET /api/works - 127.0.0.1
+✅ Cache HIT для ключа: materials:q=:p=1:l=50
+❌ Cache MISS для ключа: works:q=:p=1:l=50
+📨 GET /api/phases [9106ucypn] (3/10)
+🔄 Загрузка данных для ключа: works:q=:p=1:l=50
+🔄 Загрузка работ из базы данных...
+📨 GET /api/phases - 127.0.0.1
+{"level":30,"time":1759843526468,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843526460-ecd9058f31ef8","method":"GET","url":"/api/materials","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","content-type":"application/json","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node","accept-encoding":"gzip, deflate"},"remoteAddress":"127.0.0.1","remotePort":38514},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"284","ratelimit-reset":"898","cache-control":"public, max-age=300, stale-while-revalidate=60","last-modified":"Wed, 01 Oct 2025 08:16:08 GMT","content-type":"application/json; charset=utf-8","etag":"\"5ef0-OQ2JXFHsANgr8JJpnOfoyxCKvUw\"","content-encoding":"gzip"}},"responseTime":8,"msg":"request completed"}
+✅ Выполнен запрос: {
+  text: '\n          SELECT COALESCE(MAX(updated_at), MAX(cr...',
+  duration: '166ms',
+  rows: 1
+}
+✅ Выполнен запрос: {
+  text: '\n          SELECT \n            w.*,\n            p....',
+  duration: '173ms',
+  rows: 50
+}
+✅ Выполнен запрос: {
+  text: '\n          SELECT COUNT(*) as total \n          FRO...',
+  duration: '163ms',
+  rows: 1
+}
+💾 Cache SET для ключа: works:q=:p=1:l=50, TTL: 600s
+{"level":30,"time":1759843526975,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843526461-69b05b32274f7","method":"GET","url":"/api/works","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","content-type":"application/json","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node","accept-encoding":"gzip, deflate"},"remoteAddress":"127.0.0.1","remotePort":38524},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"283","ratelimit-reset":"898","cache-control":"public, max-age=300, stale-while-revalidate=60","last-modified":"Wed, 24 Sep 2025 20:49:27 GMT","content-type":"application/json; charset=utf-8","etag":"\"654b-lPbyPAuj1Ms2WIG4T97ZLL5cdlo\"","content-encoding":"gzip"}},"responseTime":514,"msg":"request completed"}
+✅ Подключение к PostgreSQL установлено (ssl: off )
+🐌 МЕДЛЕННЫЙ ЗАПРОС: {
+  text: 'SELECT * FROM phases ORDER BY sort_order, id...',
+  duration: '1494ms',
+  rows: 540,
+  params: 'нет'
+}
+✅ Выполнен запрос: {
+  text: 'SELECT * FROM phases ORDER BY sort_order, id...',
+  duration: '1494ms',
+  rows: 540
+}
+{"level":30,"time":1759843527968,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843526465-c07303d3e3331","method":"GET","url":"/api/phases","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","content-type":"application/json","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node","accept-encoding":"gzip, deflate"},"remoteAddress":"127.0.0.1","remotePort":38536},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"282","ratelimit-reset":"898","content-type":"application/json; charset=utf-8","etag":"\"10231-uDSz6o+7aPnNrY2ngpvhV8Fm5/o\"","content-encoding":"gzip"}},"responseTime":1503,"msg":"request completed"}
+📨 POST /api/auth/login [1w4jw4xqg] (1/10)
+📨 POST /api/auth/login - 127.0.0.1
+✅ Подключение к PostgreSQL установлено (ssl: off )
+🐌 МЕДЛЕННЫЙ ЗАПРОС: {
+  text: '\n' +
+    '      SELECT id, email, password_hash, firstname, lastname, company, is_active, email_verified, cre...',
+  duration: '1190ms',
+  rows: 1,
+  params: 'да'
+}
+✅ Выполнен запрос: {
+  text: '\n      SELECT id, email, password_hash, firstname,...',
+  duration: '1190ms',
+  rows: 1
+}
+{"level":30,"time":1759843661416,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843660166-903158ba6e7de","method":"POST","url":"/api/auth/login","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","content-type":"application/json","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node","accept-encoding":"gzip, deflate","content-length":"53"},"remoteAddress":"127.0.0.1","remotePort":38140},"res":{"statusCode":401,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"281","ratelimit-reset":"765","content-type":"application/json; charset=utf-8","content-length":"72","etag":"\"48-S1XS9eu0aQL+VIyK9A6suv0Ulyk\""}},"responseTime":1250,"msg":"request completed"}
+📨 GET /api/performance/dashboard [jzte6w1ud] (1/10)
+🔍 Извлечен userId undefined, tenantId undefined из JWT токена
+⚠️ tenantId не найден в JWT токене
+📨 GET /api/performance/dashboard - 127.0.0.1
+{"level":30,"time":1759843661430,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843661427-f71c63d20550c","method":"GET","url":"/api/performance/dashboard","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","authorization":"Bearer mock-jwt-token","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node","accept-encoding":"gzip, deflate"},"remoteAddress":"127.0.0.1","remotePort":38144},"res":{"statusCode":404,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"280","ratelimit-reset":"763","content-security-policy":"default-src 'none'","x-content-type-options":"nosniff","content-type":"text/html; charset=utf-8","content-length":164}},"responseTime":3,"msg":"request completed"}
+📨 GET /api/performance/stats [9isawm7ws] (1/10)
+🔍 Извлечен userId undefined, tenantId undefined из JWT токена
+⚠️ tenantId не найден в JWT токене
+📨 GET /api/performance/stats - 127.0.0.1
+📨 GET /api/performance/health [xj8mke68l] (1/10)
+{"level":30,"time":1759843661435,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843661433-211b152b65ad9","method":"GET","url":"/api/performance/stats","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","authorization":"Bearer mock-jwt-token","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node","accept-encoding":"gzip, deflate"},"remoteAddress":"127.0.0.1","remotePort":38140},"res":{"statusCode":404,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"279","ratelimit-reset":"763","content-security-policy":"default-src 'none'","x-content-type-options":"nosniff","content-type":"text/html; charset=utf-8","content-length":160}},"responseTime":2,"msg":"request completed"}
+📨 GET /api/performance/health - 127.0.0.1
+{"level":30,"time":1759843661439,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843661438-2e6227c21d8cf","method":"GET","url":"/api/performance/health","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","content-type":"application/json","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node","accept-encoding":"gzip, deflate"},"remoteAddress":"127.0.0.1","remotePort":38144},"res":{"statusCode":404,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"278","ratelimit-reset":"763","content-security-policy":"default-src 'none'","x-content-type-options":"nosniff","content-type":"text/html; charset=utf-8","content-length":161}},"responseTime":1,"msg":"request completed"}
+📨 GET /api/performance/version [7vs3ej7hr] (1/10)
+📨 GET /api/performance/version - 127.0.0.1
+{"level":30,"time":1759843661447,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843661444-a2b33969be70c","method":"GET","url":"/api/performance/version","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","content-type":"application/json","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node","accept-encoding":"gzip, deflate"},"remoteAddress":"127.0.0.1","remotePort":38140},"res":{"statusCode":404,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"277","ratelimit-reset":"763","content-security-policy":"default-src 'none'","x-content-type-options":"nosniff","content-type":"text/html; charset=utf-8","content-length":162}},"responseTime":3,"msg":"request completed"}
+📨 GET /api/performance/docs [oj01jrrik] (1/10)
+📨 GET /api/performance/docs - 127.0.0.1
+{"level":30,"time":1759843661453,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843661451-e1e0bfda70093","method":"GET","url":"/api/performance/docs","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","content-type":"application/json","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node","accept-encoding":"gzip, deflate"},"remoteAddress":"127.0.0.1","remotePort":38144},"res":{"statusCode":404,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"276","ratelimit-reset":"763","content-security-policy":"default-src 'none'","x-content-type-options":"nosniff","content-type":"text/html; charset=utf-8","content-length":159}},"responseTime":2,"msg":"request completed"}
+📨 POST /api/performance/clear-cache [v5mvn26qd] (1/10)
+🔍 Извлечен userId undefined, tenantId undefined из JWT токена
+⚠️ tenantId не найден в JWT токене
+📨 POST /api/performance/clear-cache - 127.0.0.1
+{"level":30,"time":1759843661455,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843661455-6ff71ea732fcb","method":"POST","url":"/api/performance/clear-cache","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","authorization":"Bearer mock-jwt-token","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node","accept-encoding":"gzip, deflate","content-length":"0"},"remoteAddress":"127.0.0.1","remotePort":38140},"res":{"statusCode":404,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"275","ratelimit-reset":"763","content-security-policy":"default-src 'none'","x-content-type-options":"nosniff","content-type":"text/html; charset=utf-8","content-length":167}},"responseTime":0,"msg":"request completed"}
+📨 POST /api/performance/test [2qddbg9he] (1/10)
+🔍 Извлечен userId undefined, tenantId undefined из JWT токена
+⚠️ tenantId не найден в JWT токене
+📨 POST /api/performance/test - 127.0.0.1
+{"level":30,"time":1759843661460,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843661459-2dbe3ea24ee21","method":"POST","url":"/api/performance/test","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","authorization":"Bearer mock-jwt-token","content-type":"text/plain;charset=UTF-8","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node","accept-encoding":"gzip, deflate","content-length":"31"},"remoteAddress":"127.0.0.1","remotePort":38144},"res":{"statusCode":404,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"274","ratelimit-reset":"763","content-security-policy":"default-src 'none'","x-content-type-options":"nosniff","content-type":"text/html; charset=utf-8","content-length":160}},"responseTime":1,"msg":"request completed"}
+📨 POST /api/performance/graphql [iolxptxc3] (1/10)
+🔍 Извлечен userId undefined, tenantId undefined из JWT токена
+⚠️ tenantId не найден в JWT токене
+📨 POST /api/performance/graphql - 127.0.0.1
+{"level":30,"time":1759843661465,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843661463-ac9eca0bf9a29","method":"POST","url":"/api/performance/graphql","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","authorization":"Bearer mock-jwt-token","content-type":"application/json","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node","accept-encoding":"gzip, deflate","content-length":"22"},"remoteAddress":"127.0.0.1","remotePort":38140},"res":{"statusCode":404,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"273","ratelimit-reset":"763","content-security-policy":"default-src 'none'","x-content-type-options":"nosniff","content-type":"text/html; charset=utf-8","content-length":163}},"responseTime":1,"msg":"request completed"}
+📨 POST /api/performance/batch [v4nnhk162] (1/10)
+🔍 Извлечен userId undefined, tenantId undefined из JWT токена
+⚠️ tenantId не найден в JWT токене
+📨 POST /api/performance/batch - 127.0.0.1
+{"level":30,"time":1759843661469,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843661468-b48f698a99bd7","method":"POST","url":"/api/performance/batch","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","authorization":"Bearer mock-jwt-token","content-type":"text/plain;charset=UTF-8","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node","accept-encoding":"gzip, deflate","content-length":"158"},"remoteAddress":"127.0.0.1","remotePort":38144},"res":{"statusCode":404,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"272","ratelimit-reset":"763","content-security-policy":"default-src 'none'","x-content-type-options":"nosniff","content-type":"text/html; charset=utf-8","content-length":161}},"responseTime":1,"msg":"request completed"}
+📨 GET /api/materials [4yetnbx7l] (1/10)
+📨 GET /api/materials - 127.0.0.1
+✅ Cache HIT для ключа: materials:q=:p=1:l=50
+{"level":30,"time":1759843661479,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843661472-e253aaebc2c04","method":"GET","url":"/api/materials","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","api-version":"1","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node","accept-encoding":"gzip, deflate"},"remoteAddress":"127.0.0.1","remotePort":38140},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"271","ratelimit-reset":"763","cache-control":"public, max-age=300, stale-while-revalidate=60","last-modified":"Wed, 01 Oct 2025 08:16:08 GMT","content-type":"application/json; charset=utf-8","etag":"\"5ef0-OQ2JXFHsANgr8JJpnOfoyxCKvUw\"","content-encoding":"gzip"}},"responseTime":7,"msg":"request completed"}
+📨 GET /api/materials [6hwv3qx6i] (1/10)
+📨 GET /api/materials - 127.0.0.1
+✅ Cache HIT для ключа: materials:q=:p=1:l=50
+{"level":30,"time":1759843661504,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843661495-d6008234ce6a7","method":"GET","url":"/api/materials","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","api-version":"2","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node","accept-encoding":"gzip, deflate"},"remoteAddress":"127.0.0.1","remotePort":38140},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"270","ratelimit-reset":"763","cache-control":"public, max-age=300, stale-while-revalidate=60","last-modified":"Wed, 01 Oct 2025 08:16:08 GMT","content-type":"application/json; charset=utf-8","etag":"\"5ef0-OQ2JXFHsANgr8JJpnOfoyxCKvUw\"","content-encoding":"gzip"}},"responseTime":9,"msg":"request completed"}
+📨 GET /api/materials [it8etvs0f] (1/10)
+📨 GET /api/materials - 127.0.0.1
+✅ Cache HIT для ключа: materials:q=:p=1:l=50
+{"level":30,"time":1759843661515,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843661507-fc48515f1d64a","method":"GET","url":"/api/materials","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","accept-encoding":"gzip, deflate, br","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node"},"remoteAddress":"127.0.0.1","remotePort":38140},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"269","ratelimit-reset":"763","cache-control":"public, max-age=300, stale-while-revalidate=60","last-modified":"Wed, 01 Oct 2025 08:16:08 GMT","content-type":"application/json; charset=utf-8","etag":"\"5ef0-OQ2JXFHsANgr8JJpnOfoyxCKvUw\"","content-encoding":"br"}},"responseTime":8,"msg":"request completed"}
+📨 GET /api/materials [x2xfxgcbh] (1/10)
+📨 GET /api/materials - 127.0.0.1
+✅ Cache HIT для ключа: materials:q=:p=1:l=50
+{"level":30,"time":1759843661545,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843661522-f2b46bcb85ec6","method":"GET","url":"/api/materials","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","content-type":"application/json","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node","accept-encoding":"gzip, deflate"},"remoteAddress":"127.0.0.1","remotePort":38140},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"268","ratelimit-reset":"763","cache-control":"public, max-age=300, stale-while-revalidate=60","last-modified":"Wed, 01 Oct 2025 08:16:08 GMT","content-type":"application/json; charset=utf-8","etag":"\"5ef0-OQ2JXFHsANgr8JJpnOfoyxCKvUw\"","content-encoding":"gzip"}},"responseTime":23,"msg":"request completed"}
+📨 GET /api/materials [etniy0auj] (1/10)
+📨 GET /api/materials - 127.0.0.1
+✅ Cache HIT для ключа: materials:q=:p=1:l=50
+{"level":30,"time":1759843661566,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843661550-8362b0317e55d","method":"GET","url":"/api/materials","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","content-type":"application/json","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node","accept-encoding":"gzip, deflate"},"remoteAddress":"127.0.0.1","remotePort":38140},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"267","ratelimit-reset":"763","cache-control":"public, max-age=300, stale-while-revalidate=60","last-modified":"Wed, 01 Oct 2025 08:16:08 GMT","content-type":"application/json; charset=utf-8","etag":"\"5ef0-OQ2JXFHsANgr8JJpnOfoyxCKvUw\"","content-encoding":"gzip"}},"responseTime":16,"msg":"request completed"}
+📨 GET /api/materials [n6cguknay] (1/10)
+📨 GET /api/materials - 127.0.0.1
+📨 GET /api/works [n5nhg9tau] (2/10)
+✅ Cache HIT для ключа: materials:q=:p=1:l=50
+📨 GET /api/works - 127.0.0.1
+📨 GET /api/phases [jyj345y5f] (3/10)
+✅ Cache HIT для ключа: works:q=:p=1:l=50
+📨 GET /api/phases - 127.0.0.1
+{"level":30,"time":1759843661623,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843661580-64d88086ea0fa","method":"GET","url":"/api/materials","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","content-type":"application/json","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node","accept-encoding":"gzip, deflate"},"remoteAddress":"127.0.0.1","remotePort":38140},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"266","ratelimit-reset":"763","cache-control":"public, max-age=300, stale-while-revalidate=60","last-modified":"Wed, 01 Oct 2025 08:16:08 GMT","content-type":"application/json; charset=utf-8","etag":"\"5ef0-OQ2JXFHsANgr8JJpnOfoyxCKvUw\"","content-encoding":"gzip"}},"responseTime":43,"msg":"request completed"}
+{"level":30,"time":1759843661624,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843661596-300375e0ef337","method":"GET","url":"/api/works","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","content-type":"application/json","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node","accept-encoding":"gzip, deflate"},"remoteAddress":"127.0.0.1","remotePort":38144},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"265","ratelimit-reset":"763","cache-control":"public, max-age=300, stale-while-revalidate=60","last-modified":"Wed, 24 Sep 2025 20:49:27 GMT","content-type":"application/json; charset=utf-8","etag":"\"654b-lPbyPAuj1Ms2WIG4T97ZLL5cdlo\"","content-encoding":"gzip"}},"responseTime":28,"msg":"request completed"}
+✅ Выполнен запрос: {
+  text: 'SELECT * FROM phases ORDER BY sort_order, id...',
+  duration: '496ms',
+  rows: 540
+}
+{"level":30,"time":1759843662118,"pid":117109,"hostname":"codespaces-1e7a1f","req":{"id":"1759843661607-ba3c520fa3d21","method":"GET","url":"/api/phases","query":{},"params":{},"headers":{"host":"localhost:3001","connection":"keep-alive","content-type":"application/json","accept":"*/*","accept-language":"*","sec-fetch-mode":"cors","user-agent":"node","accept-encoding":"gzip, deflate"},"remoteAddress":"127.0.0.1","remotePort":38158},"res":{"statusCode":200,"headers":{"x-powered-by":"Express","connection":"keep-alive","vary":"Origin, Accept-Encoding","access-control-allow-credentials":"true","ratelimit-policy":"300;w=900","ratelimit-limit":"300","ratelimit-remaining":"264","ratelimit-reset":"763","content-type":"application/json; charset=utf-8","etag":"\"10231-uDSz6o+7aPnNrY2ngpvhV8Fm5/o\"","content-encoding":"gzip"}},"responseTime":511,"msg":"request completed"}

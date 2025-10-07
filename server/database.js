@@ -2,10 +2,18 @@ import pg from 'pg';
 import fs from 'fs';
 import dotenv from 'dotenv';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
-// Явная загрузка .env из текущей папки server
-const envPath = path.resolve('.env');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Явная загрузка .env из папки server
+const envPath = path.resolve(__dirname, '.env');
 dotenv.config({ path: envPath });
+
+// Также пробуем загрузить из корневой директории
+const rootEnvPath = path.resolve(__dirname, '..', '.env');
+dotenv.config({ path: rootEnvPath });
 if (!process.env.DATABASE_URL) {
   console.warn('⚠️ DATABASE_URL не найден после загрузки .env по пути:', envPath);
 } else {
