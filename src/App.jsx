@@ -15,7 +15,7 @@ import DebugApp from './DebugApp';
 
 export default function App() {
   // Временно включаем debug режим
-  const isDebugMode = false; // Измените на true для отладки
+  const isDebugMode = true; // Измените на true для отладки
 
   if (isDebugMode) {
     return <DebugApp />;
