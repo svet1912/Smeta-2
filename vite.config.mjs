@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
   const PORT = 3000;
 
   return {
-    base: '/',
+    base: API_URL,
     server: {
       open: true,
       port: PORT,
@@ -45,10 +45,8 @@ export default defineConfig(({ mode }) => {
     },
     resolve: {
       alias: {
-        '@ant-design/icons': path.resolve(__dirname, 'node_modules/@ant-design/icons'),
-        // Фиксим React для правильного импорта
-        react: path.resolve(__dirname, 'node_modules/react'),
-        'react-dom': path.resolve(__dirname, 'node_modules/react-dom')
+        '@ant-design/icons': path.resolve(__dirname, 'node_modules/@ant-design/icons')
+        // Add more aliases as needed
       }
     },
     plugins: [
@@ -66,21 +64,10 @@ export default defineConfig(({ mode }) => {
       chunkSizeWarningLimit: 1000,
       sourcemap: false, // Отключаем source maps для production
       cssCodeSplit: true,
-      target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari13.1'],
-      assetsInlineLimit: 0, // Отключаем инлайн ассетов - исправляет data: URLs
       rollupOptions: {
-        external: (id) => {
-          // Не делаем React external - он должен быть в bundle
-          return false;
-        },
         output: {
-          format: 'es',
           chunkFileNames: 'js/[name]-[hash].js',
           entryFileNames: 'js/[name]-[hash].js',
-          globals: {
-            react: 'React',
-            'react-dom': 'ReactDOM'
-          },
           assetFileNames: (assetInfo) => {
             const name = assetInfo.name || '';
             const ext = name.split('.').pop();
@@ -89,8 +76,32 @@ export default defineConfig(({ mode }) => {
             if (/\.(woff2?|eot|ttf|otf)$/.test(name)) return `fonts/[name]-[hash].${ext}`;
             return `assets/[name]-[hash].${ext}`;
           },
-          // Временно отключаем manual chunks для теста
-          manualChunks: false
+          // T4-RECOVERY: Оптимизированное разделение на чанки
+          manualChunks: (id) => {
+            // Vendor chunk - основные библиотеки
+            if (id.includes('node_modules')) {
+              if (id.includes('react') || id.includes('react-dom')) {
+                return 'vendor-react';
+              }
+              if (id.includes('@tanstack/react-query')) {
+                return 'vendor-query';
+              }
+              if (id.includes('antd') && !id.includes('@ant-design/icons')) {
+                return 'vendor-antd';
+              }
+              if (id.includes('@ant-design/icons')) {
+                return 'vendor-icons';
+              }
+              if (id.includes('@mui')) {
+                return 'vendor-mui';
+              }
+              if (id.includes('axios') || id.includes('lodash')) {
+                return 'vendor-utils';
+              }
+              // Остальные vendor libraries
+              return 'vendor-misc';
+            }
+          }
         }
       },
       // Минификация и оптимизация
@@ -108,7 +119,6 @@ export default defineConfig(({ mode }) => {
       include: [
         'react',
         'react-dom',
-        'react-dom/client',
         'react/jsx-runtime',
         '@tanstack/react-query',
         'antd/es/button',

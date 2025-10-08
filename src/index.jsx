@@ -1,8 +1,5 @@
 import { createRoot } from 'react-dom/client';
 
-// React 18 compatibility polyfill
-import './react18-polyfill.js';
-
 // style.scss
 import 'assets/style.css';
 
@@ -34,21 +31,22 @@ import '@fontsource/public-sans/500.css';
 import '@fontsource/public-sans/600.css';
 import '@fontsource/public-sans/700.css';
 
-// Временно используем простое приложение для тестирования
-import SimpleApp from './SimpleApp';
-
-// Оригинальные импорты (закомментированы для теста)
-// import App from './App';
-// import reportWebVitals from './reportWebVitals';
-// import { QueryClientProvider } from '@tanstack/react-query';
-// import { queryClient } from 'utils/queryClient';
+// project imports
+import App from './App';
+import reportWebVitals from './reportWebVitals';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from 'utils/queryClient';
 
 const container = document.getElementById('root');
 const root = createRoot(container);
 
-// ==============================|| SIMPLE TEST APP ||============================== //
+// ==============================|| MAIN - REACT DOM RENDER ||============================== //
 
-root.render(<SimpleApp />);
+root.render(
+  <QueryClientProvider client={queryClient}>
+    <App />
+  </QueryClientProvider>
+);
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
