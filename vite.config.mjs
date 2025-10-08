@@ -89,16 +89,20 @@ export default defineConfig(({ mode }) => {
               if (id.includes('antd') && !id.includes('@ant-design/icons')) {
                 return 'vendor-antd';
               }
-              if (id.includes('@ant-design/icons')) {
-                return 'vendor-icons';
-              }
-              if (id.includes('@mui')) {
+              // ВРЕМЕННО ОТКЛЮЧЕНО: проблема с vendor-icons createContext
+              // if (id.includes('@ant-design/icons')) {
+              //   return 'vendor-icons';
+              // }
+              // if (id.includes('@mui/icons-material')) {
+              //   return 'vendor-icons';
+              // }
+              if (id.includes('@mui') && !id.includes('@mui/icons')) {
                 return 'vendor-mui';
               }
               if (id.includes('axios') || id.includes('lodash')) {
                 return 'vendor-utils';
               }
-              // Остальные vendor libraries
+              // Остальные vendor libraries (включая иконки в общий vendor)
               return 'vendor-misc';
             }
           }
@@ -129,16 +133,22 @@ export default defineConfig(({ mode }) => {
         'antd/es/card',
         'antd/es/form',
         'antd/es/select',
-        '@ant-design/icons',
+        // ВРЕМЕННО ОТКЛЮЧЕНО: проблема с иконками
+        // '@ant-design/icons',
+        // '@mui/icons-material',
         '@mui/material',
         '@mui/material/Box',
         '@mui/material/Button',
-        '@mui/icons-material',
         'hoist-non-react-statics',
         '@emotion/react',
         '@emotion/styled',
         'axios',
         'react-router-dom'
+      ],
+      // Исключаем проблемные иконки из предкомпиляции
+      exclude: [
+        '@ant-design/icons',
+        '@mui/icons-material'
       ],
       // Заставляем Vite предкомпилировать проблемные ESM пакеты
       force: true
