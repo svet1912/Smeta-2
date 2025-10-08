@@ -2,12 +2,8 @@ import { createRoot } from 'react-dom/client';
 
 // MIME Types fix - MUST be loaded first
 import './mime-fix';
-// Emergency AsyncMode patch - MUST be loaded absolutely first
-import './emergency-asyncmode-patch';
-// Vendor patches - must be loaded first
-import './vendor-patches';
-// React 18 AsyncMode polyfill - must be loaded first
-import './react18-polyfill';
+// NOTE: Removed aggressive AsyncMode/vendor patches that touched window.React too early
+// If needed, they can be reintroduced after React is guaranteed to be initialized.
 
 // style.scss
 import 'assets/style.css';

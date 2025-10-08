@@ -29,9 +29,8 @@
     <link rel="dns-prefetch" href="//fonts.googleapis.com" />
     <link rel="dns-prefetch" href="//fonts.gstatic.com" />
 
-    <!-- Preload critical resources for better FCP -->
-    <link rel="modulepreload" href="/src/index.jsx" />
-    <link rel="modulepreload" href="/src/App.jsx" />
+  <!-- Preload critical resources for better FCP -->
+  <!-- Removed manual modulepreload of .jsx to avoid data:text/jsx MIME issues; Vite will handle preload automatically -->
     
     <!-- Fonts are loaded via @fontsource packages in src/index.jsx -->
 

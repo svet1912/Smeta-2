@@ -8,8 +8,8 @@ try {
   eval('1+1');
   console.log('✅ CSP eval test passed');
   window.__CSP_EVAL_OK__ = true;
-} catch(e) {
-  console.warn('⚠️ CSP blocking eval, attempting workaround...');
+} catch (e) {
+  console.warn('⚠️ CSP blocking eval, attempting workaround...', e && e.message);
   try {
     // Function constructor fallback
     const testFunc = new Function('return 1+1');
@@ -17,14 +17,14 @@ try {
     window.eval = new Function('code', 'return eval(code)');
     window.__CSP_EVAL_OK__ = true;
     console.log('✅ CSP eval workaround successful');
-  } catch(e2) {
-    console.warn('❌ Total CSP eval block detected');
+  } catch (e2) {
+    console.warn('❌ Total CSP eval block detected', e2 && e2.message);
     window.__CSP_EVAL_OK__ = false;
   }
 }
 
 // 2. React AsyncMode global patcher
-window.__REACT_ASYNCMODE_PATCHER__ = function(ReactObject) {
+window.__REACT_ASYNCMODE_PATCHER__ = function (ReactObject) {
   if (!ReactObject || typeof ReactObject !== 'object') return ReactObject;
   
   try {
@@ -43,7 +43,7 @@ window.__REACT_ASYNCMODE_PATCHER__ = function(ReactObject) {
         } else {
           // Создаем fallback
           ReactObject.AsyncMode = function AsyncModeFallback(props) {
-            return props ? (props.children || null) : null;
+            return props ? props.children || null : null;
           };
           console.log('✅ AsyncMode fallback created');
         }
@@ -60,7 +60,7 @@ window.__REACT_ASYNCMODE_PATCHER__ = function(ReactObject) {
 
 // 3. Global interceptors setup
 const originalDefineProperty = Object.defineProperty;
-Object.defineProperty = function(obj, prop, descriptor) {
+Object.defineProperty = function (obj, prop, descriptor) {
   // Перехватываем установку AsyncMode
   if (prop === 'AsyncMode' && obj && obj.version && obj.version.startsWith('18')) {
     console.log('🛡️ Intercepting AsyncMode property assignment');
@@ -72,12 +72,14 @@ Object.defineProperty = function(obj, prop, descriptor) {
 // 4. MIME type fetch interceptor
 if (window.fetch) {
   const originalFetch = window.fetch;
-  window.fetch = function(resource, init) {
-    if (typeof resource === 'string' && (
-      resource.includes('.jsx') || 
-      resource.includes('text/jsx') ||
-      resource.includes('application/jsx')
-    )) {
+  window.fetch = function (resource, init) {
+    if (
+      typeof resource === 'string' &&
+      (resource.includes('.jsx') ||
+        resource.includes('text/jsx') ||
+        resource.includes('application/jsx') ||
+        resource.includes('data:text/jsx'))
+    ) {
       console.log('🔧 MIME intercepting:', resource.split('?')[0]);
       init = init || {};
       init.headers = init.headers || {};
@@ -107,8 +109,9 @@ function checkAndPatchReact() {
       window.__REACT_ASYNCMODE_PATCHER__(React);
       return true;
     }
-  } catch(e) {
-    // React еще не загружен
+  } catch (e) {
+    // React еще не загружен; log at debug level to satisfy linter
+    if (e && e.message) console.debug('React not yet loaded', e.message);
   }
   
   if (reactCheckAttempts < maxReactCheckAttempts) {
