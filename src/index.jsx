@@ -1,5 +1,14 @@
 import { createRoot } from 'react-dom/client';
 
+// MIME Types fix - MUST be loaded first
+import './mime-fix';
+// Emergency AsyncMode patch - MUST be loaded absolutely first
+import './emergency-asyncmode-patch';
+// Vendor patches - must be loaded first
+import './vendor-patches';
+// React 18 AsyncMode polyfill - must be loaded first
+import './react18-polyfill';
+
 // style.scss
 import 'assets/style.css';
 

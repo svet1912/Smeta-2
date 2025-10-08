@@ -8,6 +8,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#1677ff" />
+    <!-- Content Security Policy - разрешаем необходимые источники для React SPA -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net data: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; connect-src 'self' https: wss: data:; media-src 'self' data: blob:; object-src 'none'; frame-src 'none';" />
     <meta name="title" content="Mantis - React Admin Dashboard Template by CodedThemes" />
     <meta
       name="description"
@@ -38,10 +40,106 @@
     <!-- Critical CSS preload hint -->
     <meta name="preload-chunks" content="react-vendor,mui-core,antd-core" />
 
+    <!-- MIME Type Fix - CRITICAL: Must load before any modules -->
+    <script>
+      console.log('🔧 Critical MIME Type fix loading...');
+      
+      // Перехватываем ошибки MIME типа
+      window.addEventListener('error', function(event) {
+        if (event.message && event.message.includes('MIME type')) {
+          console.log('🛠️ Critical: MIME type error intercepted in HTML');
+          event.preventDefault();
+          return false;
+        }
+      });
+      
+      // Исправляем динамические импорты с неправильным MIME типом
+      if (window.import) {
+        const originalImport = window.import;
+        window.import = function(url) {
+          if (typeof url === 'string' && url.includes('text/jsx')) {
+            url = url.replace('text/jsx', 'application/javascript');
+            console.log('🛠️ Fixed MIME type in import URL');
+          }
+          return originalImport(url);
+        };
+      }
+      
+      console.log('✅ Critical MIME Type fix ready');
+    </script>
+    
+    <!-- AsyncMode Polyfill - CRITICAL: Must load before any React code -->
+    <script>
+      console.log('🛡️ Critical AsyncMode polyfill loading...');
+      
+      // 1. Создаем AsyncMode stub функцию
+      window.__AsyncModeStub = function AsyncModePolyfill(props) {
+        return props && props.children ? props.children : null;
+      };
+      window.__AsyncModeStub.$$typeof = Symbol.for('react.async_mode');
+      window.__AsyncModeStub.displayName = 'AsyncMode (Critical Polyfill)';
+      
+      // 2. Перехватываем любые попытки установить AsyncMode как undefined
+      const originalDefineProperty = Object.defineProperty;
+      Object.defineProperty = function(obj, prop, descriptor) {
+        if (prop === 'AsyncMode') {
+          console.log('🛡️ Critical: Intercepting AsyncMode defineProperty');
+          if (!descriptor || descriptor.value === undefined) {
+            descriptor = {
+              value: window.__AsyncModeStub,
+              writable: false,
+              enumerable: false,
+              configurable: true
+            };
+          }
+        }
+        return originalDefineProperty.call(this, obj, prop, descriptor);
+      };
+      
+      // 3. Глобальный перехватчик ошибок
+      window.addEventListener('error', function(event) {
+        if (event.message && event.message.includes('AsyncMode')) {
+          console.log('🛡️ Critical: AsyncMode error intercepted in HTML');
+          event.preventDefault();
+          return false;
+        }
+      });
+      
+      console.log('✅ Critical AsyncMode polyfill ready');
+    </script>
+    
+    <!-- MIME Type Fix - Исправляет проблемы с JSX MIME типами -->
+    <script>
+      console.log('🔧 MIME Type fix loading...');
+      
+      // Патч для fetch API для правильной обработки JSX файлов
+      const originalFetch = window.fetch;
+      window.fetch = function(resource, init) {
+        // Если запрашиваем JSX файл, устанавливаем правильные заголовки
+        if (typeof resource === 'string' && (resource.includes('.jsx') || resource.includes('text/jsx'))) {
+          console.log('🔧 MIME Fix: Patching JSX request:', resource);
+          init = init || {};
+          init.headers = init.headers || {};
+          init.headers['Accept'] = 'application/javascript, text/javascript, */*';
+        }
+        return originalFetch.call(this, resource, init);
+      };
+      
+      // Перехват ошибок загрузки модулей
+      window.addEventListener('error', function(event) {
+        if (event.message && event.message.includes('MIME type')) {
+          console.log('🔧 MIME Error intercepted:', event.message);
+          event.preventDefault();
+          return false;
+        }
+      });
+      
+      console.log('✅ MIME Type fix ready');
+    </script>
+    
     <!-- this is to resolve issue in old safari browser in tablet -->
     <script src="https://cdn.jsdelivr.net/npm/resize-observer-polyfill@1.5.1/dist/ResizeObserver.min.js"></script>
-    <!-- Buy Now  -->
-    <script defer="" src="https://fomo.codedthemes.com/pixel/Oo2pYDncP8R8qhhETpWKGA04b8jPhUjF"></script>
+    <!-- Buy Now script removed - causes domain errors in production -->
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>

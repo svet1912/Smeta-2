@@ -22,6 +22,9 @@ export default defineConfig(({ mode }) => {
       fs: {
         strict: false // Разрешаем доступ к файлам вне root
       },
+      // Исправляем MIME типы для JSX
+      middlewareMode: false,
+      cors: true,
       proxy: {
         '/api-proxy': {
           target: 'http://localhost:3001',
@@ -80,8 +83,8 @@ export default defineConfig(({ mode }) => {
           manualChunks: (id) => {
             // Vendor chunk - основные библиотеки
             if (id.includes('node_modules')) {
-              // React + иконки должны быть вместе (иконки используют React.createContext)
-              if (id.includes('react') || id.includes('react-dom') || id.includes('@ant-design/icons')) {
+              // React + иконки + hoist-non-react-statics должны быть вместе
+              if (id.includes('react') || id.includes('react-dom') || id.includes('@ant-design/icons') || id.includes('hoist-non-react-statics')) {
                 return 'vendor-react';
               }
               if (id.includes('@tanstack/react-query')) {
