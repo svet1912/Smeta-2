@@ -8,8 +8,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#1677ff" />
-    <!-- Content Security Policy - разрешаем необходимые источники для React SPA -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net data: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; connect-src 'self' https: wss: data:; media-src 'self' data: blob:; object-src 'none'; frame-src 'none';" />
+    <!-- Content Security Policy - разрешаем eval для React/Vite dynamic imports -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://fomo.codedthemes.com https://vercel.live data: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; connect-src 'self' https: wss: ws: data: blob:; media-src 'self' data: blob: https:; object-src 'none'; frame-src 'none'; base-uri 'self'; form-action 'self';" />
     <meta name="title" content="Mantis - React Admin Dashboard Template by CodedThemes" />
     <meta
       name="description"
@@ -70,45 +70,34 @@
     
     <!-- AsyncMode Polyfill - CRITICAL: Must load before any React code -->
     <script>
-      console.log('🛡️ Critical AsyncMode polyfill loading...');
+      // 🛡️ CSP: Force allow eval for React/Vite compatibility
+      try {
+        // Test eval capability
+        eval('1+1');
+        console.log('✅ CSP eval test passed');
+      } catch(e) {
+        console.warn('⚠️ CSP blocking eval:', e.message);
+      }
       
-      // 1. Создаем AsyncMode stub функцию
-      window.__AsyncModeStub = function AsyncModePolyfill(props) {
-        return props && props.children ? props.children : null;
-      };
-      window.__AsyncModeStub.$$typeof = Symbol.for('react.async_mode');
-      window.__AsyncModeStub.displayName = 'AsyncMode (Critical Polyfill)';
-      
-      // 2. Перехватываем любые попытки установить AsyncMode как undefined
-      const originalDefineProperty = Object.defineProperty;
-      Object.defineProperty = function(obj, prop, descriptor) {
-        if (prop === 'AsyncMode') {
-          console.log('🛡️ Critical: Intercepting AsyncMode defineProperty');
-          if (!descriptor || descriptor.value === undefined) {
-            descriptor = {
-              value: window.__AsyncModeStub,
-              writable: false,
-              enumerable: false,
-              configurable: true
-            };
-          }
+      // 🛡️ CRITICAL: AsyncMode Polyfill для React 18 совместимости
+      if (typeof React !== 'undefined' && React.version && React.version.startsWith('18')) {
+        if (!React.AsyncMode && typeof React.unstable_AsyncMode !== 'undefined') {
+          console.log('� Setting React.AsyncMode from unstable_AsyncMode');
+          React.AsyncMode = React.unstable_AsyncMode;
         }
-        return originalDefineProperty.call(this, obj, prop, descriptor);
-      };
-      
-      // 3. Глобальный перехватчик ошибок
-      window.addEventListener('error', function(event) {
-        if (event.message && event.message.includes('AsyncMode')) {
-          console.log('🛡️ Critical: AsyncMode error intercepted in HTML');
-          event.preventDefault();
-          return false;
+        if (!React.AsyncMode && typeof React.ConcurrentMode !== 'undefined') {
+          console.log('🔧 Setting React.AsyncMode from ConcurrentMode');  
+          React.AsyncMode = React.ConcurrentMode;
         }
-      });
-      
+        if (!React.AsyncMode) {
+          console.log('� Creating React.AsyncMode fallback for compatibility');
+          React.AsyncMode = function(props) {
+            return props.children || null;
+          };
+        }
+      }
       console.log('✅ Critical AsyncMode polyfill ready');
-    </script>
-    
-    <!-- MIME Type Fix - Исправляет проблемы с JSX MIME типами -->
+    </script>    <!-- MIME Type Fix - Исправляет проблемы с JSX MIME типами -->
     <script>
       console.log('🔧 MIME Type fix loading...');
       
