@@ -80,7 +80,8 @@ export default defineConfig(({ mode }) => {
           manualChunks: (id) => {
             // Vendor chunk - основные библиотеки
             if (id.includes('node_modules')) {
-              if (id.includes('react') || id.includes('react-dom')) {
+              // React + иконки должны быть вместе (иконки используют React.createContext)
+              if (id.includes('react') || id.includes('react-dom') || id.includes('@ant-design/icons')) {
                 return 'vendor-react';
               }
               if (id.includes('@tanstack/react-query')) {
@@ -88,9 +89,6 @@ export default defineConfig(({ mode }) => {
               }
               if (id.includes('antd') && !id.includes('@ant-design/icons')) {
                 return 'vendor-antd';
-              }
-              if (id.includes('@ant-design/icons')) {
-                return 'vendor-icons';
               }
               if (id.includes('@mui')) {
                 return 'vendor-mui';
