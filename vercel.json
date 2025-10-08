@@ -124,10 +124,6 @@
       "source": "/(index\\.html|.*)",
       "headers": [
         {
-          "key": "Content-Security-Policy-Report-Only", 
-          "value": "default-src *; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; object-src *; font-src *; img-src *; media-src *; connect-src *; form-action *; base-uri *; frame-src *;"
-        },
-        {
           "key": "X-Frame-Options",
           "value": "DENY"
         },
