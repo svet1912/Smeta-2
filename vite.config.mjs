@@ -42,9 +42,12 @@ export default defineConfig(({ mode }) => {
       global: 'window',
       // Исправляем проблемы с process в браузере
       'process.env': 'import.meta.env',
-      // Polyfill для React 18 совместимости
+      // Более агрессивный polyfill для React 18 совместимости
       'React.AsyncMode': 'React.Fragment',
-      'React.unstable_AsyncMode': 'React.Fragment'
+      'React.unstable_AsyncMode': 'React.Fragment',
+      // Для случаев когда React импортируется как default
+      '__react_default__.AsyncMode': '__react_default__.Fragment',
+      '__react_default__.unstable_AsyncMode': '__react_default__.Fragment'
     },
     resolve: {
       alias: {
@@ -63,7 +66,21 @@ export default defineConfig(({ mode }) => {
         open: false, // не открываем автоматически в headless окружении
         gzipSize: true,
         brotliSize: true
-      })
+      }),
+      // Кастомный plugin для исправления React AsyncMode
+      {
+        name: 'fix-react-asyncmode',
+        transform(code, id) {
+          if (id.includes('node_modules') && (code.includes('AsyncMode') || code.includes('unstable_AsyncMode'))) {
+            code = code.replace(/React\.AsyncMode/g, 'React.Fragment');
+            code = code.replace(/React\.unstable_AsyncMode/g, 'React.Fragment');
+            code = code.replace(/\.AsyncMode\s*=/g, '.Fragment =');
+            code = code.replace(/\.unstable_AsyncMode\s*=/g, '.Fragment =');
+            return { code, map: null };
+          }
+          return null;
+        }
+      }
     ],
     build: {
       chunkSizeWarningLimit: 1000,
