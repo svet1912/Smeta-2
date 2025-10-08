@@ -67,10 +67,18 @@ export default defineConfig(({ mode }) => {
       target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari13.1'],
       assetsInlineLimit: 0, // Отключаем инлайн ассетов - исправляет data: URLs
       rollupOptions: {
+        external: (id) => {
+          // Не делаем React external - он должен быть в bundle
+          return false;
+        },
         output: {
           format: 'es',
           chunkFileNames: 'js/[name]-[hash].js',
           entryFileNames: 'js/[name]-[hash].js',
+          globals: {
+            react: 'React',
+            'react-dom': 'ReactDOM'
+          },
           assetFileNames: (assetInfo) => {
             const name = assetInfo.name || '';
             const ext = name.split('.').pop();
@@ -79,25 +87,31 @@ export default defineConfig(({ mode }) => {
             if (/\.(woff2?|eot|ttf|otf)$/.test(name)) return `fonts/[name]-[hash].${ext}`;
             return `assets/[name]-[hash].${ext}`;
           },
-          // T4-RECOVERY: Оптимизированное разделение на чанки
+          // T4-RECOVERY: Исправленное разделение на чанки - React первым
           manualChunks: (id) => {
             // Vendor chunk - основные библиотеки
             if (id.includes('node_modules')) {
-              if (id.includes('react') || id.includes('react-dom')) {
+              // React и React-DOM - самый важный чанк, загружается первым
+              if (id.includes('react') || id.includes('react-dom') || id.includes('react/jsx-runtime')) {
                 return 'vendor-react';
               }
+              // Иконки ВМЕСТЕ с React - избегаем проблем с createContext
+              if (id.includes('@ant-design/icons')) {
+                return 'vendor-react';
+              }
+              // React Query
               if (id.includes('@tanstack/react-query')) {
                 return 'vendor-query';
               }
-              if (id.includes('antd') && !id.includes('@ant-design/icons')) {
+              // Ant Design без иконок
+              if (id.includes('antd')) {
                 return 'vendor-antd';
               }
-              if (id.includes('@ant-design/icons')) {
-                return 'vendor-icons';
-              }
+              // Material UI
               if (id.includes('@mui')) {
                 return 'vendor-mui';
               }
+              // Утилиты
               if (id.includes('axios') || id.includes('lodash')) {
                 return 'vendor-utils';
               }
@@ -122,6 +136,7 @@ export default defineConfig(({ mode }) => {
       include: [
         'react',
         'react-dom',
+        'react-dom/client',
         'react/jsx-runtime',
         '@tanstack/react-query',
         'antd/es/button',
