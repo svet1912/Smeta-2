@@ -126,4 +126,70 @@ function checkAndPatchReact() {
 // Запускаем проверку
 checkAndPatchReact();
 
-console.log('✅ Emergency polyfill ready');
+// 6. Диагностика загрузки приложения
+let appMountCheckCount = 0;
+function checkAppMount() {
+  appMountCheckCount++;
+  const rootElement = document.getElementById('root');
+  
+  if (rootElement) {
+    const hasContent = rootElement.children.length > 0;
+    const hasReactRoot = rootElement._reactRootContainer || rootElement._reactInternalFiber;
+    
+    console.log(`📊 App mount check ${appMountCheckCount}:`, {
+      hasContent,
+      hasReactRoot,
+      childCount: rootElement.children.length,
+      innerHTMLLength: rootElement.innerHTML.length
+    });
+    
+    if (!hasContent && appMountCheckCount === 5) {
+      console.error('❌ App failed to mount after 5 checks');
+      console.log('📋 Diagnostics:', {
+        windowReact: typeof window.React,
+        windowReactDOM: typeof window.ReactDOM,
+        globalReact: typeof React,
+        cspEval: window.__CSP_EVAL_OK__,
+        chunks: Object.keys(window).filter((k) => k.includes('chunk'))
+      });
+      
+      // Показываем сообщение пользователю
+      rootElement.innerHTML = `
+        <div style="padding: 20px; font-family: Arial; text-align: center;">
+          <h3>Loading Issue Detected</h3>
+          <p>The application is having trouble loading. Please refresh the page.</p>
+          <button onclick="window.location.reload()" style="padding: 10px 20px; background: #1890ff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            Refresh Page
+          </button>
+        </div>
+      `;
+    }
+  }
+  
+  if (appMountCheckCount < 10) {
+    setTimeout(checkAppMount, 2000);
+  }
+}
+
+// Запускаем мониторинг после загрузки DOM
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(checkAppMount, 1000);
+  });
+} else {
+  setTimeout(checkAppMount, 1000);
+}
+
+// 7. Отслеживание ошибок загрузки JS
+window.addEventListener('error', (event) => {
+  if (event.filename && event.filename.includes('.js')) {
+    console.error('💥 JS loading error:', {
+      filename: event.filename,
+      message: event.message,
+      lineno: event.lineno,
+      colno: event.colno
+    });
+  }
+});
+
+console.log('✅ Emergency polyfill ready with diagnostics');
