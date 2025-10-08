@@ -20,11 +20,7 @@
       "destination": "/index.html"
     }
   ],
-  "functions": {
-    "app": {
-      "runtime": "nodejs18.x"
-    }
-  },
+
   "headers": [
     {
       "source": "/api/(.*)",

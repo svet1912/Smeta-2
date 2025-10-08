@@ -50,11 +50,7 @@ export default defineConfig(({ mode }) => {
       }
     },
     plugins: [
-      react({
-        jsxRuntime: 'automatic',
-        jsxImportSource: undefined,
-        fastRefresh: false // Отключаем в production
-      }),
+      react(),
       jsconfigPaths(),
       // Bundle analyzer - создает stats.html для анализа размера бандла
       visualizer({
