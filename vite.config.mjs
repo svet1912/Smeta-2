@@ -60,20 +60,7 @@ export default defineConfig(({ mode }) => {
         open: false, // не открываем автоматически в headless окружении
         gzipSize: true,
         brotliSize: true
-      }),
-      // Более деликатный plugin для React совместимости
-      {
-        name: 'fix-react-compatibility',
-        transform(code, id) {
-          if (id.includes('node_modules') && code.includes('AsyncMode')) {
-            // Только заменяем УСТАНАВКУ AsyncMode, не все упоминания
-            code = code.replace(/(\w+)\.AsyncMode\s*=\s*([^;]+);/g, '$1.AsyncMode = $1.Fragment || $2;');
-            code = code.replace(/(\w+)\.unstable_AsyncMode\s*=\s*([^;]+);/g, '$1.unstable_AsyncMode = $1.Fragment || $2;');
-            return { code, map: null };
-          }
-          return null;
-        }
-      }
+      })
     ],
     build: {
       chunkSizeWarningLimit: 1000,
@@ -102,25 +89,8 @@ export default defineConfig(({ mode }) => {
             if (/\.(woff2?|eot|ttf|otf)$/.test(name)) return `fonts/[name]-[hash].${ext}`;
             return `assets/[name]-[hash].${ext}`;
           },
-          // Простое разделение чанков - избегаем сложностей
-          manualChunks: (id) => {
-            if (id.includes('node_modules')) {
-              // Все React-зависимые библиотеки в один большой чанк
-              if (id.includes('react') || id.includes('@ant-design') || id.includes('@tanstack/react-query')) {
-                return 'vendor-react';
-              }
-              // Остальные UI библиотеки отдельно
-              if (id.includes('antd') || id.includes('@mui')) {
-                return 'vendor-ui';
-              }
-              // Утилиты
-              if (id.includes('axios') || id.includes('lodash')) {
-                return 'vendor-utils';
-              }
-              // Все остальное
-              return 'vendor-misc';
-            }
-          }
+          // Временно отключаем manual chunks для теста
+          manualChunks: false
         }
       },
       // Минификация и оптимизация
