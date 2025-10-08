@@ -1,5 +1,8 @@
 import { createRoot } from 'react-dom/client';
 
+// React 18 compatibility polyfill
+import './react18-polyfill.js';
+
 // style.scss
 import 'assets/style.css';
 

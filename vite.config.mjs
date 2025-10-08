@@ -41,12 +41,17 @@ export default defineConfig(({ mode }) => {
     define: {
       global: 'window',
       // Исправляем проблемы с process в браузере
-      'process.env': 'import.meta.env'
+      'process.env': 'import.meta.env',
+      // Polyfill для React 18 совместимости
+      'React.AsyncMode': 'React.Fragment',
+      'React.unstable_AsyncMode': 'React.Fragment'
     },
     resolve: {
       alias: {
-        '@ant-design/icons': path.resolve(__dirname, 'node_modules/@ant-design/icons')
-        // Add more aliases as needed
+        '@ant-design/icons': path.resolve(__dirname, 'node_modules/@ant-design/icons'),
+        // Фиксим React для правильного импорта
+        react: path.resolve(__dirname, 'node_modules/react'),
+        'react-dom': path.resolve(__dirname, 'node_modules/react-dom')
       }
     },
     plugins: [
