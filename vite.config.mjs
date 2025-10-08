@@ -50,7 +50,11 @@ export default defineConfig(({ mode }) => {
       }
     },
     plugins: [
-      react(),
+      react({
+        jsxRuntime: 'automatic',
+        jsxImportSource: undefined,
+        fastRefresh: false // Отключаем в production
+      }),
       jsconfigPaths(),
       // Bundle analyzer - создает stats.html для анализа размера бандла
       visualizer({
@@ -65,8 +69,10 @@ export default defineConfig(({ mode }) => {
       sourcemap: false, // Отключаем source maps для production
       cssCodeSplit: true,
       target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari13.1'],
+      assetsInlineLimit: 0, // Отключаем инлайн ассетов - исправляет data: URLs
       rollupOptions: {
         output: {
+          format: 'es',
           chunkFileNames: 'js/[name]-[hash].js',
           entryFileNames: 'js/[name]-[hash].js',
           assetFileNames: (assetInfo) => {
