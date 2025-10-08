@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
   const PORT = 3000;
 
   return {
-    base: API_URL,
+    base: '/',
     server: {
       open: true,
       port: PORT,
@@ -64,6 +64,7 @@ export default defineConfig(({ mode }) => {
       chunkSizeWarningLimit: 1000,
       sourcemap: false, // Отключаем source maps для production
       cssCodeSplit: true,
+      target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari13.1'],
       rollupOptions: {
         output: {
           chunkFileNames: 'js/[name]-[hash].js',
