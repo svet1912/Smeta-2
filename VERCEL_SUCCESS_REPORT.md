@@ -38,17 +38,16 @@
 
 ## 🔧 Настроенные компоненты
 
-### Environment Variables  
-✅ **Статус**: Обновлены для Neon PostgreSQL (8 октября 2025)
+### Environment Variables
+✅ **Статус**: Настроены в Vercel Dashboard
 - `NODE_ENV=production`
 - `VITE_API_URL=/api`
-- `DATABASE_URL` - **Neon PostgreSQL 17.5** (мигрировано с Aiven Cloud)
-- `DATABASE_SSLMODE=require`
+- `DATABASE_URL` - PostgreSQL (Aiven Cloud)
 - `DATABASE_SSL=true`
 - `JWT_SECRET` - Автогенерированный безопасный ключ
 - `JWT_REFRESH_SECRET` - Автогенерированный ключ для refresh токенов
 - `BCRYPT_SALT_ROUNDS=12`
-- `CACHE_ENABLED=true` - Настройки кэширования включены
+- Настройки кэширования включены
 
 ### База данных
 ✅ **PostgreSQL (Aiven Cloud)**
