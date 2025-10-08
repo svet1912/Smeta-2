@@ -41,13 +41,7 @@ export default defineConfig(({ mode }) => {
     define: {
       global: 'window',
       // Исправляем проблемы с process в браузере
-      'process.env': 'import.meta.env',
-      // Более агрессивный polyfill для React 18 совместимости
-      'React.AsyncMode': 'React.Fragment',
-      'React.unstable_AsyncMode': 'React.Fragment',
-      // Для случаев когда React импортируется как default
-      '__react_default__.AsyncMode': '__react_default__.Fragment',
-      '__react_default__.unstable_AsyncMode': '__react_default__.Fragment'
+      'process.env': 'import.meta.env'
     },
     resolve: {
       alias: {
@@ -67,15 +61,14 @@ export default defineConfig(({ mode }) => {
         gzipSize: true,
         brotliSize: true
       }),
-      // Кастомный plugin для исправления React AsyncMode
+      // Более деликатный plugin для React совместимости
       {
-        name: 'fix-react-asyncmode',
+        name: 'fix-react-compatibility',
         transform(code, id) {
-          if (id.includes('node_modules') && (code.includes('AsyncMode') || code.includes('unstable_AsyncMode'))) {
-            code = code.replace(/React\.AsyncMode/g, 'React.Fragment');
-            code = code.replace(/React\.unstable_AsyncMode/g, 'React.Fragment');
-            code = code.replace(/\.AsyncMode\s*=/g, '.Fragment =');
-            code = code.replace(/\.unstable_AsyncMode\s*=/g, '.Fragment =');
+          if (id.includes('node_modules') && code.includes('AsyncMode')) {
+            // Только заменяем УСТАНАВКУ AsyncMode, не все упоминания
+            code = code.replace(/(\w+)\.AsyncMode\s*=\s*([^;]+);/g, '$1.AsyncMode = $1.Fragment || $2;');
+            code = code.replace(/(\w+)\.unstable_AsyncMode\s*=\s*([^;]+);/g, '$1.unstable_AsyncMode = $1.Fragment || $2;');
             return { code, map: null };
           }
           return null;
@@ -109,35 +102,22 @@ export default defineConfig(({ mode }) => {
             if (/\.(woff2?|eot|ttf|otf)$/.test(name)) return `fonts/[name]-[hash].${ext}`;
             return `assets/[name]-[hash].${ext}`;
           },
-          // T4-RECOVERY: Исправленное разделение на чанки - React первым
+          // Простое разделение чанков - избегаем сложностей
           manualChunks: (id) => {
-            // Vendor chunk - основные библиотеки
             if (id.includes('node_modules')) {
-              // React и React-DOM - самый важный чанк, загружается первым
-              if (id.includes('react') || id.includes('react-dom') || id.includes('react/jsx-runtime')) {
+              // Все React-зависимые библиотеки в один большой чанк
+              if (id.includes('react') || id.includes('@ant-design') || id.includes('@tanstack/react-query')) {
                 return 'vendor-react';
               }
-              // Иконки ВМЕСТЕ с React - избегаем проблем с createContext
-              if (id.includes('@ant-design/icons')) {
-                return 'vendor-react';
-              }
-              // React Query
-              if (id.includes('@tanstack/react-query')) {
-                return 'vendor-query';
-              }
-              // Ant Design без иконок
-              if (id.includes('antd')) {
-                return 'vendor-antd';
-              }
-              // Material UI
-              if (id.includes('@mui')) {
-                return 'vendor-mui';
+              // Остальные UI библиотеки отдельно
+              if (id.includes('antd') || id.includes('@mui')) {
+                return 'vendor-ui';
               }
               // Утилиты
               if (id.includes('axios') || id.includes('lodash')) {
                 return 'vendor-utils';
               }
-              // Остальные vendor libraries
+              // Все остальное
               return 'vendor-misc';
             }
           }
